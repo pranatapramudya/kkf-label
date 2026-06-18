@@ -1,73 +1,84 @@
-# 🛍️ KKF Label E-Commerce Platform
+# 🛍️ KKF Label - Premium E-Commerce SaaS Platform
 
-Platform e-commerce modern, cepat, dan responsif yang dirancang khusus untuk memanajemen penjualan dan inventaris toko KKF Label. Dibangun dengan antarmuka berkelas _SaaS premium_ untuk kemudahan operasional admin melalui berbagai perangkat (PC maupun Mobile/iOS).
+![Next.js](https://img.shields.io/badge/Next.js-14%2B-black?style=for-the-badge&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue?style=for-the-badge&logo=typescript)
+![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)
+![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma)
+![Midtrans](https://img.shields.io/badge/Midtrans-Payment_Gateway-00A6DF?style=for-the-badge)
+![Vercel](https://img.shields.io/badge/Vercel-Deployed-success?style=for-the-badge&logo=vercel)
 
-## 🚀 Teknologi yang Digunakan
+Platform _e-commerce_ modern, _ultra-fast_, dan responsif yang dirancang dengan arsitektur **SaaS Premium**. KKF Label tidak hanya berfungsi sebagai etalase digital, tetapi juga sebagai mesin kasir otomatis dengan integrasi _payment gateway_ langsung dan panel manajemen berbasis _Cloud_ untuk kemudahan operasional tingkat lanjut.
+
+## 🚀 Teknologi Pendukung (Tech Stack)
 
 - **Framework:** Next.js (App Router)
-- **Bahasa:** TypeScript
+- **Bahasa:** TypeScript (Strict Type-Safe)
 - **Styling:** Tailwind CSS + Lucide Icons
 - **Database ORM:** Prisma
-- **Database & Penyimpanan:** Supabase (PostgreSQL & Storage)
-- **Authentication:** Clerk (Sistem Auth Premium & Aman)
+- **Database & Storage:** Supabase (PostgreSQL)
+- **Authentication:** Clerk (Standar Keamanan Enterprise)
+- **Payment Gateway:** Midtrans (QRIS, GoPay, Virtual Account)
 
-## ✨ Fitur Utama (Terbaru)
+## ✨ Fitur Unggulan
 
-- **Etalase & Galeri Interaktif:** Katalog produk dinamis dengan sistem _Auto-Play Video_ produk (Maks 15MB) dan galeri foto cerdas yang otomatis berubah mengikuti varian yang dipilih pengguna.
-- **Mobile-First UX (Ala Shopee):** Dilengkapi fitur _Bottom Sheet Modal_ yang mulus saat pengguna menekan tombol Keranjang/Beli di perangkat HP, serta fitur _Read More_ untuk deskripsi produk yang panjang.
-- **Keranjang Belanja Cerdas & Diskon Otomatis:** Manajemen _state_ keranjang yang akurat dengan sistem kalkulasi Harga Coret (Diskon) otomatis. Dilengkapi notifikasi _toast_ interaktif.
-- **Admin Dashboard Premium:** Panel manajemen dengan tampilan UI/UX yang _ultra-responsive_ (Layout Tabel untuk PC dan Layout Kartu untuk Mobile).
-- **Sistem Autentikasi Super Aman:** Dashboard `/admin` dikunci menggunakan Clerk. Hanya _Owner_ yang dapat mengakses panel manajemen, kebal dari injeksi dan bypass.
-- **Sistem Manajemen Produk Lanjutan (CRUD):** Pembuatan, pengeditan, dan penghapusan produk beserta Varian (Ukuran & Warna). Admin dapat menambah atau menimpa Foto dan Video secara langsung di halaman Edit.
-- **Upload Multi-Media:** Integrasi mulus dengan Supabase Storage untuk mengunggah lebih dari satu foto dan video berdurasi pendek secara bersamaan langsung dari PC atau Galeri HP.
+- **Checkout Mulus & Pembayaran Langsung:** Sistem _checkout_ cerdas dengan perhitungan harga otomatis yang terintegrasi langsung dengan **Midtrans (Live Production)**. Mendukung pembayaran QRIS dan _e-wallet_ melalui _pop-up snap_ tanpa meninggalkan halaman web.
+- **Etalase Interaktif & Auto-Play Media:** Katalog produk dinamis dengan dukungan _Auto-Play Video_ (iOS/Android _Ready_) yang teroptimasi, serta galeri foto cerdas (resolusi tinggi tanpa _layout shift_).
+- **Mobile-First UX (Standar Industri):** Antarmuka yang beradaptasi sempurna di layar _mobile_, dilengkapi _Bottom Sheet Modal_ instan saat proses _Add to Cart_ dan navigasi mulus ala aplikasi _native_.
+- **Admin Dashboard Eksklusif:** Panel manajemen pro (_Layout_ Tabel & Kartu) yang diamankan oleh sistem autentikasi Clerk. Kebal dari injeksi dan _bypass_, hanya dapat diakses oleh _Owner_.
+- **Sistem Manajemen Produk Lanjutan (CRUD):** Kontrol penuh atas produk, stok, dan Varian (Ukuran/Warna). Mendukung integrasi multi-media langsung ke Supabase Storage.
 
-## 📌 Roadmap Selanjutnya (To-Do List)
+## 📌 Status Pengembangan (Roadmap)
 
-- [x] **Sistem Autentikasi Admin:** Menambahkan pengamanan login (Auth) menggunakan Clerk.
-- [ ] **Deployment Vercel:** Persiapan dan peluncuran kode ke server _production_ (Sedang Berjalan 🚀).
-- [ ] **Integrasi API Ongkir Asli:** Menyambungkan sistem dengan layanan (seperti RajaOngkir/BinderByte) untuk tarif pengiriman _real-time_.
-- [ ] **Integrasi Payment Gateway:** Mengaktifkan API **Midtrans** agar pelanggan dapat membayar via QRIS, GoPay, atau Virtual Account.
+- [x] **Sistem Autentikasi Admin:** Pengamanan _dashboard_ menggunakan Clerk.
+- [x] **Deployment Vercel:** Konfigurasi _build_ dan peluncuran kode ke _server production_.
+- [x] **Integrasi Payment Gateway:** Menyambungkan API **Midtrans (Live)** untuk pemrosesan pembayaran otomatis via QRIS & GoPay.
+- [ ] **Integrasi API Ongkir:** Menyambungkan sistem dengan layanan tarif pengiriman pihak ketiga secara _real-time_.
+- [ ] **Automasi Notifikasi WhatsApp:** Pengiriman _invoice_ ke pelanggan melalui bot pihak ketiga.
 
 ## 🛠️ Panduan Instalasi (Lokal)
 
-Ikuti langkah-langkah berikut untuk menjalankan proyek ini di mesin lokal Anda:
+Ingin menjalankan proyek ini di mesin lokal Anda? Ikuti panduan berikut:
 
 **1. Clone repositori & Install dependensi**
-\`\`\`bash
+
+```bash
+git clone [https://github.com/username/kkf-label.git](https://github.com/username/kkf-label.git)
+cd kkf-label
 npm install
-\`\`\`
+2. Pengaturan Environment Variables
+Buat file .env.local di root direktori proyek dan masukkan kredensial berikut:
 
-**2. Pengaturan Environment Variables**
-Buat file `.env` di _root_ direktori dan masukkan konfigurasi Database, Clerk, serta API eksternal Anda:
-\`\`\`env
-
-# Database & Storage
-
-DATABASE_URL="postgresql://postgres.[PROYEK_SUPABASE]:[PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
-DIRECT_URL="postgresql://postgres.[PROYEK_SUPABASE]:[PASSWORD]@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
+Cuplikan kode
+# Database & Storage (Supabase)
+DATABASE_URL="postgresql://postgres.[PROYEK_SUPABASE]:[PASSWORD]@[aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true](https://aws-0-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true)"
+DIRECT_URL="postgresql://postgres.[PROYEK_SUPABASE]:[PASSWORD]@[aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres](https://aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres)"
 NEXT_PUBLIC_SUPABASE_URL="https://[PROYEK_SUPABASE].supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="kunci_anon_supabase_anda_di_sini"
+NEXT_PUBLIC_SUPABASE_ANON_KEY="kunci_anon_supabase"
 
 # Authentication (Clerk)
-
-NEXT*PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test*..."
-CLERK*SECRET_KEY="sk_test*..."
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
+CLERK_SECRET_KEY="sk_test_..."
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
 NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
-\`\`\`
+NEXT_PUBLIC_CLERK_SIGN_IN_FALLBACK_REDIRECT_URL=/admin
+NEXT_PUBLIC_CLERK_SIGN_UP_FALLBACK_REDIRECT_URL=/admin
 
-**3. Sinkronisasi Database (Prisma)**
-Jalankan perintah ini untuk mendorong skema ke Supabase:
-\`\`\`bash
+# Payment Gateway (Midtrans)
+MIDTRANS_MERCHANT_ID="M..."
+NEXT_PUBLIC_MIDTRANS_CLIENT_KEY="Mid-client-..."
+MIDTRANS_SERVER_KEY="Mid-server-..."
+3. Sinkronisasi Database (Prisma)
+Generate client Prisma dan dorong skema ke database Supabase Anda:
+
+Bash
+npx prisma generate
 npx prisma db push
-\`\`\`
+4. Jalankan Server Development
 
-**4. Jalankan Server Development**
-\`\`\`bash
+Bash
 npm run dev
-\`\`\`
-Buka [http://localhost:3000](http://localhost:3000) di browser untuk melihat etalase, dan arahkan ke `/admin` untuk masuk ke Dashboard.
+Buka http://localhost:3000 di browser untuk melihat etalase publik, atau arahkan ke /admin untuk masuk ke Dashboard Manajemen.
 
-## 📄 Lisensi
-
-Hak Cipta © 2026 KKF Label. Seluruh hak dilindungi...
+📄 Lisensi
+Hak Cipta © 2026 KKF Label. Seluruh hak dilindungi. Sistem SaaS E-Commerce eksklusif yang dikembangkan khusus untuk kelancaran operasional bisnis.
+```
