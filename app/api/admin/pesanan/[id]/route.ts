@@ -5,14 +5,19 @@ const prisma = new PrismaClient();
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } },
+  // 🔥 FIX 1: Ubah tipe params menjadi Promise
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const body = await request.json();
     const { statusPesanan, ekspedisi, nomorResi } = body;
 
+    // 🔥 FIX 2: Kita "tunggu" (await) params-nya kebuka dulu sebelum diambil id-nya
+    const resolvedParams = await params;
+
     const updateOrder = await prisma.order.update({
-      where: { id: params.id },
+      // 🔥 FIX 3: Gunakan id dari params yang sudah di-await
+      where: { id: resolvedParams.id },
       data: {
         statusPesanan,
         ekspedisi: ekspedisi || null,
