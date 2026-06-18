@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Script from "next/script"; // 🔥 Wajib buat manggil fungsi popup Midtrans
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -145,7 +146,6 @@ export default function HalamanCheckout() {
   const [sedangMembayar, setSedangMembayar] = useState(false);
   const [pesanPembayaran, setPesanPembayaran] = useState("");
 
-  // STATE MODAL SUKSES MODERN
   const [modalSukses, setModalSukses] = useState({
     show: false,
     invoice: "",
@@ -153,9 +153,7 @@ export default function HalamanCheckout() {
   });
 
   useEffect(() => {
-    if (itemKeranjang.length === 0 && !modalSukses.show) {
-      router.push("/");
-    }
+    if (itemKeranjang.length === 0 && !modalSukses.show) router.push("/");
   }, [itemKeranjang.length, router, modalSukses.show]);
 
   const daftarProvinsiAman = useMemo(
@@ -261,11 +259,10 @@ export default function HalamanCheckout() {
         pesan?: string;
       };
 
-      if (!respons.ok || !dataOngkir.daftarBiaya?.length) {
+      if (!respons.ok || !dataOngkir.daftarBiaya?.length)
         throw new Error(
           dataOngkir.pesan ?? "Ongkir belum tersedia untuk pilihan ini.",
         );
-      }
       setPilihanOngkir(dataOngkir.daftarBiaya[0]);
     } catch (galat) {
       setPesanOngkir(
@@ -280,72 +277,114 @@ export default function HalamanCheckout() {
     hitungOngkir();
   }, [hitungOngkir]);
 
+  // 🔥 FUNGSI BAYAR SUPER CANGGIH 🔥
   async function buatPesanan() {
     setPesanPembayaran("");
-    if (!namaPenerima || !emailPenerima || !teleponPenerima || !alamatLengkap) {
-      setPesanPembayaran("Lengkapi data penerima terlebih dahulu.");
-      return;
-    }
-    if (!kotaDipilih || !pilihanOngkir) {
-      setPesanPembayaran("Pilih kota dan tunggu ongkir selesai dihitung.");
-      return;
-    }
+    if (!namaPenerima || !emailPenerima || !teleponPenerima || !alamatLengkap)
+      return setPesanPembayaran("Lengkapi data penerima terlebih dahulu.");
+    if (!kotaDipilih || !pilihanOngkir)
+      return setPesanPembayaran(
+        "Pilih kota dan tunggu ongkir selesai dihitung.",
+      );
 
     setSedangMembayar(true);
     try {
-      const respons = await fetch("/api/pesanan", {
+      const bodyPesanan = {
+        nama: namaPenerima,
+        email: emailPenerima,
+        telepon: teleponPenerima,
+        alamatLengkap: alamatLengkap,
+        provinsi: namaProvinsi,
+        kota: namaKota,
+        ekspedisi: `${daftarEkspedisi.find((item) => item.kode === ekspedisiDipilih)?.nama} - ${pilihanOngkir.layanan}`,
+        subtotal: subtotalBersih,
+        ongkir: pilihanOngkir.biaya,
+        total: totalAkhir,
+        items: itemKeranjang,
+      };
+
+      // 1. Minta tiket/token dulu ke server API kita
+      const resToken = await fetch("/api/payment", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          nama: namaPenerima,
-          email: emailPenerima,
-          telepon: teleponPenerima,
-          alamatLengkap: alamatLengkap,
-          provinsi: namaProvinsi,
-          kota: namaKota,
-          ekspedisi: `${daftarEkspedisi.find((item) => item.kode === ekspedisiDipilih)?.nama} - ${pilihanOngkir.layanan}`,
-          subtotal: subtotalBersih,
-          ongkir: pilihanOngkir.biaya,
-          total: totalAkhir,
-          items: itemKeranjang,
-        }),
+        body: JSON.stringify(bodyPesanan),
       });
 
-      const dataPesanan = await respons.json();
+      const dataToken = await resToken.json();
 
-      if (!respons.ok || !dataPesanan.sukses) {
-        throw new Error(
-          dataPesanan.pesan ?? "Gagal memproses pesanan ke server.",
-        );
+      if (!resToken.ok || !dataToken.token) {
+        throw new Error(dataToken.pesan || "Gagal membuka jalur pembayaran.");
       }
 
-      kosongkanKeranjang();
+      setSedangMembayar(false); // Matikan loading biar popup bisa nongol
 
-      // 🔥 MUNCULKAN MODAL SUKSES, BUKAN ALERT JADUL 🔥
-      setModalSukses({
-        show: true,
-        invoice: dataPesanan.invoice,
-        total: totalAkhir,
+      // 2. Munculin Popup Midtrans
+      // @ts-ignore
+      window.snap.pay(dataToken.token, {
+        onSuccess: async function (result: any) {
+          // 3. BARU KETIKA SUKSES BAYAR, SIMPAN KE DATABASE KITA (Biar ga penuh data abal-abal)
+          setSedangMembayar(true);
+          try {
+            const respons = await fetch("/api/pesanan", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({
+                ...bodyPesanan,
+                invoice: dataToken.kodePesanan, // Gunakan kode dari Midtrans
+              }),
+            });
+            const dataPesanan = await respons.json();
+            kosongkanKeranjang();
+            setModalSukses({
+              show: true,
+              invoice: dataPesanan.invoice || dataToken.kodePesanan,
+              total: totalAkhir,
+            });
+          } catch (galat) {
+            setPesanPembayaran(
+              "Pesanan berhasil dibayar, namun gagal tersimpan. Harap lapor ke admin!",
+            );
+          } finally {
+            setSedangMembayar(false);
+          }
+        },
+        onPending: function (result: any) {
+          setPesanPembayaran(
+            "Mohon selesaikan pembayaran Anda terlebih dahulu.",
+          );
+        },
+        onError: function (result: any) {
+          setPesanPembayaran("Proses pembayaran gagal atau ditolak bank.");
+        },
+        onClose: function () {
+          setPesanPembayaran(
+            "Anda menutup jendela pembayaran sebelum menyelesaikannya.",
+          );
+        },
       });
     } catch (galat) {
       setPesanPembayaran(
-        galat instanceof Error ? galat.message : "Gagal membuat pesanan.",
+        galat instanceof Error ? galat.message : "Gagal memproses pembayaran.",
       );
-    } finally {
       setSedangMembayar(false);
     }
   }
 
-  // Fungsi buat ngirim WA ke admin
   const kirimKeWA = () => {
-    const nomorAdmin = "6285117490449"; // Nomor lu dari resi
+    const nomorAdmin = "6285117490449";
     const teksWA = `Halo Admin KKF Label! 👋%0A%0ASaya baru saja membuat pesanan dengan detail berikut:%0A%0A*No. Invoice:* ${modalSukses.invoice}%0A*Total:* ${formatRupiah(modalSukses.total)}%0A%0AMohon bantuannya untuk diproses ya min! Terima kasih. ✨`;
     window.open(`https://wa.me/${nomorAdmin}?text=${teksWA}`, "_blank");
   };
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-pink-50/30 font-sans text-zinc-900 pb-20">
-      {/* 🔥 MODAL SUKSES MODERN 🔥 */}
+      {/* 🔥 INI YANG BIKIN POPUP MIDTRANS MUNCUL DI LAYAR 🔥 */}
+      <Script
+        src="https://app.midtrans.com/snap/snap.js"
+        data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
+        strategy="lazyOnload"
+      />
+
       {modalSukses.show && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
           <div className="bg-white rounded-3xl w-full max-w-md p-6 sm:p-8 shadow-2xl animate-in zoom-in-95 slide-in-from-bottom-10 text-center">
@@ -387,7 +426,6 @@ export default function HalamanCheckout() {
         </div>
       )}
 
-      {/* ISI KONTEN CHECKOUT (Sembunyikan kalau modal sukses muncul) */}
       {!modalSukses.show && (
         <div className="max-w-6xl mx-auto px-4 md:px-8 pt-6 md:pt-8">
           <div className="mb-6">
@@ -431,7 +469,6 @@ export default function HalamanCheckout() {
                       placeholder="08xxxxxxxx"
                     />
                   </div>
-
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-bold text-zinc-600 mb-1.5">
                       Email
@@ -627,7 +664,6 @@ export default function HalamanCheckout() {
                       {pilihanOngkir.ekspedisi}
                     </span>{" "}
                     - {pilihanOngkir.layanan} <br />
-                    {/* 🔥 FIX BUG JNT ESTIMASI: KALAU KOSONG ATAU MINUS, OTOMATIS 2-4 HARI 🔥 */}
                     Estimasi tiba:{" "}
                     {!pilihanOngkir.estimasi ||
                     pilihanOngkir.estimasi === "-" ||
@@ -672,7 +708,7 @@ export default function HalamanCheckout() {
                 ) : (
                   <CreditCard size={18} />
                 )}
-                {sedangMembayar ? "Menyiapkan Pesanan..." : "Buat Pesanan"}
+                {sedangMembayar ? "Membuka Pembayaran..." : "Bayar Sekarang"}
               </button>
             </aside>
           </div>

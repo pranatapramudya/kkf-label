@@ -1,111 +1,87 @@
 import { NextResponse } from "next/server";
-import { buatKodePesanan } from "@/lib/format";
-
-type ItemPembayaran = {
-  id: string;
-  nama: string;
-  harga: number;
-  jumlah: number;
-};
-
-type PermintaanPembayaran = {
-  namaPenerima: string;
-  emailPenerima: string;
-  teleponPenerima: string;
-  subtotal: number;
-  ongkir: number;
-  total: number;
-  ekspedisi: string;
-  item: ItemPembayaran[];
-};
 
 export async function POST(permintaan: Request) {
-  const apiKeyPayment = process.env.PAYMENT_API_KEY;
-  const apiKeyQrisly = process.env.QRISLY_API_KEY;
+  // 🔥 Murni pakai Kunci Server asli yang tadi lu simpan
+  const serverKey = process.env.MIDTRANS_SERVER_KEY;
 
-  if (!apiKeyPayment || !apiKeyQrisly) {
+  if (!serverKey) {
     return NextResponse.json(
-      { pesan: "PAYMENT_API_KEY dan QRISLY_API_KEY wajib diatur di .env.local." },
-      { status: 500 }
-    );
-  }
-
-  const body = (await permintaan.json()) as PermintaanPembayaran;
-  const kodePesanan = buatKodePesanan();
-
-  if (!body.total || body.total <= 0 || body.item.length === 0) {
-    return NextResponse.json(
-      { pesan: "Data pesanan tidak valid." },
-      { status: 400 }
+      { pesan: "Server Key Midtrans belum diatur di Vercel!" },
+      { status: 500 },
     );
   }
 
   try {
+    const body = await permintaan.json();
+
+    // Bikin invoice acak khusus untuk Midtrans
+    const kodePesanan = `KKF-${Date.now()}`;
+
+    // Wajib dibulatkan, Midtrans bakal error kalau ada angka desimal/koma
+    const grossAmount = Math.round(body.total);
+
+    // Menyusun daftar belanjaan buat ditampilin di nota Midtrans
     const itemDetails = [
-      ...body.item.map((item) => ({
-        id: item.id,
-        price: item.harga,
+      ...body.items.map((item: any) => ({
+        id: item.idVarian || item.id,
+        price: Math.round(item.harga),
         quantity: item.jumlah,
-        name: item.nama
+        name: item.nama.substring(0, 50), // Nama barang dibatasi 50 huruf dari sananya
       })),
       {
         id: "ongkir",
-        price: body.ongkir,
+        price: Math.round(body.ongkir),
         quantity: 1,
-        name: `Ongkir ${body.ekspedisi}`
-      }
+        name: `Ongkir ${body.ekspedisi}`.substring(0, 50),
+      },
     ];
 
     const payloadMidtrans = {
       transaction_details: {
         order_id: kodePesanan,
-        gross_amount: body.total
+        gross_amount: grossAmount,
       },
       customer_details: {
-        first_name: body.namaPenerima,
-        email: body.emailPenerima,
-        phone: body.teleponPenerima
+        first_name: body.nama,
+        email: body.email,
+        phone: body.telepon,
       },
       item_details: itemDetails,
-      enabled_payments: ["credit_card", "bank_transfer", "gopay", "qris"]
     };
 
-    const kredensial = Buffer.from(`${apiKeyPayment}:`).toString("base64");
-    const respons = await fetch("https://app.sandbox.midtrans.com/snap/v1/transactions", {
-      method: "POST",
-      headers: {
-        authorization: `Basic ${kredensial}`,
-        "content-type": "application/json",
-        "x-qrisly-key": apiKeyQrisly
-      },
-      body: JSON.stringify(payloadMidtrans)
-    });
+    // Encode kunci rahasia jadi Base64 sesuai standar mereka
+    const kredensial = Buffer.from(`${serverKey}:`).toString("base64");
 
-    const dataPembayaran = await respons.json();
+    // 🔥 LINK PRODUCTION (DUIT ASLI) 🔥
+    const respons = await fetch(
+      "https://app.midtrans.com/snap/v1/transactions",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Basic ${kredensial}`,
+        },
+        body: JSON.stringify(payloadMidtrans),
+      },
+    );
+
+    const data = await respons.json();
 
     if (!respons.ok) {
+      console.error("Gagal Midtrans:", data);
       return NextResponse.json(
-        {
-          pesan: "Payment gateway menolak transaksi.",
-          detail: dataPembayaran
-        },
-        { status: respons.status }
+        { pesan: "Gagal membuat tiket pembayaran", detail: data },
+        { status: 400 },
       );
     }
 
-    return NextResponse.json({
-      kodePesanan,
-      token: dataPembayaran.token,
-      redirectUrl: dataPembayaran.redirect_url,
-      status: "MENUNGGU_PEMBAYARAN"
-    });
+    // Balikin tiket/token-nya ke Frontend biar bisa buka popup
+    return NextResponse.json({ token: data.token, kodePesanan });
   } catch (galat) {
     return NextResponse.json(
-      {
-        pesan: "Gagal membuat transaksi pembayaran.",
-        detail: galat instanceof Error ? galat.message : "Terjadi kesalahan"
-      },
-      { status: 500 }
+      { pesan: "Kesalahan internal server." },
+      { status: 500 },
     );
   }
 }
