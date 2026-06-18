@@ -139,7 +139,8 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
   };
 
   return (
-    <div className="kontainer-halaman pt-0 md:py-6 pb-32 md:pb-12 relative overflow-x-hidden">
+    // 🔥 FIX 1: max-w-[100vw] dan w-full buat ngunci layar HP biar gak nerobos ke samping
+    <div className="kontainer-halaman pt-0 md:py-6 pb-32 md:pb-12 relative overflow-x-hidden w-full max-w-[100vw]">
       {toast.show && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[999999] bg-zinc-900/90 backdrop-blur-sm text-white px-5 py-2.5 rounded-full shadow-2xl flex items-center gap-2.5 animate-in fade-in zoom-in-95 slide-in-from-bottom-5 duration-200">
           {toast.tipe === "sukses" ? (
@@ -153,14 +154,15 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
         </div>
       )}
 
-      <div className="grid gap-6 md:gap-8 lg:grid-cols-2">
-        {/* 🔥 FIX GALERI: w-full MURNI TANPA HACK MARGIN ANEH 🔥 */}
-        <div className="w-full flex flex-col gap-3">
+      {/* 🔥 FIX 2: w-full max-w-full biar dua kolomnya patuh sama ukuran HP */}
+      <div className="grid gap-6 md:gap-8 lg:grid-cols-2 w-full max-w-full">
+        <div className="w-full flex flex-col gap-3 overflow-hidden">
           {!isMounted ? (
             <div className="aspect-square w-full bg-zinc-100 animate-pulse md:rounded-2xl border border-pink-50"></div>
           ) : (
             <>
-              <div className="relative w-full aspect-square md:aspect-[4/5] bg-black md:rounded-2xl overflow-hidden shadow-sm group">
+              {/* 🔥 FIX 3: Ganti bg-black jadi bg-zinc-100 biar lebih cerah/premium */}
+              <div className="relative w-full aspect-square md:aspect-[4/5] bg-zinc-100 md:rounded-2xl overflow-hidden shadow-sm group border border-pink-50">
                 <div
                   ref={scrollContainerRef}
                   onScroll={handleScroll}
@@ -169,8 +171,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                   {mediaItems.map((item, idx) => (
                     <div
                       key={idx}
-                      // 🔥 OBATNYA DI SINI: min-w-full biar ukurannya solid 100% layar 🔥
-                      className="min-w-full w-full h-full shrink-0 snap-center flex items-center justify-center bg-black relative"
+                      className="min-w-full w-full h-full shrink-0 snap-center flex items-center justify-center relative"
                     >
                       {item.type === "video" ? (
                         <video
@@ -180,8 +181,8 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                           muted
                           loop
                           playsInline
-                          controls
-                          className="w-full h-full object-contain"
+                          // 🔥 FIX 4: object-cover biar penuh sekotak tanpa blok item
+                          className="absolute inset-0 w-full h-full object-cover"
                         />
                       ) : (
                         <Image
@@ -189,7 +190,8 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                           alt={`${produk.nama} ${idx}`}
                           fill
                           sizes="(max-width: 768px) 100vw, 50vw"
-                          className="object-contain"
+                          // 🔥 FIX 5: object-cover biar foto penuh tanpa distorsi
+                          className="object-cover"
                           priority={idx === 0}
                         />
                       )}
@@ -261,7 +263,8 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
         </div>
 
         {/* INFORMASI PRODUK */}
-        <div className="flex flex-col">
+        {/* 🔥 FIX 6: w-full min-w-0 biar teksnya nggak ngedesek layout keluar batas */}
+        <div className="flex flex-col w-full min-w-0">
           <span className="rounded-full bg-soft-pink-100 px-3 py-1 text-xs font-semibold text-soft-pink-700 uppercase w-fit">
             {produk.kategori?.nama || "Umum"}
           </span>
@@ -291,7 +294,8 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
             )}
           </div>
 
-          <div className="mt-5 text-sm leading-relaxed text-zinc-600 text-justify whitespace-pre-line">
+          {/* 🔥 FIX 7: Tambah break-words biar teks/link/kata panjang otomatis enter ke bawah */}
+          <div className="mt-5 text-sm leading-relaxed text-zinc-600 text-justify whitespace-pre-line break-words w-full overflow-hidden">
             {bacaSelengkapnya
               ? produk.deskripsi
               : produk.deskripsi?.length > 180
@@ -335,7 +339,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                 <p className="text-sm font-bold text-zinc-900 mb-3">
                   Pilih varian
                 </p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 w-full">
                   {produk.varian.map((v: any, idx: number) => (
                     <button
                       key={v.id}
@@ -399,7 +403,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
             </div>
           </div>
 
-          <section className="mt-8 rounded-2xl border border-pink-100 bg-zinc-50/50 p-5 md:p-7">
+          <section className="mt-8 rounded-2xl border border-pink-100 bg-zinc-50/50 p-5 md:p-7 w-full overflow-hidden">
             <h2 className="font-semibold text-zinc-900">Ulasan pelanggan</h2>
             <div className="mt-4 space-y-4">
               {[
@@ -416,7 +420,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                       <Star key={i} size={14} className="fill-current" />
                     ))}
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-zinc-600">
+                  <p className="mt-2 text-sm leading-6 text-zinc-600 break-words">
                     {ulasan}
                   </p>
                 </div>
@@ -426,6 +430,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
         </div>
       </div>
 
+      {/* Navigasi Mobile Bawah */}
       <div className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-zinc-200 p-3 px-4 flex items-center gap-3 z-[90] pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.1)]">
         <button className="flex flex-col items-center justify-center text-zinc-500 hover:text-soft-pink-600 px-2 transition-colors">
           <MessageCircle size={22} />
@@ -451,6 +456,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
         </button>
       </div>
 
+      {/* Modal Varian Mobile */}
       {showModal && (
         <>
           <div
