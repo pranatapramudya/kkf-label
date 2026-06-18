@@ -46,7 +46,7 @@ import TabelProduk from "./produk/TabelProduk";
 import { useClerk, UserButton } from "@clerk/nextjs";
 
 // ==========================================
-// 🔥 KOMPONEN DROPDOWN MEWAH (Anti Jadul)
+// 🔥 KOMPONEN DROPDOWN MEWAH
 // ==========================================
 function DropdownMewah({
   value,
@@ -123,7 +123,6 @@ function FormTambahProduk({
   const [fileVideo, setFileVideo] = useState<File | null>(null);
   const [sedangMenyimpan, setSedangMenyimpan] = useState(false);
   const [teksLoading, setTeksLoading] = useState("Simpan & Publish Produk");
-
   const [showDropdownKategori, setShowDropdownKategori] = useState(false);
 
   const listKategoriAman = Array.isArray(riwayatKategori)
@@ -152,7 +151,6 @@ function FormTambahProduk({
     e.preventDefault();
     if (fileFoto.length === 0)
       return onError("Wajib pilih minimal 1 foto produk!");
-
     setSedangMenyimpan(true);
     setTeksLoading("Mengunggah Media ke Supabase...");
 
@@ -270,7 +268,6 @@ function FormTambahProduk({
                         Ketik untuk mencari...
                       </li>
                     )}
-
                 {kategori.trim() !== "" &&
                   !listKategoriAman.some(
                     (k: string) =>
@@ -289,7 +286,6 @@ function FormTambahProduk({
               </ul>
             )}
           </div>
-
           <div>
             <label className="block text-sm font-bold text-zinc-700 mb-1.5">
               Harga Normal
@@ -465,14 +461,13 @@ function FormTambahProduk({
 }
 
 // ==========================================
-// 2. KOMPONEN TABEL PESANAN & INVOICE REAL
+// 2. KOMPONEN TABEL PESANAN
 // ==========================================
 function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
   const [daftarPesanan, setDaftarPesanan] = useState<any[]>([]);
   const [sedangMemuat, setSedangMemuat] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
 
-  // STATE UPDATE STATUS & RESI
   const [pesananDiedit, setPesananDiedit] = useState<any>(null);
   const [formEdit, setFormEdit] = useState({
     statusPesanan: "",
@@ -481,11 +476,9 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
   });
   const [sedangUpdate, setSedangUpdate] = useState(false);
 
-  // Pagination Logic (Maks 10 Per Halaman)
   const [currentPage, setCurrentPage] = useState(1);
   const itemPerPage = 10;
 
-  // 🔥 FILTER BULAN & TAHUN SAAS MODERN 🔥
   const tahunSekarang = new Date().getFullYear();
   const [bulanExport, setBulanExport] = useState("semua");
   const [tahunExport, setTahunExport] = useState(tahunSekarang.toString());
@@ -535,7 +528,6 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
     currentPage * itemPerPage,
   );
 
-  // 🔥 FUNGSI EXPORT CSV (SUDAH BISA FILTER TAHUN JUGA!) 🔥
   const exportCSV = () => {
     let dataDifilter = daftarPesanan.filter((p) => {
       const tgl = new Date(p.dibuatPada);
@@ -570,14 +562,11 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
     const blob = new Blob([csvData], { type: "text/csv;charset=utf-8;" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-
     const namaBulan =
       bulanExport === "semua"
         ? "Semua"
         : opsiBulan.find((o) => o.value === bulanExport)?.label;
-    const namaFile = `Rekap_KKF_${namaBulan}_${tahunExport}.csv`;
-    link.setAttribute("download", namaFile);
-
+    link.setAttribute("download", `Rekap_KKF_${namaBulan}_${tahunExport}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -604,23 +593,19 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
 
       if (!res.ok) throw new Error("Gagal menyimpan perubahan ke database.");
 
-      if (tampilkanNotifikasi) {
+      if (tampilkanNotifikasi)
         tampilkanNotifikasi(
           "Mantap! Status pesanan berhasil diupdate.",
           "sukses",
         );
-      } else {
-        alert("Status pesanan berhasil diupdate!");
-      }
+      else alert("Status pesanan berhasil diupdate!");
 
       setPesananDiedit(null);
       fetchPesanan();
     } catch (err: any) {
-      if (tampilkanNotifikasi) {
+      if (tampilkanNotifikasi)
         tampilkanNotifikasi("Gagal: " + err.message, "gagal");
-      } else {
-        alert("Gagal update pesanan.");
-      }
+      else alert("Gagal update pesanan.");
     } finally {
       setSedangUpdate(false);
     }
@@ -631,8 +616,6 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
       <div className="bg-white p-6 rounded-2xl border border-pink-100 shadow-sm">
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
           <h3 className="font-bold text-zinc-900 text-lg">Rekapan Transaksi</h3>
-
-          {/* 🔥 TOMBOL EXPORT & DROPDOWN FILTER CUSTOM 🔥 */}
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-fit">
             <DropdownMewah
               value={bulanExport}
@@ -646,7 +629,6 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
               onChange={setTahunExport}
               widthClass="w-full sm:w-28"
             />
-
             <button
               onClick={exportCSV}
               className="flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 font-bold border border-emerald-100 px-5 py-2.5 rounded-xl hover:bg-emerald-100 transition text-sm w-full sm:w-fit shadow-sm"
@@ -706,16 +688,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                       </td>
                       <td className="py-4 px-2">
                         <span
-                          className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase ${
-                            p.statusPesanan === "SELESAI" ||
-                            p.statusPesanan === "SAMPAI"
-                              ? "bg-emerald-100 text-emerald-700"
-                              : p.statusPesanan === "DIKIRIM"
-                                ? "bg-blue-100 text-blue-700"
-                                : p.statusPesanan === "DIBATALKAN"
-                                  ? "bg-red-100 text-red-700"
-                                  : "bg-amber-100 text-amber-700"
-                          }`}
+                          className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase ${p.statusPesanan === "SELESAI" || p.statusPesanan === "SAMPAI" ? "bg-emerald-100 text-emerald-700" : p.statusPesanan === "DIKIRIM" ? "bg-blue-100 text-blue-700" : p.statusPesanan === "DIBATALKAN" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}
                         >
                           {p.statusPesanan.replace("_", " ")}
                         </span>
@@ -769,7 +742,6 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
         )}
       </div>
 
-      {/* MODAL UPDATE STATUS & INPUT RESI */}
       {pesananDiedit && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 sm:p-8 shadow-2xl animate-in zoom-in-95">
@@ -789,7 +761,6 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                 <X size={18} />
               </button>
             </div>
-
             <form onSubmit={simpanUpdatePesanan} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-zinc-700 mb-1.5">
@@ -814,7 +785,6 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                   <option value="DIBATALKAN">Dibatalkan</option>
                 </select>
               </div>
-
               <div>
                 <label className="block text-xs font-bold text-zinc-700 mb-1.5">
                   Kurir / Ekspedisi (Opsional)
@@ -829,7 +799,6 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                   className="w-full border border-zinc-300 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm uppercase"
                 />
               </div>
-
               <div>
                 <label className="block text-xs font-bold text-zinc-700 mb-1.5">
                   Nomor Resi (Opsional)
@@ -844,7 +813,6 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                   className="w-full border border-zinc-300 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm font-bold tracking-wide"
                 />
               </div>
-
               <div className="pt-4 flex gap-3">
                 <button
                   type="button"
@@ -870,7 +838,6 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
         </div>
       )}
 
-      {/* POPUP INVOICE DIGITAL REAL */}
       {selectedInvoice && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 sm:p-8 shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
@@ -894,10 +861,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                 <span className="text-right">
                   {new Date(selectedInvoice.dibuatPada).toLocaleString(
                     "id-ID",
-                    {
-                      dateStyle: "long",
-                      timeStyle: "medium",
-                    },
+                    { dateStyle: "long", timeStyle: "medium" },
                   )}{" "}
                   WIB
                 </span>
@@ -962,7 +926,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
 // 3. HALAMAN UTAMA ADMIN
 // ==========================================
 export default function HalamanAdmin() {
-  const { signOut } = useClerk(); // 🔥 Jalur Super VIP buat Logout
+  const { signOut } = useClerk();
 
   const [tabAktif, setTabAktif] = useState("analitik");
   const [terakhirDiperbarui, setTerakhirDiperbarui] = useState("");
@@ -971,7 +935,6 @@ export default function HalamanAdmin() {
   const [daftarProduk, setDaftarProduk] = useState<any[]>([]);
   const [memuatProduk, setMemuatProduk] = useState(false);
 
-  // 🔥 STATE KALKULATOR PROFIT 🔥
   const [bukaKalkulator, setBukaKalkulator] = useState(false);
   const [hargaJualCalc, setHargaJualCalc] = useState("");
   const [hargaBeliCalc, setHargaBeliCalc] = useState("");
@@ -1016,60 +979,64 @@ export default function HalamanAdmin() {
     );
   };
 
-  // 🔥 FIX: Tambahin parameter isBackground biar dia tau kapan harus sembunyi
-  const tarikProdukDariDB = async (isBackground = false) => {
-    if (!isBackground) setMemuatProduk(true); // Cuma munculin loading pas pertama buka
+  const updateWaktuRefresh = () => {
+    const sekarang = new Date();
+    setTerakhirDiperbarui(
+      `${sekarang.getHours().toString().padStart(2, "0")}:${sekarang.getMinutes().toString().padStart(2, "0")}:${sekarang.getSeconds().toString().padStart(2, "0")}`,
+    );
+  };
+
+  // 🔥 FUNGSI TARIK DATA SILUMAN 🔥
+  const tarikProdukDariDB = async (sembunyi = false) => {
+    if (!sembunyi) setMemuatProduk(true);
     try {
       const respons = await fetch("/api/admin/produk");
       if (respons.ok) setDaftarProduk(await respons.json());
     } catch (galat) {
       console.error(galat);
     } finally {
-      if (!isBackground) setMemuatProduk(false);
+      if (!sembunyi) setMemuatProduk(false);
     }
   };
 
-  const tarikDataAnalitik = async (isBackground = false) => {
-    if (!isBackground) setMemuatAnalitik(true); // Cuma munculin loading pas pertama buka
+  const tarikDataAnalitik = async (sembunyi = false) => {
+    if (!sembunyi) setMemuatAnalitik(true);
     try {
       const respons = await fetch(`/api/admin/analitik?filter=${filterWaktu}`);
-      if (respons.ok) setDataAnalitik(await respons.json());
+      if (respons.ok) {
+        setDataAnalitik(await respons.json());
+        updateWaktuRefresh();
+      }
     } catch (galat) {
       console.error(galat);
     } finally {
-      if (!isBackground) setMemuatAnalitik(false);
+      if (!sembunyi) setMemuatAnalitik(false);
     }
   };
 
-  // 🔥 FIX: AUTOREFRESH DIAM-DIAM TANPA GANGGU LAYAR 🔥
+  // 🔥 EFEK REFRESH SILUMAN TIAP 10 DETIK 🔥
   useEffect(() => {
     if (tabAktif === "produk") {
-      tarikProdukDariDB(false); // Load pertama pakai spinner
-      const intervalRealtime = setInterval(
-        () => tarikProdukDariDB(true),
-        10000,
-      ); // Tarik data diam-diam di background
+      tarikProdukDariDB(false);
+      const intervalRealtime = setInterval(() => {
+        tarikProdukDariDB(true);
+      }, 10000);
       return () => clearInterval(intervalRealtime);
     }
-
     if (tabAktif === "analitik") {
-      tarikDataAnalitik(false); // Load pertama pakai spinner
-      const intervalRealtime = setInterval(
-        () => tarikDataAnalitik(true),
-        10000,
-      ); // Tarik data diam-diam di background
+      tarikDataAnalitik(false);
+      const intervalRealtime = setInterval(() => {
+        tarikDataAnalitik(true);
+      }, 10000);
       return () => clearInterval(intervalRealtime);
     }
   }, [tabAktif, filterWaktu]);
 
   const tarikDataTerbaru = () => {
     setSedangRefresh(true);
-    const sekarang = new Date();
-    setTerakhirDiperbarui(
-      `${sekarang.getHours().toString().padStart(2, "0")}:${sekarang.getMinutes().toString().padStart(2, "0")}:${sekarang.getSeconds().toString().padStart(2, "0")}`,
-    );
-    if (tabAktif === "produk") tarikProdukDariDB();
-    if (tabAktif === "analitik") tarikDataAnalitik();
+    updateWaktuRefresh();
+    if (tabAktif === "produk") tarikProdukDariDB(true);
+    if (tabAktif === "analitik") tarikDataAnalitik(true);
     setTimeout(() => setSedangRefresh(false), 800);
   };
 
@@ -1106,7 +1073,6 @@ export default function HalamanAdmin() {
     modeGrafikTop === "dilihat"
       ? dataAnalitik.grafikProdukDilihat
       : dataAnalitik.grafikProdukTerjual;
-
   const kategoriAktifReal = Array.from(
     new Set(
       daftarProduk.map((p) => p.kategori?.nama || p.kategori).filter(Boolean),
@@ -1128,7 +1094,7 @@ export default function HalamanAdmin() {
                 Workspace
               </p>
               <h1 className="text-xl font-bold text-zinc-900 tracking-tight">
-                KKF LABEL ADMIN
+                KKF LABEL
               </h1>
             </div>
           </div>
@@ -1147,7 +1113,6 @@ export default function HalamanAdmin() {
             </button>
           ))}
         </nav>
-
         <div className="p-4 border-t border-pink-100 flex flex-col gap-3">
           <button
             onClick={async () => {
@@ -1164,12 +1129,13 @@ export default function HalamanAdmin() {
       <div className="flex-1 flex flex-col min-w-0 bg-zinc-50/50 relative h-full">
         <header className="md:hidden shrink-0 bg-white border-b border-pink-100 p-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
           <div className="flex items-center gap-2">
+            {/* 🔥 FIX LOGO MOBILE: Udah pakai ekstensi .png */}
             <img
               src="/logo-kkf.png"
               alt="KKF Label"
               className="h-8 w-8 rounded-full object-cover border border-pink-100"
             />
-            <span className="font-bold text-zinc-900">KKF-LABEL</span>
+            <span className="font-bold text-zinc-900">KKF-LABEL-ADMIN</span>
           </div>
           <div className="bg-white p-1 rounded-full border border-pink-100 shadow-sm flex items-center justify-center shrink-0 w-10 h-10">
             <UserButton
@@ -1182,9 +1148,7 @@ export default function HalamanAdmin() {
           <h2 className="text-2xl font-bold text-zinc-900 tracking-tight capitalize">
             {tabAktif.replace("-", " ")}
           </h2>
-
           <div className="flex items-center gap-3">
-            {/* 🔥 FIX: Hapus hidden md:flex, teksnya dibikin responsif biar nggak menuhin layar HP 🔥 */}
             <button
               onClick={() => setBukaKalkulator(true)}
               className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 sm:px-3 py-1.5 rounded-full shadow-sm hover:bg-emerald-100 transition"
@@ -1193,8 +1157,10 @@ export default function HalamanAdmin() {
               <span className="hidden sm:inline">Kalkulator Profit</span>
               <span className="sm:hidden">Profit</span>
             </button>
-
-            <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 bg-white border border-zinc-200 px-3 py-1.5 rounded-full shadow-sm w-fit">
+            <button
+              onClick={tarikDataTerbaru}
+              className="flex items-center gap-2 text-xs font-medium text-zinc-500 bg-white border border-zinc-200 px-3 py-1.5 rounded-full shadow-sm w-fit hover:bg-zinc-50 transition"
+            >
               <RefreshCw
                 size={12}
                 className={
@@ -1202,7 +1168,7 @@ export default function HalamanAdmin() {
                 }
               />{" "}
               Diperbarui: {terakhirDiperbarui}
-            </div>
+            </button>
             <div className="hidden md:flex items-center justify-center bg-white p-1.5 rounded-full border border-pink-100 shadow-sm hover:shadow-md transition-all shrink-0 w-12 h-12 cursor-pointer">
               <UserButton
                 appearance={{ elements: { userButtonAvatarBox: "w-9 h-9" } }}
@@ -1228,19 +1194,13 @@ export default function HalamanAdmin() {
                   </p>
                 </div>
 
-                {/* 🔥 FIX: Filter Dirapihin (Hari Ini, Minggu Ini, Semua Bulan) + Dropdown Tahun 🔥 */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full xl:w-fit">
-                  {/* Tombol Filter Cepat */}
                   <div className="flex items-center overflow-x-auto bg-white p-1 rounded-xl border border-pink-100 shadow-sm w-full sm:w-fit whitespace-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                     {["hari", "minggu", "semua"].map((filter) => (
                       <button
                         key={filter}
                         onClick={() => setFilterWaktu(filter)}
-                        className={`px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg capitalize transition-all shrink-0 ${
-                          filterWaktu === filter
-                            ? "bg-soft-pink-100 text-soft-pink-700 shadow-sm"
-                            : "text-zinc-500 hover:text-zinc-900"
-                        }`}
+                        className={`px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg capitalize transition-all shrink-0 ${filterWaktu === filter ? "bg-soft-pink-100 text-soft-pink-700 shadow-sm" : "text-zinc-500 hover:text-zinc-900"}`}
                       >
                         {filter === "hari"
                           ? "Hari Ini"
@@ -1250,8 +1210,6 @@ export default function HalamanAdmin() {
                       </button>
                     ))}
                   </div>
-
-                  {/* Dropdown Tahun Modern */}
                   <div className="shrink-0 w-full sm:w-32 z-[60]">
                     <DropdownMewah
                       value={
@@ -1516,7 +1474,7 @@ export default function HalamanAdmin() {
                   onKembali={() => setModeTambah(false)}
                   onSukses={() => {
                     setModeTambah(false);
-                    tarikProdukDariDB();
+                    tarikProdukDariDB(true);
                     tampilkanNotifikasi(
                       "MANTAP BRE! Produk berhasil masuk database!",
                       "sukses",
@@ -1531,7 +1489,6 @@ export default function HalamanAdmin() {
           )}
         </main>
 
-        {/* 🔥 FIX 4: MODAL POPUP KALKULATOR PROFIT 🔥 */}
         {bukaKalkulator && (
           <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4 animate-in fade-in">
             <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in-95">
