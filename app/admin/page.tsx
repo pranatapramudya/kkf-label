@@ -1016,41 +1016,49 @@ export default function HalamanAdmin() {
     );
   };
 
-  const tarikProdukDariDB = async () => {
-    setMemuatProduk(true);
+  // 🔥 FIX: Tambahin parameter isBackground biar dia tau kapan harus sembunyi
+  const tarikProdukDariDB = async (isBackground = false) => {
+    if (!isBackground) setMemuatProduk(true); // Cuma munculin loading pas pertama buka
     try {
       const respons = await fetch("/api/admin/produk");
       if (respons.ok) setDaftarProduk(await respons.json());
     } catch (galat) {
       console.error(galat);
     } finally {
-      setMemuatProduk(false);
+      if (!isBackground) setMemuatProduk(false);
     }
   };
 
-  const tarikDataAnalitik = async () => {
-    setMemuatAnalitik(true);
+  const tarikDataAnalitik = async (isBackground = false) => {
+    if (!isBackground) setMemuatAnalitik(true); // Cuma munculin loading pas pertama buka
     try {
       const respons = await fetch(`/api/admin/analitik?filter=${filterWaktu}`);
       if (respons.ok) setDataAnalitik(await respons.json());
     } catch (galat) {
       console.error(galat);
     } finally {
-      setMemuatAnalitik(false);
+      if (!isBackground) setMemuatAnalitik(false);
     }
   };
 
-  // 🔥 FIX 1: AUTOREFRESH REALTIME 10 DETIK 🔥
+  // 🔥 FIX: AUTOREFRESH DIAM-DIAM TANPA GANGGU LAYAR 🔥
   useEffect(() => {
-    if (tabAktif === "produk") tarikProdukDariDB();
+    if (tabAktif === "produk") {
+      tarikProdukDariDB(false); // Load pertama pakai spinner
+      const intervalRealtime = setInterval(
+        () => tarikProdukDariDB(true),
+        10000,
+      ); // Tarik data diam-diam di background
+      return () => clearInterval(intervalRealtime);
+    }
+
     if (tabAktif === "analitik") {
-      tarikDataAnalitik();
-
-      const intervalRealtime = setInterval(() => {
-        tarikDataAnalitik();
-      }, 10000);
-
-      return () => clearInterval(intervalRealtime); // Bersihkan saat pindah tab biar gak bocor memori
+      tarikDataAnalitik(false); // Load pertama pakai spinner
+      const intervalRealtime = setInterval(
+        () => tarikDataAnalitik(true),
+        10000,
+      ); // Tarik data diam-diam di background
+      return () => clearInterval(intervalRealtime);
     }
   }, [tabAktif, filterWaktu]);
 
@@ -1120,7 +1128,7 @@ export default function HalamanAdmin() {
                 Workspace
               </p>
               <h1 className="text-xl font-bold text-zinc-900 tracking-tight">
-                KKF LABEL
+                KKF LABEL ADMIN
               </h1>
             </div>
           </div>
@@ -1157,11 +1165,11 @@ export default function HalamanAdmin() {
         <header className="md:hidden shrink-0 bg-white border-b border-pink-100 p-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
           <div className="flex items-center gap-2">
             <img
-              src="/logo-kkf.jpeg"
+              src="/logo-kkf.png"
               alt="KKF Label"
               className="h-8 w-8 rounded-full object-cover border border-pink-100"
             />
-            <span className="font-bold text-zinc-900">KKF-Admin</span>
+            <span className="font-bold text-zinc-900">KKF-LABEL</span>
           </div>
           <div className="bg-white p-1 rounded-full border border-pink-100 shadow-sm flex items-center justify-center shrink-0 w-10 h-10">
             <UserButton

@@ -26,7 +26,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
   const [isMounted, setIsMounted] = useState(false);
 
   // ========================================================
-  // 🔥 CCTV VIEWS REALTIME 🔥
+  // 🔥 CCTV VIEWS REALTIME & REFRESH SILUMAN 🔥
   // ========================================================
   useEffect(() => {
     setIsMounted(true);
@@ -39,7 +39,15 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
         body: JSON.stringify({ id: produk.id }),
       }).catch((err) => console.error("Gagal merekam view:", err));
     }
-  }, [produk?.id]);
+
+    // 🔥 SUNTIKAN FRONTEND: Tarik update stok & info terbaru tiap 15 detik diam-diam
+    // Pembeli nggak akan nyadar layarnya ke-refresh, tapi data stoknya tiba-tiba akurat!
+    const autoRefreshSiluman = setInterval(() => {
+      router.refresh();
+    }, 15000);
+
+    return () => clearInterval(autoRefreshSiluman);
+  }, [produk?.id, router]);
   // ========================================================
 
   const mediaItems: { type: string; url: string }[] = [];
@@ -126,7 +134,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
       idVarian: varianAktif?.id || produk.id,
       idProduk: produk.id,
       nama: produk.nama,
-      foto: produk.fotoUtama || "/logo-kkf.jpeg",
+      foto: produk.fotoUtama || "/logo-kkf.png",
       ukuran: varianAktif?.ukuran || "",
       warna: varianAktif?.warna || "",
       harga: hargaAkhir,
@@ -187,7 +195,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                       {item.type === "video" ? (
                         <video
                           src={item.url}
-                          poster={produk.fotoUtama || "/logo-kkf.jpeg"}
+                          poster={produk.fotoUtama || "/logo-kkf.png"}
                           autoPlay
                           muted
                           loop
@@ -471,7 +479,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
             <div className="p-4 flex gap-4 relative border-b border-pink-50">
               <div className="relative -mt-10 h-28 w-28 shrink-0 rounded-xl border-4 border-white bg-white shadow-md overflow-hidden">
                 <Image
-                  src={produk.fotoUtama || "/logo-kkf.jpeg"}
+                  src={produk.fotoUtama || "/logo-kkf.png"}
                   fill
                   sizes="112px"
                   className="object-cover"
