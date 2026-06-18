@@ -1,0 +1,11 @@
+export function formatRupiah(nilai: number) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0
+  }).format(nilai);
+}
+
+export function buatKodePesanan() {
+  return `KKF-${Date.now().toString().slice(-8)}`;
+}

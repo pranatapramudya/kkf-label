@@ -1,0 +1,180 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import Image from "next/image"; // 🔥 Wajib di-import
+import {
+  ShoppingBag,
+  AlertCircle,
+  Home,
+  Truck,
+  MessageCircle,
+  Phone,
+} from "lucide-react";
+import { useKeranjang } from "@/context/CartContext";
+
+export function Navbar() {
+  const { jumlahItem } = useKeranjang();
+  const pathname = usePathname();
+  const [showToast, setShowToast] = useState(false);
+
+  const [activeNav, setActiveNav] = useState("/");
+
+  useEffect(() => {
+    setActiveNav(window.location.hash || pathname);
+  }, [pathname]);
+
+  if (pathname.startsWith("/admin")) return null;
+
+  const cegahCheckoutKosong = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (jumlahItem === 0) {
+      e.preventDefault();
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    }
+  };
+
+  const navItems = [
+    { name: "Beranda", href: "/", icon: Home },
+    { name: "Lacak", href: "/lacak-pesanan", icon: Truck },
+    { name: "Keranjang", href: "/checkout", icon: ShoppingBag, isCart: true },
+    { name: "Bantuan", href: "/bantuan", icon: MessageCircle },
+    { name: "Kontak", href: "/#kontak", icon: Phone },
+  ];
+
+  return (
+    <>
+      <div
+        className={`fixed top-20 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 transform ${showToast ? "translate-y-0 opacity-100" : "-translate-y-10 opacity-0 pointer-events-none"}`}
+      >
+        <div className="bg-zinc-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 text-sm font-medium border border-zinc-700 w-max max-w-[90vw]">
+          <AlertCircle size={18} className="text-soft-pink-500 flex-shrink-0" />
+          <span>Keranjang masih kosong, sis! Pilih produk dulu yuk. 🛍️</span>
+        </div>
+      </div>
+
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/70 bg-white/70 backdrop-blur-md h-16 flex items-center">
+        <nav className="kontainer-halaman flex h-full w-full items-center justify-between relative z-50">
+          <Link
+            href="/"
+            className="flex items-center group gap-3" // 🔥 Gap-3 biar ada jarak manis antara foto dan teks
+            onClick={() => setActiveNav("/")}
+          >
+            {/* 🔥 FIX FINAL: Logo foto dimunculkan kembali dengan ukuran proporsional */}
+            {/* Pastikan file 'logo-kkf.png' sudah ada di folder /public proyek lu yak! */}
+            <Image
+              src="/logo-kkf.png"
+              alt="Logo KKF Label"
+              width={40} // h-10
+              height={40}
+              className="object-contain h-10 w-10 flex-shrink-0" // Ukuran pas untuk header h-16
+              priority // Biar diload duluan pas web dibuka
+            />
+
+            {/* Tulisan dipertahankan total sesuai permintaan, jangan diubah warnanya! */}
+            <span className="text-xl font-black tracking-tighter text-zinc-900 group-hover:text-soft-pink-600 transition-colors uppercase">
+              KKF LABEL
+            </span>
+          </Link>
+
+          {/* Menu Desktop */}
+          <div className="hidden md:flex items-center gap-7 text-sm font-medium text-zinc-700">
+            <Link className="transition hover:text-soft-pink-600" href="/">
+              Katalog
+            </Link>
+            <Link
+              className="transition hover:text-soft-pink-600"
+              href="/lacak-pesanan"
+            >
+              Lacak Pesanan
+            </Link>
+            <Link
+              className="transition hover:text-soft-pink-600"
+              href="/bantuan"
+            >
+              Bantuan
+            </Link>
+            <Link
+              className="transition hover:text-soft-pink-600"
+              href="/#kontak"
+            >
+              Kontak
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link
+              href="/checkout"
+              className="relative flex items-center justify-center h-10 w-10 bg-white border border-pink-200 rounded-full text-soft-pink-500 hover:bg-soft-pink-50 transition-all shadow-sm"
+              onClick={cegahCheckoutKosong}
+            >
+              <ShoppingBag size={20} />
+              {jumlahItem > 0 && (
+                <span className="absolute -top-1 -right-1 bg-zinc-900 text-white text-[10px] font-bold h-5 w-5 flex items-center justify-center rounded-full border-2 border-white shadow-sm">
+                  {jumlahItem}
+                </span>
+              )}
+            </Link>
+          </div>
+        </nav>
+      </header>
+
+      {!pathname.startsWith("/produk/") &&
+        !pathname.startsWith("/checkout") && (
+          <nav className="md:hidden fixed bottom-0 inset-x-0 z-[90] bg-white border-t border-pink-100 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-[env(safe-area-inset-bottom)] h-16">
+            <div className="flex items-center justify-around h-full px-2">
+              {navItems.map((item) => {
+                const isActive = activeNav === item.href;
+
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={(e) => {
+                      if (item.isCart && jumlahItem === 0) {
+                        cegahCheckoutKosong(e);
+                        return;
+                      }
+                      setActiveNav(item.href);
+                    }}
+                    className="relative flex flex-col items-center w-16 h-full"
+                  >
+                    <div
+                      className={`absolute transition-all duration-300 ease-in-out flex items-center justify-center ${
+                        isActive
+                          ? "-top-5 h-14 w-14 bg-soft-pink-600 text-white rounded-full shadow-lg border-4 border-white"
+                          : "top-2 h-8 w-8 text-zinc-400 hover:text-soft-pink-500"
+                      }`}
+                    >
+                      <item.icon size={isActive ? 24 : 22} />
+                      {item.isCart && jumlahItem > 0 && (
+                        <span
+                          className={`absolute bg-zinc-900 text-white font-bold flex items-center justify-center rounded-full transition-all ${
+                            isActive
+                              ? "top-0 right-0 h-5 w-5 text-[10px] border-2 border-white"
+                              : "-top-1 -right-1 h-4 w-4 text-[9px]"
+                          }`}
+                        >
+                          {jumlahItem}
+                        </span>
+                      )}
+                    </div>
+                    <span
+                      className={`absolute transition-all duration-300 font-bold ${
+                        isActive
+                          ? "bottom-1 text-[10px] text-soft-pink-600"
+                          : "bottom-1.5 text-[9px] text-zinc-500"
+                      }`}
+                    >
+                      {item.name}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </nav>
+        )}
+    </>
+  );
+}

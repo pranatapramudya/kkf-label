@@ -1,0 +1,172 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum PeranUser {
+  ADMIN
+  CUSTOMER
+}
+
+enum StatusPesanan {
+  MENUNGGU_PEMBAYARAN
+  DIBAYAR
+  DIPROSES
+  DIKIRIM
+  SAMPAI
+  SELESAI
+  DIBATALKAN
+}
+
+enum StatusTransaksi {
+  PENDING
+  SETTLEMENT
+  CAPTURE
+  DENY
+  EXPIRE
+  CANCEL
+  REFUND
+}
+
+model User {
+  id           String      @id @default(cuid())
+  nama         String
+  email        String      @unique
+  kataSandi    String
+  peran        PeranUser   @default(CUSTOMER)
+  telepon      String?
+  alamat       String?
+  kota         String?
+  provinsi     String?
+  kodePos      String?
+  pesanan      Order[]
+  ulasan       Review[]
+  dibuatPada   DateTime    @default(now())
+  diubahPada   DateTime    @updatedAt
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  nama        String    @unique
+  slug        String    @unique
+  deskripsi   String?
+  produk      Product[]
+  dibuatPada  DateTime  @default(now())
+  diubahPada  DateTime  @updatedAt
+}
+
+model Product {
+  id             String           @id @default(cuid())
+  nama           String
+  slug           String           @unique
+  deskripsi      String
+  harga          Int
+  hargaCoret     Int?
+  diskonPersen   Int              @default(0)
+  fotoUtama      String
+  galeriFoto     String[]
+  aktif          Boolean          @default(true)
+  stokTotal      Int              @default(0)
+  viewCount      Int              @default(0)
+  kategoriId     String
+  kategori       Category         @relation(fields: [kategoriId], references: [id], onDelete: Cascade)
+  varian         ProductVariant[]
+  itemPesanan    OrderItem[]
+  ulasan         Review[]
+  dibuatPada     DateTime         @default(now())
+  diubahPada     DateTime         @updatedAt
+  videoUrl  String?
+}
+
+model ProductVariant {
+  id          String      @id @default(cuid())
+  ukuran      String
+  warna       String
+  stok        Int         @default(0)
+  sku         String      @unique
+  produkId    String
+  produk      Product     @relation(fields: [produkId], references: [id], onDelete: Cascade)
+  itemPesanan OrderItem[]
+  dibuatPada  DateTime    @default(now())
+  diubahPada  DateTime    @updatedAt
+}
+
+model Order {
+  id                 String          @id @default(cuid())
+  kodePesanan        String          @unique
+  penggunaId         String?
+  pengguna           User?           @relation(fields: [penggunaId], references: [id], onDelete: SetNull)
+  namaPenerima       String
+  emailPenerima      String
+  teleponPenerima    String
+  alamatLengkap      String
+  provinsi           String
+  kota               String
+  ekspedisi          String
+  nomorResi          String?         
+  subtotal           Int
+  ongkir             Int
+  total              Int
+  statusPesanan      StatusPesanan   @default(MENUNGGU_PEMBAYARAN)
+  item               OrderItem[]
+  transaksi          Transaction?
+  ulasan             Review[]
+  dibuatPada         DateTime        @default(now())
+  diubahPada         DateTime        @updatedAt
+}
+
+model OrderItem {
+  id          String          @id @default(cuid())
+  pesananId   String
+  pesanan     Order           @relation(fields: [pesananId], references: [id], onDelete: Cascade)
+  produkId    String
+  produk      Product         @relation(fields: [produkId], references: [id])
+  varianId    String?
+  varian      ProductVariant? @relation(fields: [varianId], references: [id], onDelete: SetNull)
+  namaProduk  String
+  ukuran      String?
+  warna       String?
+  harga       Int
+  jumlah      Int
+  total       Int
+}
+
+model Transaction {
+  id                    String           @id @default(cuid())
+  pesananId             String           @unique
+  pesanan               Order            @relation(fields: [pesananId], references: [id], onDelete: Cascade)
+  paymentGateway        String
+  gatewayOrderId        String           @unique
+  statusTransaksi       StatusTransaksi  @default(PENDING)
+  grossAmount           Int
+  paymentType           String?
+  redirectUrl           String?
+  fraudStatus           String?
+  payloadGateway        Json?
+  dibuatPada            DateTime         @default(now())
+  diubahPada            DateTime         @updatedAt
+}
+
+model Review {
+  id          String    @id @default(cuid())
+  produkId    String
+  produk      Product   @relation(fields: [produkId], references: [id], onDelete: Cascade)
+  penggunaId  String
+  pengguna    User      @relation(fields: [penggunaId], references: [id], onDelete: Cascade)
+  pesananId   String
+  pesanan     Order     @relation(fields: [pesananId], references: [id], onDelete: Cascade)
+  rating      Int
+  comment     String
+  imageUrl    String?
+  videoUrl    String?
+  dibuatPada  DateTime  @default(now())
+  diubahPada  DateTime  @updatedAt
+
+  @@unique([produkId, penggunaId, pesananId])
+}
+
