@@ -70,4 +70,4 @@ Buka [http://localhost:3000](http://localhost:3000) di browser untuk melihat eta
 
 ## 📄 Lisensi
 
-Hak Cipta © 2026 KKF Label. Seluruh hak dilindungi.
+Hak Cipta © 2026 KKF Label. Seluruh hak dilindungi...
