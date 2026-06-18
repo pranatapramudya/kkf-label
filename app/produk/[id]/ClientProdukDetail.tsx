@@ -24,9 +24,23 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
   const router = useRouter();
 
   const [isMounted, setIsMounted] = useState(false);
+
+  // ========================================================
+  // 🔥 CCTV VIEWS REALTIME 🔥
+  // ========================================================
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+
+    if (produk?.id) {
+      // Diam-diam kirim sinyal ke backend kalau produk ini lagi dilihat
+      fetch("/api/produk/view", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: produk.id }),
+      }).catch((err) => console.error("Gagal merekam view:", err));
+    }
+  }, [produk?.id]);
+  // ========================================================
 
   const mediaItems: { type: string; url: string }[] = [];
   if (produk.videoUrl && produk.videoUrl.trim() !== "") {
@@ -139,7 +153,6 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
   };
 
   return (
-    // 🔥 FIX 1: max-w-[100vw] dan w-full buat ngunci layar HP biar gak nerobos ke samping
     <div className="kontainer-halaman pt-0 md:py-6 pb-32 md:pb-12 relative overflow-x-hidden w-full max-w-[100vw]">
       {toast.show && (
         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[999999] bg-zinc-900/90 backdrop-blur-sm text-white px-5 py-2.5 rounded-full shadow-2xl flex items-center gap-2.5 animate-in fade-in zoom-in-95 slide-in-from-bottom-5 duration-200">
@@ -154,14 +167,12 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
         </div>
       )}
 
-      {/* 🔥 FIX 2: w-full max-w-full biar dua kolomnya patuh sama ukuran HP */}
       <div className="grid gap-6 md:gap-8 lg:grid-cols-2 w-full max-w-full">
         <div className="w-full flex flex-col gap-3 overflow-hidden">
           {!isMounted ? (
             <div className="aspect-square w-full bg-zinc-100 animate-pulse md:rounded-2xl border border-pink-50"></div>
           ) : (
             <>
-              {/* 🔥 FIX 3: Ganti bg-black jadi bg-zinc-100 biar lebih cerah/premium */}
               <div className="relative w-full aspect-square md:aspect-[4/5] bg-zinc-100 md:rounded-2xl overflow-hidden shadow-sm group border border-pink-50">
                 <div
                   ref={scrollContainerRef}
@@ -181,7 +192,6 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                           muted
                           loop
                           playsInline
-                          // 🔥 FIX 4: object-cover biar penuh sekotak tanpa blok item
                           className="absolute inset-0 w-full h-full object-cover"
                         />
                       ) : (
@@ -190,7 +200,6 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                           alt={`${produk.nama} ${idx}`}
                           fill
                           sizes="(max-width: 768px) 100vw, 50vw"
-                          // 🔥 FIX 5: object-cover biar foto penuh tanpa distorsi
                           className="object-cover"
                           priority={idx === 0}
                         />
@@ -262,8 +271,6 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
           )}
         </div>
 
-        {/* INFORMASI PRODUK */}
-        {/* 🔥 FIX 6: w-full min-w-0 biar teksnya nggak ngedesek layout keluar batas */}
         <div className="flex flex-col w-full min-w-0">
           <span className="rounded-full bg-soft-pink-100 px-3 py-1 text-xs font-semibold text-soft-pink-700 uppercase w-fit">
             {produk.kategori?.nama || "Umum"}
@@ -294,7 +301,6 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
             )}
           </div>
 
-          {/* 🔥 FIX 7: Tambah break-words biar teks/link/kata panjang otomatis enter ke bawah */}
           <div className="mt-5 text-sm leading-relaxed text-zinc-600 text-justify whitespace-pre-line break-words w-full overflow-hidden">
             {bacaSelengkapnya
               ? produk.deskripsi
@@ -430,7 +436,6 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
         </div>
       </div>
 
-      {/* Navigasi Mobile Bawah */}
       <div className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-zinc-200 p-3 px-4 flex items-center gap-3 z-[90] pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.1)]">
         <button className="flex flex-col items-center justify-center text-zinc-500 hover:text-soft-pink-600 px-2 transition-colors">
           <MessageCircle size={22} />
@@ -456,7 +461,6 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
         </button>
       </div>
 
-      {/* Modal Varian Mobile */}
       {showModal && (
         <>
           <div

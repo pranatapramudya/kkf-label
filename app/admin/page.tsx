@@ -970,6 +970,15 @@ export default function HalamanAdmin() {
   const [modeTambah, setModeTambah] = useState(false);
   const [daftarProduk, setDaftarProduk] = useState<any[]>([]);
   const [memuatProduk, setMemuatProduk] = useState(false);
+
+  // 🔥 STATE KALKULATOR PROFIT 🔥
+  const [bukaKalkulator, setBukaKalkulator] = useState(false);
+  const [hargaJualCalc, setHargaJualCalc] = useState("");
+  const [hargaBeliCalc, setHargaBeliCalc] = useState("");
+  const profitKalkulator =
+    Number(hargaJualCalc.replace(/\D/g, "")) -
+    Number(hargaBeliCalc.replace(/\D/g, ""));
+
   const [notifikasiAdmin, setNotifikasiAdmin] = useState({
     terbuka: false,
     pesan: "",
@@ -1031,9 +1040,18 @@ export default function HalamanAdmin() {
     }
   };
 
+  // 🔥 FIX 1: AUTOREFRESH REALTIME 10 DETIK 🔥
   useEffect(() => {
     if (tabAktif === "produk") tarikProdukDariDB();
-    if (tabAktif === "analitik") tarikDataAnalitik();
+    if (tabAktif === "analitik") {
+      tarikDataAnalitik();
+
+      const intervalRealtime = setInterval(() => {
+        tarikDataAnalitik();
+      }, 10000);
+
+      return () => clearInterval(intervalRealtime); // Bersihkan saat pindah tab biar gak bocor memori
+    }
   }, [tabAktif, filterWaktu]);
 
   const tarikDataTerbaru = () => {
@@ -1093,16 +1111,16 @@ export default function HalamanAdmin() {
         <div className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
-              src="/logo-kkf.jpeg"
+              src="/logo-kkf.png"
               alt="KKF Label"
-              className="h-10 w-10 rounded-full object-cover border border-pink-100 shadow-sm"
+              className="h-10 w-10 rounded-md object-cover border border-pink-100 shadow-sm"
             />
             <div>
               <p className="text-[10px] font-bold text-soft-pink-600 uppercase tracking-wider">
                 Workspace
               </p>
               <h1 className="text-xl font-bold text-zinc-900 tracking-tight">
-                KKF-Admin
+                KKF LABEL
               </h1>
             </div>
           </div>
@@ -1122,12 +1140,11 @@ export default function HalamanAdmin() {
           ))}
         </nav>
 
-        {/* 🔥 FIX: TOMBOL LOGOUT DESKTOP PAKAI JALUR SUPER VIP 🔥 */}
         <div className="p-4 border-t border-pink-100 flex flex-col gap-3">
           <button
             onClick={async () => {
               await signOut();
-              window.location.href = "/"; // Force hard redirect biar bersih!
+              window.location.href = "/";
             }}
             className="flex items-center justify-center gap-2 text-red-500 bg-red-50 hover:bg-red-100 w-full px-4 py-3 rounded-xl font-bold transition outline-none shadow-sm border border-red-100"
           >
@@ -1137,7 +1154,6 @@ export default function HalamanAdmin() {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0 bg-zinc-50/50 relative h-full">
-        {/* 🔥 FIX: PROFILE CLERK MUNCUL DI HEADER MOBILE 🔥 */}
         <header className="md:hidden shrink-0 bg-white border-b border-pink-100 p-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
           <div className="flex items-center gap-2">
             <img
@@ -1147,7 +1163,6 @@ export default function HalamanAdmin() {
             />
             <span className="font-bold text-zinc-900">KKF-Admin</span>
           </div>
-          {/* 🔥 BUNGKUSAN BARU BIAR GAK KEGENCET 🔥 */}
           <div className="bg-white p-1 rounded-full border border-pink-100 shadow-sm flex items-center justify-center shrink-0 w-10 h-10">
             <UserButton
               appearance={{ elements: { userButtonAvatarBox: "w-8 h-8" } }}
@@ -1160,8 +1175,17 @@ export default function HalamanAdmin() {
             {tabAktif.replace("-", " ")}
           </h2>
 
-          {/* 🔥 FIX: PROFILE CLERK MUNCUL DI POJOK KANAN DESKTOP 🔥 */}
           <div className="flex items-center gap-3">
+            {/* 🔥 FIX: Hapus hidden md:flex, teksnya dibikin responsif biar nggak menuhin layar HP 🔥 */}
+            <button
+              onClick={() => setBukaKalkulator(true)}
+              className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 sm:px-3 py-1.5 rounded-full shadow-sm hover:bg-emerald-100 transition"
+            >
+              <CircleDollarSign size={14} />
+              <span className="hidden sm:inline">Kalkulator Profit</span>
+              <span className="sm:hidden">Profit</span>
+            </button>
+
             <div className="flex items-center gap-2 text-xs font-medium text-zinc-500 bg-white border border-zinc-200 px-3 py-1.5 rounded-full shadow-sm w-fit">
               <RefreshCw
                 size={12}
@@ -1196,41 +1220,45 @@ export default function HalamanAdmin() {
                   </p>
                 </div>
 
-                <div className="flex items-center overflow-x-auto bg-white p-1 rounded-xl border border-pink-100 shadow-sm w-full xl:w-fit whitespace-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                  {["hari", "7hari", "30hari", "bulan"].map((filter) => (
-                    <button
-                      key={filter}
-                      onClick={() => setFilterWaktu(filter)}
-                      className={`px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg capitalize transition-all shrink-0 ${filterWaktu === filter ? "bg-soft-pink-100 text-soft-pink-700 shadow-sm" : "text-zinc-500 hover:text-zinc-900"}`}
-                    >
-                      {filter === "hari"
-                        ? "Hari Ini"
-                        : filter === "7hari"
-                          ? "7 Hari"
-                          : filter === "30hari"
-                            ? "30 Hari"
-                            : "Bulan Ini"}
-                    </button>
-                  ))}
-                  <div className="border-l border-pink-100 ml-1 pl-1 shrink-0 flex items-center h-full">
-                    <select
-                      className={`px-3 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg outline-none cursor-pointer transition-all ${!isNaN(Number(filterWaktu)) && filterWaktu.length === 4 ? "bg-soft-pink-100 text-soft-pink-700 shadow-sm" : "bg-transparent text-zinc-500 hover:text-zinc-900"}`}
+                {/* 🔥 FIX: Filter Dirapihin (Hari Ini, Minggu Ini, Semua Bulan) + Dropdown Tahun 🔥 */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full xl:w-fit">
+                  {/* Tombol Filter Cepat */}
+                  <div className="flex items-center overflow-x-auto bg-white p-1 rounded-xl border border-pink-100 shadow-sm w-full sm:w-fit whitespace-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                    {["hari", "minggu", "semua"].map((filter) => (
+                      <button
+                        key={filter}
+                        onClick={() => setFilterWaktu(filter)}
+                        className={`px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg capitalize transition-all shrink-0 ${
+                          filterWaktu === filter
+                            ? "bg-soft-pink-100 text-soft-pink-700 shadow-sm"
+                            : "text-zinc-500 hover:text-zinc-900"
+                        }`}
+                      >
+                        {filter === "hari"
+                          ? "Hari Ini"
+                          : filter === "minggu"
+                            ? "Minggu Ini"
+                            : "Semua Bulan"}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Dropdown Tahun Modern */}
+                  <div className="shrink-0 w-full sm:w-32 z-[60]">
+                    <DropdownMewah
                       value={
                         !isNaN(Number(filterWaktu)) && filterWaktu.length === 4
                           ? filterWaktu
                           : ""
                       }
-                      onChange={(e) => setFilterWaktu(e.target.value)}
-                    >
-                      <option value="" disabled>
-                        Pilih Tahun
-                      </option>
-                      {daftarTahun.map((tahun) => (
-                        <option key={tahun} value={tahun.toString()}>
-                          {tahun}
-                        </option>
-                      ))}
-                    </select>
+                      options={daftarTahun.map((tahun) => ({
+                        value: tahun.toString(),
+                        label: tahun.toString(),
+                      }))}
+                      onChange={(val: string) => setFilterWaktu(val)}
+                      placeholder="Pilih Tahun"
+                      widthClass="w-full"
+                    />
                   </div>
                 </div>
               </div>
@@ -1400,6 +1428,11 @@ export default function HalamanAdmin() {
                                 tickLine={false}
                                 tick={{ fill: "#3f3f46", fontSize: 10 }}
                                 width={90}
+                                tickFormatter={(value) =>
+                                  value.length > 12
+                                    ? value.substring(0, 12) + "..."
+                                    : value
+                                }
                               />
                               <Tooltip
                                 cursor={{ fill: "#fdf2f8" }}
@@ -1489,6 +1522,87 @@ export default function HalamanAdmin() {
             </div>
           )}
         </main>
+
+        {/* 🔥 FIX 4: MODAL POPUP KALKULATOR PROFIT 🔥 */}
+        {bukaKalkulator && (
+          <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4 animate-in fade-in">
+            <div className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in-95">
+              <div className="flex justify-between items-center mb-5 border-b border-zinc-100 pb-3">
+                <h3 className="font-bold text-zinc-900 flex items-center gap-2">
+                  <CircleDollarSign className="text-emerald-500" size={18} />{" "}
+                  Kalkulator Profit
+                </h3>
+                <button
+                  onClick={() => setBukaKalkulator(false)}
+                  className="text-zinc-400 hover:text-red-500 bg-zinc-50 rounded-full p-1.5 transition"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-600 mb-1">
+                    Harga Jual (Customer)
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-sm font-bold text-zinc-400">
+                      Rp
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={hargaJualCalc}
+                      onChange={(e) => {
+                        const angkaMurni = e.target.value.replace(/\D/g, "");
+                        setHargaJualCalc(
+                          angkaMurni ? formatRupiah(Number(angkaMurni)) : "",
+                        );
+                      }}
+                      className="w-full border border-zinc-300 py-2.5 pl-10 pr-3 rounded-xl focus:outline-none focus:border-emerald-500 text-sm"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-600 mb-1">
+                    Harga Modal (Beli/Pabrik)
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5 text-sm font-bold text-zinc-400">
+                      Rp
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={hargaBeliCalc}
+                      onChange={(e) => {
+                        const angkaMurni = e.target.value.replace(/\D/g, "");
+                        setHargaBeliCalc(
+                          angkaMurni ? formatRupiah(Number(angkaMurni)) : "",
+                        );
+                      }}
+                      className="w-full border border-zinc-300 py-2.5 pl-10 pr-3 rounded-xl focus:outline-none focus:border-emerald-500 text-sm"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+                <div
+                  className={`p-4 rounded-xl mt-4 border ${profitKalkulator > 0 ? "bg-emerald-50 border-emerald-100" : profitKalkulator < 0 ? "bg-red-50 border-red-100" : "bg-zinc-50 border-zinc-200"}`}
+                >
+                  <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">
+                    Total Profit Margin
+                  </p>
+                  <p
+                    className={`text-2xl font-black ${profitKalkulator > 0 ? "text-emerald-600" : profitKalkulator < 0 ? "text-red-600" : "text-zinc-800"}`}
+                  >
+                    {profitKalkulator > 0 ? "+" : ""}
+                    {formatRupiah(profitKalkulator)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {notifikasiAdmin.terbuka && (
           <div className="fixed top-20 right-5 left-5 md:left-auto md:bottom-5 md:top-auto z-[99999] bg-zinc-900 text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 border border-zinc-800 animate-in slide-in-from-top-5 md:slide-in-from-bottom-5 duration-300">
