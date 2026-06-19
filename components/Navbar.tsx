@@ -3,14 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Image from "next/image"; // 🔥 Wajib di-import
+import Image from "next/image";
 import {
   ShoppingBag,
   AlertCircle,
   Home,
   Truck,
   MessageCircle,
-  Phone,
+  User, // 🔥 Ikon User untuk menu "Saya"
 } from "lucide-react";
 import { useKeranjang } from "@/context/CartContext";
 
@@ -35,12 +35,13 @@ export function Navbar() {
     }
   };
 
+  // 🔥 FIX: Menu Kontak diganti jadi Saya ala Shopee
   const navItems = [
     { name: "Beranda", href: "/", icon: Home },
     { name: "Lacak", href: "/lacak-pesanan", icon: Truck },
     { name: "Keranjang", href: "/checkout", icon: ShoppingBag, isCart: true },
     { name: "Bantuan", href: "/bantuan", icon: MessageCircle },
-    { name: "Kontak", href: "/#kontak", icon: Phone },
+    { name: "Saya", href: "/akun", icon: User }, // 👈 Ini dia menu barunya!
   ];
 
   return (
@@ -58,21 +59,17 @@ export function Navbar() {
         <nav className="kontainer-halaman flex h-full w-full items-center justify-between relative z-50">
           <Link
             href="/"
-            className="flex items-center group gap-3" // 🔥 Gap-3 biar ada jarak manis antara foto dan teks
+            className="flex items-center group gap-3"
             onClick={() => setActiveNav("/")}
           >
-            {/* 🔥 FIX FINAL: Logo foto dimunculkan kembali dengan ukuran proporsional */}
-            {/* Pastikan file 'logo-kkf.png' sudah ada di folder /public proyek lu yak! */}
             <Image
               src="/logo-kkf.png"
               alt="Logo KKF Label"
-              width={40} // h-10
+              width={40}
               height={40}
-              className="object-contain h-10 w-10 flex-shrink-0" // Ukuran pas untuk header h-16
-              priority // Biar diload duluan pas web dibuka
+              className="object-contain h-10 w-10 flex-shrink-0"
+              priority
             />
-
-            {/* Tulisan dipertahankan total sesuai permintaan, jangan diubah warnanya! */}
             <span className="text-xl font-black tracking-tighter text-zinc-900 group-hover:text-soft-pink-600 transition-colors uppercase">
               KKF LABEL
             </span>
@@ -95,11 +92,9 @@ export function Navbar() {
             >
               Bantuan
             </Link>
-            <Link
-              className="transition hover:text-soft-pink-600"
-              href="/#kontak"
-            >
-              Kontak
+            {/* 🔥 FIX: Ubah navigasi desktop juga */}
+            <Link className="transition hover:text-soft-pink-600" href="/akun">
+              Saya
             </Link>
           </div>
 

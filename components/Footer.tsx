@@ -15,7 +15,8 @@ export function Footer() {
   // KUNCIAN: Sembunyikan Footer di halaman Admin, Checkout, Lacak Pesanan, DAN DETAIL PRODUK
   if (
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/produk/") || // 👈 Ini yang bikin footer hilang di halaman detail!
+    pathname.startsWith("/produk/") ||
+    pathname.startsWith("/akun") || // 👈 Ini yang bikin footer hilang di halaman detail!
     pathname === "/checkout" ||
     pathname === "/lacak-pesanan"
   ) {

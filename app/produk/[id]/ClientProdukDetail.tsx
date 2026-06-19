@@ -25,14 +25,10 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
 
   const [isMounted, setIsMounted] = useState(false);
 
-  // ========================================================
-  // 🔥 CCTV VIEWS REALTIME & REFRESH SILUMAN 🔥
-  // ========================================================
   useEffect(() => {
     setIsMounted(true);
 
     if (produk?.id) {
-      // Diam-diam kirim sinyal ke backend kalau produk ini lagi dilihat
       fetch("/api/produk/view", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -40,15 +36,12 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
       }).catch((err) => console.error("Gagal merekam view:", err));
     }
 
-    // 🔥 SUNTIKAN FRONTEND: Tarik update stok & info terbaru tiap 15 detik diam-diam
-    // Pembeli nggak akan nyadar layarnya ke-refresh, tapi data stoknya tiba-tiba akurat!
     const autoRefreshSiluman = setInterval(() => {
       router.refresh();
     }, 15000);
 
     return () => clearInterval(autoRefreshSiluman);
   }, [produk?.id, router]);
-  // ========================================================
 
   const mediaItems: { type: string; url: string }[] = [];
   if (produk.videoUrl && produk.videoUrl.trim() !== "") {
@@ -288,9 +281,9 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
           </h1>
 
           <div className="mt-3 flex items-center gap-2 text-sm text-zinc-600">
-            <Star size={16} className="fill-soft-pink-400 text-soft-pink-400" />
+            <Star size={16} className="fill-amber-400 text-amber-400" />
             <span className="font-semibold text-zinc-900">4.9</span>
-            <span>({produk.ulasan?.length || 128} ulasan)</span>
+            <span>({produk.ulasan?.length || 0} ulasan)</span>
           </div>
 
           <div className="mt-5 flex items-center gap-3 border-b border-pink-50 pb-5">
@@ -417,28 +410,52 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
             </div>
           </div>
 
+          {/* 🔥 FIX: Ulasan Realtime 🔥 */}
           <section className="mt-8 rounded-2xl border border-pink-100 bg-zinc-50/50 p-5 md:p-7 w-full overflow-hidden">
-            <h2 className="font-semibold text-zinc-900">Ulasan pelanggan</h2>
+            <h2 className="font-semibold text-zinc-900">Ulasan Pelanggan</h2>
             <div className="mt-4 space-y-4">
-              {[
-                "Potongannya rapi dan warnanya cantik di kulit.",
-                "Bahannya adem, cocok dipakai seharian.",
-                "Pengiriman cepat dan packing-nya aman.",
-              ].map((ulasan, idx) => (
-                <div
-                  key={idx}
-                  className="border-b border-pink-50 pb-4 last:border-0 last:pb-0"
-                >
-                  <div className="flex gap-1 text-soft-pink-400">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} size={14} className="fill-current" />
-                    ))}
-                  </div>
-                  <p className="mt-2 text-sm leading-6 text-zinc-600 break-words">
-                    {ulasan}
+              {!produk.ulasan || produk.ulasan.length === 0 ? (
+                <div className="text-center py-6">
+                  <p className="text-sm text-zinc-500 italic">
+                    Belum ada ulasan untuk produk ini. Jadilah yang pertama!
                   </p>
                 </div>
-              ))}
+              ) : (
+                produk.ulasan.map((ulasan: any, idx: number) => (
+                  <div
+                    key={idx}
+                    className="border-b border-pink-50 pb-4 last:border-0 last:pb-0 animate-in fade-in"
+                  >
+                    <div className="flex justify-between items-start mb-1.5">
+                      <span className="text-xs font-bold text-zinc-800 bg-white px-2 py-0.5 rounded-md border border-zinc-100 shadow-sm">
+                        {ulasan.namaGuest || "Pelanggan Setia KKF"}
+                      </span>
+                      <span className="text-[10px] font-medium text-zinc-400">
+                        {new Date(ulasan.dibuatPada).toLocaleDateString(
+                          "id-ID",
+                          { day: "numeric", month: "short", year: "numeric" },
+                        )}
+                      </span>
+                    </div>
+
+                    <div className="flex gap-1 text-amber-400 mb-2.5">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          size={12}
+                          className={
+                            i < ulasan.rating ? "fill-current" : "text-zinc-300"
+                          }
+                        />
+                      ))}
+                    </div>
+
+                    <p className="text-sm leading-relaxed text-zinc-600 break-words">
+                      {ulasan.comment}
+                    </p>
+                  </div>
+                ))
+              )}
             </div>
           </section>
         </div>

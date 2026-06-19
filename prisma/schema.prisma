@@ -156,8 +156,12 @@ model Review {
   id          String    @id @default(cuid())
   produkId    String
   produk      Product   @relation(fields: [produkId], references: [id], onDelete: Cascade)
-  penggunaId  String
-  pengguna    User      @relation(fields: [penggunaId], references: [id], onDelete: Cascade)
+  
+  // 🔥 FIX: Tanda tanya (?) ditambahkan biar pembeli tanpa akun bisa ngulas
+  penggunaId  String?   
+  pengguna    User?     @relation(fields: [penggunaId], references: [id], onDelete: Cascade)
+  
+  namaGuest   String?
   pesananId   String
   pesanan     Order     @relation(fields: [pesananId], references: [id], onDelete: Cascade)
   rating      Int
@@ -167,6 +171,7 @@ model Review {
   dibuatPada  DateTime  @default(now())
   diubahPada  DateTime  @updatedAt
 
-  @@unique([produkId, penggunaId, pesananId])
+  // 🔥 FIX: penggunaId dihapus dari unique biar gak bentrok
+  @@unique([produkId, pesananId])
 }
 

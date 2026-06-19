@@ -46,7 +46,7 @@ git clone [https://github.com/username/kkf-label.git](https://github.com/usernam
 cd kkf-label
 npm install
 2. Pengaturan Environment Variables
-Buat file .env.local di root direktori proyek dan masukkan kredensial berikut:
+Buat file .env di root direktori proyek dan masukkan kredensial berikut:
 
 Cuplikan kode
 # Database & Storage (Supabase)
