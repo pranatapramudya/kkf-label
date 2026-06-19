@@ -9,7 +9,6 @@ import {
   AlertCircle,
   Home,
   Truck,
-  MessageCircle,
   User, // 🔥 Ikon User untuk menu "Saya"
 } from "lucide-react";
 import { useKeranjang } from "@/context/CartContext";
@@ -40,7 +39,6 @@ export function Navbar() {
     { name: "Beranda", href: "/", icon: Home },
     { name: "Lacak", href: "/lacak-pesanan", icon: Truck },
     { name: "Keranjang", href: "/checkout", icon: ShoppingBag, isCart: true },
-    { name: "Bantuan", href: "/bantuan", icon: MessageCircle },
     { name: "Saya", href: "/akun", icon: User }, // 👈 Ini dia menu barunya!
   ];
 
@@ -85,12 +83,6 @@ export function Navbar() {
               href="/lacak-pesanan"
             >
               Lacak Pesanan
-            </Link>
-            <Link
-              className="transition hover:text-soft-pink-600"
-              href="/bantuan"
-            >
-              Bantuan
             </Link>
             {/* 🔥 FIX: Ubah navigasi desktop juga */}
             <Link className="transition hover:text-soft-pink-600" href="/akun">

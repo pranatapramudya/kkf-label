@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { Instagram, Mail, MapPin, Sparkles, ShoppingBag } from "lucide-react";
 
 const tautanBantuan = [
-  { label: "FAQ / Tanya Jawab", href: "/bantuan" },
   { label: "Lacak Pesanan", href: "/lacak-pesanan" },
 ];
 

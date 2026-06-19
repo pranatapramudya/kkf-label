@@ -5,25 +5,35 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const filter = searchParams.get("filter") || "7hari";
+    const bulan = searchParams.get("bulan");
+    const tahun = searchParams.get("tahun");
 
     const sekarang = new Date();
     let tanggalMulai = new Date();
     let tanggalAkhir = new Date();
-    let isFilterTahun = false; // Penanda buat ubah grafik jadi Jan-Des
+    let isFilterTahun = false;
+    let isFilterBulan = false;
 
     if (filter === "hari") {
       tanggalMulai.setHours(0, 0, 0, 0);
-    } else if (filter === "7hari") {
+    } else if (filter === "7hari" || filter === "minggu") {
       tanggalMulai.setDate(sekarang.getDate() - 7);
-    } else if (filter === "30hari") {
-      tanggalMulai.setDate(sekarang.getDate() - 30);
-    } else if (filter === "bulan") {
-      tanggalMulai = new Date(sekarang.getFullYear(), sekarang.getMonth(), 1);
-    } else if (filter === "tahun") {
-      tanggalMulai = new Date(sekarang.getFullYear(), 0, 1);
-      isFilterTahun = true;
+    } else if (filter === "bulanan") {
+      let tBulan = bulan ? parseInt(bulan) : sekarang.getMonth();
+      let tTahun = tahun ? parseInt(tahun) : sekarang.getFullYear();
+      
+      if (tBulan === -1) {
+        // Semua Bulan (1 Tahun)
+        tanggalMulai = new Date(tTahun, 0, 1);
+        tanggalAkhir = new Date(tTahun, 11, 31, 23, 59, 59);
+        isFilterTahun = true;
+      } else {
+        // Spesifik Bulan
+        tanggalMulai = new Date(tTahun, tBulan, 1);
+        tanggalAkhir = new Date(tTahun, tBulan + 1, 0, 23, 59, 59);
+        isFilterBulan = true;
+      }
     } else if (!isNaN(Number(filter))) {
-      // Kalau filter berupa angka tahun (Contoh: "2025")
       const tahunDipilih = Number(filter);
       tanggalMulai = new Date(tahunDipilih, 0, 1);
       tanggalAkhir = new Date(tahunDipilih, 11, 31, 23, 59, 59);
@@ -31,7 +41,7 @@ export async function GET(request: Request) {
     }
 
     const queryWaktu =
-      isFilterTahun && filter.length === 4
+      (isFilterTahun || isFilterBulan)
         ? { gte: tanggalMulai, lte: tanggalAkhir }
         : { gte: tanggalMulai };
 
@@ -85,6 +95,20 @@ export async function GET(request: Request) {
       grafikPenjualan = namaBulan.map((nama, index) => ({
         hari: nama,
         total: mapBulan.get(index) || 0,
+      }));
+    } else if (isFilterBulan) {
+      // Grafik per tanggal dalam 1 bulan spesifik
+      const mapTanggal = new Map();
+      pesananReal.forEach((order) => {
+        const tanggal = new Date(order.dibuatPada).getDate();
+        mapTanggal.set(tanggal, (mapTanggal.get(tanggal) || 0) + order.total);
+      });
+      const tBulan = bulan ? parseInt(bulan) : sekarang.getMonth();
+      const tTahun = tahun ? parseInt(tahun) : sekarang.getFullYear();
+      const maxHari = new Date(tTahun, tBulan + 1, 0).getDate();
+      grafikPenjualan = Array.from({ length: maxHari }, (_, i) => ({
+        hari: (i + 1).toString(),
+        total: mapTanggal.get(i + 1) || 0,
       }));
     } else {
       // Grafik 7 Hari (Senin - Minggu)

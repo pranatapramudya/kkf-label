@@ -44,11 +44,20 @@ import {
 } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
 import TabelProduk from "./produk/TabelProduk";
+import PromosiTab from "@/components/admin/PromosiTab";
 import { useClerk, UserButton } from "@clerk/nextjs";
 
 // ==========================================
 // 🔥 KOMPONEN DROPDOWN MEWAH
 // ==========================================
+const opsiBulanGlobal = [
+  { value: "-1", label: "Semua Bulan" },
+  ...[
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+  ].map((b, i) => ({ value: i.toString(), label: b })),
+];
+
 function DropdownMewah({
   value,
   options,
@@ -997,11 +1006,12 @@ export default function HalamanAdmin() {
   const [memuatProduk, setMemuatProduk] = useState(false);
 
   const [bukaKalkulator, setBukaKalkulator] = useState(false);
-  const [hargaJualCalc, setHargaJualCalc] = useState("");
+  const [kalkulatorBulan, setKalkulatorBulan] = useState(new Date().getMonth().toString());
+  const [kalkulatorTahun, setKalkulatorTahun] = useState(new Date().getFullYear().toString());
+  const [pendapatanSelesai, setPendapatanSelesai] = useState(0);
   const [hargaBeliCalc, setHargaBeliCalc] = useState("");
-  const profitKalkulator =
-    Number(hargaJualCalc.replace(/\D/g, "")) -
-    Number(hargaBeliCalc.replace(/\D/g, ""));
+  const profitKalkulator = pendapatanSelesai - Number(hargaBeliCalc.replace(/\D/g, ""));
+  const [memuatKalkulator, setMemuatKalkulator] = useState(false);
 
   const [notifikasiAdmin, setNotifikasiAdmin] = useState({
     terbuka: false,
@@ -1010,6 +1020,8 @@ export default function HalamanAdmin() {
   });
 
   const [filterWaktu, setFilterWaktu] = useState("7hari");
+  const [filterBulan, setFilterBulan] = useState(new Date().getMonth().toString());
+  const [filterTahun, setFilterTahun] = useState(new Date().getFullYear().toString());
   const [modeGrafikTop, setModeGrafikTop] = useState("terjual");
   const [memuatAnalitik, setMemuatAnalitik] = useState(true);
 
@@ -1063,7 +1075,7 @@ export default function HalamanAdmin() {
   const tarikDataAnalitik = async (sembunyi = false) => {
     if (!sembunyi) setMemuatAnalitik(true);
     try {
-      const respons = await fetch(`/api/admin/analitik?filter=${filterWaktu}`);
+      const respons = await fetch(`/api/admin/analitik?filter=${filterWaktu}&bulan=${filterBulan}&tahun=${filterTahun}`);
       if (respons.ok) {
         setDataAnalitik(await respons.json());
         updateWaktuRefresh();
@@ -1091,7 +1103,24 @@ export default function HalamanAdmin() {
       }, 10000);
       return () => clearInterval(intervalRealtime);
     }
-  }, [tabAktif, filterWaktu]);
+  }, [tabAktif, filterWaktu, filterBulan, filterTahun]);
+
+  useEffect(() => {
+    if(bukaKalkulator) {
+       const fetchKalkulator = async () => {
+         setMemuatKalkulator(true);
+         try {
+            const res = await fetch(`/api/admin/kalkulator?bulan=${kalkulatorBulan}&tahun=${kalkulatorTahun}`);
+            if(res.ok) {
+               const data = await res.json();
+               setPendapatanSelesai(data.totalPendapatan);
+            }
+         } catch(e) {}
+         setMemuatKalkulator(false);
+       };
+       fetchKalkulator();
+    }
+  }, [bukaKalkulator, kalkulatorBulan, kalkulatorTahun]);
 
   const tarikDataTerbaru = () => {
     setSedangRefresh(true);
@@ -1126,7 +1155,6 @@ export default function HalamanAdmin() {
     { id: "analitik", ikon: BarChart2, label: "Analitik" },
     { id: "produk", ikon: Package, label: "Produk" },
     { id: "pesanan", ikon: ShoppingCart, label: "Pesanan" },
-    { id: "cs", ikon: Headphones, label: "Layanan" },
     { id: "promosi", ikon: Megaphone, label: "Promosi" },
   ];
 
@@ -1190,12 +1218,6 @@ export default function HalamanAdmin() {
       <div className="flex-1 flex flex-col min-w-0 bg-zinc-50/50 relative h-full">
         <header className="md:hidden shrink-0 bg-white border-b border-pink-100 p-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
           <div className="flex items-center gap-2">
-            {/* 🔥 FIX LOGO MOBILE: Udah pakai ekstensi .png */}
-            <img
-              src="/logo-kkf.png"
-              alt="KKF Label"
-              className="h-8 w-8 rounded-full object-cover border border-pink-100"
-            />
             <span className="font-bold text-zinc-900">KKF-LABEL-ADMIN</span>
           </div>
           <div className="bg-white p-1 rounded-full border border-pink-100 shadow-sm flex items-center justify-center shrink-0 w-10 h-10">
@@ -1257,36 +1279,47 @@ export default function HalamanAdmin() {
 
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full xl:w-fit">
                   <div className="flex items-center overflow-x-auto bg-white p-1 rounded-xl border border-pink-100 shadow-sm w-full sm:w-fit whitespace-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                    {["hari", "minggu", "semua"].map((filter) => (
+                    {["hari", "minggu"].map((filter) => (
                       <button
                         key={filter}
                         onClick={() => setFilterWaktu(filter)}
-                        className={`px-4 py-1.5 text-[11px] sm:text-xs font-bold rounded-lg capitalize transition-all shrink-0 ${filterWaktu === filter ? "bg-soft-pink-100 text-soft-pink-700 shadow-sm" : "text-zinc-500 hover:text-zinc-900"}`}
+                        className={`px-4 py-1.5 text-[11px] sm:text-xs rounded-lg capitalize transition-all shrink-0 ${filterWaktu === filter ? "bg-pink-100 text-pink-700 font-bold shadow-sm" : "text-zinc-500 hover:text-zinc-900 font-medium"}`}
                       >
-                        {filter === "hari"
-                          ? "Hari Ini"
-                          : filter === "minggu"
-                            ? "Minggu Ini"
-                            : "Semua Bulan"}
+                        {filter === "hari" ? "Hari Ini" : "Minggu Ini"}
                       </button>
                     ))}
+                    <button
+                        onClick={() => setFilterWaktu("bulanan")}
+                        className={`px-4 py-1.5 text-[11px] sm:text-xs rounded-lg capitalize transition-all shrink-0 ${filterWaktu === "bulanan" ? "bg-pink-100 text-pink-700 font-bold shadow-sm" : "text-zinc-500 hover:text-zinc-900 font-medium"}`}
+                      >
+                        Bulanan
+                    </button>
                   </div>
-                  <div className="shrink-0 w-full sm:w-32 z-[60]">
-                    <DropdownMewah
-                      value={
-                        !isNaN(Number(filterWaktu)) && filterWaktu.length === 4
-                          ? filterWaktu
-                          : ""
-                      }
-                      options={daftarTahun.map((tahun) => ({
-                        value: tahun.toString(),
-                        label: tahun.toString(),
-                      }))}
-                      onChange={(val: string) => setFilterWaktu(val)}
-                      placeholder="Pilih Tahun"
-                      widthClass="w-full"
-                    />
-                  </div>
+                  {filterWaktu === "bulanan" && (
+                    <>
+                      <div className="shrink-0 w-full sm:w-32 z-[60]">
+                        <DropdownMewah
+                          value={filterBulan}
+                          options={opsiBulanGlobal}
+                          onChange={setFilterBulan}
+                          placeholder="Pilih Bulan"
+                          widthClass="w-full"
+                        />
+                      </div>
+                      <div className="shrink-0 w-full sm:w-28 z-[60]">
+                        <DropdownMewah
+                          value={filterTahun}
+                          options={daftarTahun.map((tahun) => ({
+                            value: tahun.toString(),
+                            label: tahun.toString(),
+                          }))}
+                          onChange={setFilterTahun}
+                          placeholder="Tahun"
+                          widthClass="w-full"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -1548,6 +1581,8 @@ export default function HalamanAdmin() {
               )}
             </div>
           )}
+
+          {tabAktif === "promosi" && <PromosiTab />}
         </main>
 
         {bukaKalkulator && (
@@ -1566,9 +1601,25 @@ export default function HalamanAdmin() {
                 </button>
               </div>
               <div className="space-y-4">
+                <div className="flex gap-2">
+                  <DropdownMewah
+                    value={kalkulatorBulan}
+                    options={opsiBulanGlobal}
+                    onChange={setKalkulatorBulan}
+                    placeholder="Bulan"
+                    widthClass="w-1/2"
+                  />
+                  <DropdownMewah
+                    value={kalkulatorTahun}
+                    options={daftarTahun.map(t => ({value: t.toString(), label: t.toString()}))}
+                    onChange={setKalkulatorTahun}
+                    placeholder="Tahun"
+                    widthClass="w-1/2"
+                  />
+                </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-600 mb-1">
-                    Harga Jual (Customer)
+                    Total Pendapatan (Status Selesai)
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-2.5 text-sm font-bold text-zinc-400">
@@ -1576,22 +1627,15 @@ export default function HalamanAdmin() {
                     </span>
                     <input
                       type="text"
-                      inputMode="numeric"
-                      value={hargaJualCalc}
-                      onChange={(e) => {
-                        const angkaMurni = e.target.value.replace(/\D/g, "");
-                        setHargaJualCalc(
-                          angkaMurni ? formatRupiah(Number(angkaMurni)) : "",
-                        );
-                      }}
-                      className="w-full border border-zinc-300 py-2.5 pl-10 pr-3 rounded-xl focus:outline-none focus:border-emerald-500 text-sm"
-                      placeholder="0"
+                      disabled
+                      value={memuatKalkulator ? "Menghitung..." : formatRupiah(pendapatanSelesai)}
+                      className="w-full border border-zinc-300 py-2.5 pl-10 pr-3 rounded-xl bg-zinc-50 text-zinc-700 font-bold focus:outline-none text-sm"
                     />
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-600 mb-1">
-                    Harga Modal (Beli/Pabrik)
+                    Total Pengeluaran / Modal
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-2.5 text-sm font-bold text-zinc-400">

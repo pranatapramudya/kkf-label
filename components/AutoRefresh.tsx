@@ -12,7 +12,7 @@ export function AutoRefresh() {
       // router.refresh() bakal narik data terbaru dari server (database Prisma)
       // secara diam-diam di background tanpa reload halaman.
       router.refresh();
-    }, 60000);
+    }, 15000);
 
     // Bersihin timer kalau user pindah halaman biar nggak bocor memorinya
     return () => clearInterval(interval);
