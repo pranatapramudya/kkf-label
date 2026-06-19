@@ -48,6 +48,9 @@ export default function HalamanAkunSaya() {
   const [rating, setRating] = useState(5);
   const [komentar, setKomentar] = useState("");
   const [sedangKirim, setSedangKirim] = useState(false);
+  // State Modal Konfirmasi Pesanan Diterima
+  const [modalKonfirm, setModalKonfirm] = useState<string | null>(null);
+  const [sedangKonfirm, setSedangKonfirm] = useState(false);
 
   useEffect(() => {
     const kontakTersimpan = localStorage.getItem("kkf_user_kontak");
@@ -87,19 +90,23 @@ export default function HalamanAkunSaya() {
     setDataPesanan([]);
   };
 
-  const konfirmasiPesananDiterima = async (idPesanan: string) => {
-    if (!confirm("Apakah pesanan sudah kamu terima dengan baik?")) return;
+  const eksekusiPesananDiterima = async () => {
+    if (!modalKonfirm) return;
+    setSedangKonfirm(true);
     try {
       await fetch("/api/pesanan/user", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idPesanan, status: "SELESAI" }),
+        body: JSON.stringify({ idPesanan: modalKonfirm, status: "SELESAI" }),
       });
       tarikDataPesanan(kontak);
       setTabAktif("ulasan");
       showNotif("Pesanan berhasil dikonfirmasi!", "sukses");
     } catch (e) {
       showNotif("Gagal mengupdate pesanan", "gagal");
+    } finally {
+      setSedangKonfirm(false);
+      setModalKonfirm(null);
     }
   };
 
@@ -212,13 +219,14 @@ export default function HalamanAkunSaya() {
       )}
 
       {/* Header Pink Melengkung */}
-      <div className="bg-pink-600 px-6 pt-10 pb-16 rounded-b-[2.5rem] shadow-sm text-white flex justify-between items-start sticky top-0 z-10">
-        <div className="flex items-center gap-4">
-          <div className="h-16 w-16 bg-white/20 rounded-full flex items-center justify-center border border-white/40 backdrop-blur-sm shadow-inner">
+      <div className="bg-pink-600 px-6 pt-10 pb-16 rounded-b-[2.5rem] shadow-sm text-white flex justify-between items-start sticky top-0 z-10 gap-2">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
+          <div className="h-16 w-16 shrink-0 bg-white/20 rounded-full flex items-center justify-center border border-white/40 backdrop-blur-sm shadow-inner">
             <User size={32} className="text-white" />
           </div>
-          <div>
-            <h1 className="font-bold text-lg line-clamp-1">{kontak}</h1>
+          <div className="min-w-0 flex-1">
+            {/* 🔥 FIX: truncate bikin teks kepanjangan jadi titik-titik (...) */}
+            <h1 className="font-bold text-lg truncate w-full pr-2">{kontak}</h1>
             <p className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full w-fit mt-1.5 shadow-sm">
               Pelanggan KKF
             </p>
@@ -226,7 +234,7 @@ export default function HalamanAkunSaya() {
         </div>
         <button
           onClick={logout}
-          className="text-white/80 hover:text-white transition p-2 bg-white/10 rounded-full backdrop-blur-sm"
+          className="shrink-0 text-white/80 hover:text-white transition p-2 bg-white/10 rounded-full backdrop-blur-sm"
         >
           <LogOut size={18} />
         </button>
@@ -379,7 +387,7 @@ export default function HalamanAkunSaya() {
                   {(order.statusPesanan === "DIKIRIM" ||
                     order.statusPesanan === "SAMPAI") && (
                     <button
-                      onClick={() => konfirmasiPesananDiterima(order.id)}
+                      onClick={() => setModalKonfirm(order.id)} // 👈 Panggil Modal, bukan alert jadul
                       className="bg-pink-600 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-sm hover:bg-pink-700 transition"
                     >
                       Pesanan Diterima
@@ -484,6 +492,42 @@ export default function HalamanAkunSaya() {
               </button>
             </form>
           </div>
+          {/* 🔥 MODAL KONFIRMASI MODERN 🔥 */}
+          {modalKonfirm && (
+            <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4 animate-in fade-in">
+              <div className="bg-white rounded-3xl w-full max-w-xs p-6 shadow-2xl animate-in zoom-in-95 text-center">
+                <div className="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Package size={32} />
+                </div>
+                <h3 className="font-black text-zinc-900 text-lg mb-2">
+                  Pesanan Diterima?
+                </h3>
+                <p className="text-xs text-zinc-500 mb-6 leading-relaxed">
+                  Pastikan paket sudah kamu terima dengan aman dan sesuai
+                  pesanan ya kak!
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setModalKonfirm(null)}
+                    className="flex-1 py-3 text-xs font-bold text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={eksekusiPesananDiterima}
+                    disabled={sedangKonfirm}
+                    className="flex-1 py-3 text-xs font-bold text-white bg-pink-600 rounded-xl shadow-md hover:bg-pink-700 transition flex items-center justify-center"
+                  >
+                    {sedangKonfirm ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      "Ya, Selesai"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
