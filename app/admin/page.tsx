@@ -14,6 +14,7 @@ import {
 import { uploadFotoProduk, uploadVideoProduk } from "@/lib/supabase";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Barcode from "react-barcode";
 import {
   CircleDollarSign,
   PackageCheck,
@@ -838,70 +839,130 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
         </div>
       )}
 
+      {/* 🔥 MODAL LABEL PENGIRIMAN (UKURAN A6 THERMAL + BARCODE) 🔥 */}
       {selectedInvoice && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 sm:p-8 shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-            <div className="text-center border-b border-dashed border-zinc-200 pb-6 mb-6">
-              <h2 className="text-2xl font-black text-zinc-900 tracking-widest uppercase">
-                KKF-LABEL
-              </h2>
-              <p className="text-zinc-500 text-sm mt-1">
-                Invoice: {selectedInvoice.kodePesanan}
-              </p>
-            </div>
-            <div className="space-y-4 text-sm text-zinc-600">
-              <div className="flex justify-between items-start gap-4">
-                <span className="font-semibold shrink-0">Pelanggan:</span>
-                <span className="text-right">
-                  {selectedInvoice.namaPenerima}
-                </span>
-              </div>
-              <div className="flex justify-between items-start gap-4">
-                <span className="font-semibold shrink-0">Waktu Order:</span>
-                <span className="text-right">
-                  {new Date(selectedInvoice.dibuatPada).toLocaleString(
-                    "id-ID",
-                    { dateStyle: "long", timeStyle: "medium" },
-                  )}{" "}
-                  WIB
-                </span>
-              </div>
-              <div className="flex justify-between items-start gap-4">
-                <span className="font-semibold shrink-0">Pembayaran:</span>
-                <span className="text-emerald-600 font-bold uppercase text-right">
-                  {selectedInvoice.statusPesanan.replace("_", " ")}
-                </span>
-              </div>
-            </div>
-            <div className="mt-6 bg-zinc-50 p-4 rounded-xl space-y-3">
-              <div className="flex justify-between text-sm font-semibold text-zinc-900 border-b border-zinc-200 pb-2">
-                <span>Item</span>
-                <span>Subtotal</span>
-              </div>
-              {selectedInvoice.item?.map((itm: any, i: number) => (
-                <div
-                  key={i}
-                  className="flex justify-between text-sm text-zinc-600 gap-4"
-                >
-                  <span className="truncate">
-                    {itm.namaProduk} ({itm.ukuran || "-"}, {itm.warna || "-"}) x{" "}
-                    {itm.jumlah}
-                  </span>
-                  <span className="shrink-0 font-medium text-zinc-800">
-                    {formatRupiah(itm.total)}
-                  </span>
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-zinc-900/80 backdrop-blur-sm p-4 print:p-0 print:bg-white print:block">
+          {/* 🔥 SUNTIKAN CSS KHUSUS PRINTER THERMAL A6 🔥 */}
+          <style type="text/css" media="print">
+            {`
+              @page { size: 100mm 150mm; margin: 0; }
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; background: white; }
+              /* Sembunyikan elemen lain saat nge-print */
+              aside, header, nav { display: none !important; }
+            `}
+          </style>
+
+          <div className="bg-white w-full max-w-md shadow-2xl overflow-y-auto max-h-[90vh] print:max-h-none print:shadow-none print:w-[100mm] print:h-[148mm] print:m-0 print:p-2">
+            <div className="p-4 border-4 border-black print:border-2 print:p-2 flex flex-col h-full bg-white relative">
+              {/* 1. KOP RESI & KURIR */}
+              <div className="flex justify-between items-start border-b-2 border-black pb-2 mb-2">
+                <div>
+                  <h2 className="text-xl font-black text-black tracking-widest leading-none">
+                    KKF LABEL
+                  </h2>
+                  <p className="text-[10px] font-bold text-black mt-1 uppercase">
+                    INV: {selectedInvoice.kodePesanan}
+                  </p>
                 </div>
-              ))}
-              <div className="flex justify-between text-xs font-semibold text-zinc-500 border-t border-zinc-200 pt-2 mt-2">
-                <span>Ongkir</span>
-                <span>{formatRupiah(selectedInvoice.ongkir || 0)}</span>
+                <div className="text-right">
+                  <h3 className="text-2xl font-black text-black leading-none uppercase">
+                    {selectedInvoice.ekspedisi || "STD"}
+                  </h3>
+                  <p className="text-[10px] font-bold bg-black text-white px-2 py-0.5 inline-block mt-1">
+                    CASHLESS
+                  </p>
+                </div>
               </div>
-              <div className="flex justify-between text-base font-black text-soft-pink-600 pt-1">
-                <span>Total</span>
-                <span>{formatRupiah(selectedInvoice.total)}</span>
+
+              {/* 2. BARCODE AREA */}
+              <div className="flex flex-col items-center justify-center border-b-2 border-black pb-2 mb-2">
+                <div className="w-full flex justify-center overflow-hidden scale-90 print:scale-100">
+                  <Barcode
+                    value={
+                      selectedInvoice.nomorResi || selectedInvoice.kodePesanan
+                    }
+                    height={45}
+                    width={1.8}
+                    displayValue={false}
+                    margin={0}
+                    background="#ffffff"
+                  />
+                </div>
+                <p className="text-sm font-black tracking-widest mt-1 uppercase">
+                  {selectedInvoice.nomorResi || "RESI MENYUSUL"}
+                </p>
+              </div>
+
+              {/* 3. ALAMAT PENERIMA & PENGIRIM */}
+              <div className="flex-1">
+                <div className="mb-2 border-b-2 border-black pb-2">
+                  <p className="text-[10px] font-black text-black uppercase bg-zinc-200 w-fit px-1 mb-1">
+                    Penerima:
+                  </p>
+                  <p className="font-black text-black text-sm uppercase leading-tight">
+                    {selectedInvoice.namaPenerima}
+                  </p>
+                  <p className="text-[11px] font-bold text-black mt-0.5">
+                    {selectedInvoice.teleponPenerima}
+                  </p>
+                  <p className="text-[11px] text-black mt-0.5 font-semibold leading-snug line-clamp-3">
+                    {selectedInvoice.alamatLengkap}, {selectedInvoice.kota},{" "}
+                    {selectedInvoice.provinsi}
+                  </p>
+                </div>
+
+                <div className="mb-2 border-b-2 border-black pb-2 flex justify-between items-center">
+                  <div>
+                    <p className="text-[10px] font-black text-black uppercase bg-zinc-200 w-fit px-1 mb-1">
+                      Pengirim:
+                    </p>
+                    <p className="font-bold text-black text-xs uppercase leading-tight">
+                      KKF Label
+                    </p>
+                    {/* 🔥 FIX: Nomor HP lu udah dipatenkan di sini 🔥 */}
+                    <p className="text-[10px] font-semibold text-black">
+                      085117490449
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-bold">Batas Kirim:</p>
+                    <p className="text-[10px] font-black">
+                      {new Date(selectedInvoice.dibuatPada).toLocaleDateString(
+                        "id-ID",
+                      )}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 4. RINCIAN BARANG */}
+                <div>
+                  <p className="text-[10px] font-black text-black uppercase bg-zinc-200 w-fit px-1 mb-1">
+                    Isi Paket:
+                  </p>
+                  <div className="text-[10px] font-bold text-black leading-snug">
+                    {selectedInvoice.item?.map((itm: any, i: number) => (
+                      <div key={i} className="flex gap-1 mb-1">
+                        <span className="shrink-0">{itm.jumlah}x</span>
+                        <span className="uppercase truncate">
+                          {itm.namaProduk} ({itm.ukuran || "-"},{" "}
+                          {itm.warna || "-"})
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Tanda Tangan / Note */}
+              <div className="mt-auto pt-2 text-center border-t border-dashed border-black">
+                <p className="text-[8px] font-bold uppercase">
+                  Terima kasih telah berbelanja di KKF Label
+                </p>
               </div>
             </div>
-            <div className="mt-8 flex gap-3">
+
+            {/* TOMBOL AKSI - HILANG SAAT DI-PRINT */}
+            <div className="mt-4 flex gap-3 print:hidden p-4">
               <button
                 onClick={() => setSelectedInvoice(null)}
                 className="flex-1 py-3 font-bold text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition"
@@ -910,9 +971,9 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
               </button>
               <button
                 onClick={() => window.print()}
-                className="flex-1 py-3 font-bold text-white bg-soft-pink-600 rounded-xl shadow-md hover:bg-soft-pink-700 transition flex items-center justify-center gap-2"
+                className="flex-1 py-3 font-bold text-white bg-black rounded-xl shadow-md hover:bg-zinc-800 transition flex items-center justify-center gap-2"
               >
-                <Printer size={18} /> Print Kasir
+                Cetak A6
               </button>
             </div>
           </div>
