@@ -1,14 +1,16 @@
-# PRD: Top-Tier E-Commerce Security Audit & Implementation (v30.0)
+# PRD: Custom Free Allowlist (v31.0)
 
 ## 1. Objective
-Mengimplementasikan standar keamanan level *Enterprise / Top-Tier E-Commerce* pada aplikasi, berfokus pada otentikasi *webhook* pembayaran, proteksi rute API, dan injeksi *Security Headers* global.
+Membuat sistem *Allowlist* kustom di level aplikasi (Server-Side) untuk membatasi akses dasbor admin hanya kepada 4 email spesifik, sebagai alternatif gratis dari fitur Clerk Pro.
 
 ## 2. Scope of Work
-- **Midtrans Webhook Security:** Memvalidasi *Signature Key* yang dikirim oleh Midtrans menggunakan algoritma SHA512 (`order_id` + `status_code` + `gross_amount` + `ServerKey`) untuk mencegah *Fraud / Spoofing* pada endpoint `/api/webhook/midtrans`.
-- **Admin Route & API Protection:** Mengamankan rute `app/(dashboard)/admin` dan seluruh API endpoint `/api/admin/*` agar hanya bisa diakses oleh *session* admin yang valid (via Middleware atau server-side auth check).
-- **Global Security Headers:** Menambahkan HTTP Security Headers (X-Frame-Options, X-Content-Type-Options, Strict-Transport-Security, X-XSS-Protection) di `next.config.js` atau `middleware.ts` untuk mencegah serangan Clickjacking dan XSS.
+- **Server-Side Authorization:** Menggunakan fungsi `currentUser()` dari `@clerk/nextjs/server` di dalam *root layout* admin (`app/(dashboard)/layout.tsx`).
+- **Email Validation:** Mengekstrak alamat email pengguna yang sedang *login* dan mencocokkannya dengan array `ALLOWED_EMAILS`.
+- **Rejection Logic:** Jika pengguna *login* dengan email di luar daftar tersebut, sistem akan langsung melakukan `redirect` ke halaman utama (`/`) atau merender komponen "Akses Ditolak".
 
 ## 3. Strict Guidelines
-- **Zero Trust Architecture:** Jangan pernah percaya data *payload* dari klien/webhook tanpa melakukan validasi otentikasi atau *hash matching*.
-- **No Hardcoded Secrets:** Pastikan proses *hashing* menggunakan `process.env.MIDTRANS_SERVER_KEY`.
-- **Graceful Rejection:** Jika ada *unauthorized request*, tolak dengan status 401/403 dan jangan bocorkan *stack trace* error ke *response*.
+- **Hardcoded Security:** Array email di-*hardcode* dengan aman di sisi server agar tidak bisa dimanipulasi dari *client*.
+- **List Email yang Diizinkan:** 1. pranatapramudya39@gmail.com
+  2. pranajaya52@gmail.com
+  3. kkflabel@gmail.com
+  4. uwenkuswendi5@gmail.com
