@@ -1,16 +1,14 @@
-# PRD: Universal Admin Table Pagination (v24.0)
+# PRD: RajaOngkir Integration Audit & Testing (v26.0)
 
 ## 1. Objective
-Mengimplementasikan sistem *Pagination* (Halaman Next/Previous) pada seluruh tabel data di halaman Admin untuk membatasi tampilan maksimal 10 baris per halaman, meningkatkan performa *rendering*, dan merapikan UI.
+Melakukan audit menyeluruh pada rute API RajaOngkir untuk memastikan kalkulasi ongkos kirim berfungsi dengan baik, tidak ada *hardcode* yang salah, dan siap untuk digunakan di *production*.
 
 ## 2. Scope of Work
-- **Target Components:** Semua komponen tabel di dasbor admin (misal: Tabel Pesanan, Tabel Ulasan, Tabel RFM).
-- **State Management:** Menambahkan logika *client-side pagination* menggunakan `useState` untuk melacak `currentPage`.
-- **Data Slicing:** Memotong array data asli agar hanya me-render 10 item yang sesuai dengan halaman aktif.
-- **UI Navigation:** Menambahkan kontrol navigasi (tombol "Sebelumnya" dan "Selanjutnya", beserta indikator "Halaman X dari Y") di bagian bawah setiap tabel.
+- **Route Audit:** Memeriksa file API endpoint untuk RajaOngkir (misal: `app/api/rajaongkir/cost/route.ts` atau endpoint provinsi/kota).
+- **Payload Validation:** Memastikan API menerima dan mengirim parameter yang benar sesuai dokumentasi RajaOngkir (origin, destination, weight, courier).
+- **Error Handling:** Memastikan ada *response* error yang jelas jika API Key invalid atau server RajaOngkir sedang *down*.
+- **Test Generation:** Membuatkan *script test* atau *cURL command* agar user bisa langsung mengetes API tersebut dari terminal.
 
 ## 3. Strict Guidelines
-- **Limit:** Fix 10 baris data per halaman (Items Per Page = 10).
-- **UX Fallbacks:** - Tombol "Sebelumnya" harus *disabled* jika berada di halaman 1.
-  - Tombol "Selanjutnya" harus *disabled* jika berada di halaman terakhir.
-- **Styling:** Kontrol navigasi harus berada di bawah tabel, memiliki desain yang serasi (border/background Tailwind), dan responsif di mobile.
+- **API Key Security:** Pastikan API Key diambil dari `process.env.RAJAONGKIR_API_KEY`, jangan di- *hardcode*.
+- **Type Safety:** Pastikan *response* dari RajaOngkir di- *parsing* dengan benar sebelum dikirim ke *frontend*.

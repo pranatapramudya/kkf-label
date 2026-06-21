@@ -4,7 +4,7 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ provinceId: string }> },
 ) {
-  const apiKey = process.env.SHIPPING_API_KEY;
+  const apiKey = process.env.RAJAONGKIR_API_KEY;
   const { provinceId } = await params;
   if (!apiKey)
     return NextResponse.json({ pesan: "API Key kosong" }, { status: 500 });

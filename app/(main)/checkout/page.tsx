@@ -322,31 +322,13 @@ export default function HalamanCheckout() {
       // @ts-ignore
       window.snap.pay(dataToken.token, {
         onSuccess: async function (result: any) {
-          // 3. BARU KETIKA SUKSES BAYAR, SIMPAN KE DATABASE KITA (Biar ga penuh data abal-abal)
-          setSedangMembayar(true);
-          try {
-            const respons = await fetch("/api/pesanan", {
-              method: "POST",
-              headers: { "content-type": "application/json" },
-              body: JSON.stringify({
-                ...bodyPesanan,
-                invoice: dataToken.kodePesanan, // Gunakan kode dari Midtrans
-              }),
-            });
-            const dataPesanan = await respons.json();
-            kosongkanKeranjang();
-            setModalSukses({
-              show: true,
-              invoice: dataPesanan.invoice || dataToken.kodePesanan,
-              total: totalAkhir,
-            });
-          } catch (galat) {
-            setPesanPembayaran(
-              "Pesanan berhasil dibayar, namun gagal tersimpan. Harap lapor ke admin!",
-            );
-          } finally {
-            setSedangMembayar(false);
-          }
+          // Pesanan sudah tersimpan di database lewat /api/payment sebagai PENDING
+          kosongkanKeranjang();
+          setModalSukses({
+            show: true,
+            invoice: dataToken.kodePesanan,
+            total: totalAkhir,
+          });
         },
         onPending: function (result: any) {
           setPesanPembayaran(

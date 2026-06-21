@@ -1,5 +1,7 @@
 "use client";
 
+import useSWR from "swr";
+
 import {
   LineChart,
   Line,
@@ -1047,8 +1049,15 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
 // ==========================================
 // 3. HALAMAN UTAMA ADMIN
 // ==========================================
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
 export default function HalamanAdmin() {
   const { signOut } = useClerk();
+
+  const { data: pendingData } = useSWR("/api/admin/pesanan/pending", fetcher, {
+    refreshInterval: 10000,
+  });
+  const pendingCount = pendingData?.count || 0;
 
   const [tabAktif, setTabAktif] = useState("analitik");
   const [analitikTabAktif, setAnalitikTabAktif] = useState("ringkasan");
@@ -1253,13 +1262,20 @@ export default function HalamanAdmin() {
                   setTabAktif(menu.id);
                   setModeTambah(false);
                 }}
-                className={`w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex items-center gap-3 ${
+                className={`w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex items-center justify-between ${
                   tabAktif === menu.id
                     ? "bg-soft-pink-100/70 text-soft-pink-700 font-bold shadow-sm"
                     : "hover:bg-pink-50 text-zinc-600"
                 }`}
               >
-                <menu.ikon size={20} /> {menu.label}
+                <div className="flex items-center gap-3">
+                  <menu.ikon size={20} /> {menu.label}
+                </div>
+                {menu.id === "pesanan" && pendingCount > 0 && (
+                  <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-pulse shadow-sm">
+                    {pendingCount}
+                  </span>
+                )}
               </button>
             ))}
           </nav>

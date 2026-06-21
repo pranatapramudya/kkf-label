@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function POST(permintaan: Request) {
-  const apiKey = process.env.SHIPPING_API_KEY;
+  const apiKey = process.env.RAJAONGKIR_API_KEY;
   if (!apiKey)
     return NextResponse.json(
       { pesan: "API Key kosong di .env" },
@@ -13,7 +13,7 @@ export async function POST(permintaan: Request) {
 
     // Format pengiriman data Komerce V2
     const parameter = new URLSearchParams({
-      origin: "440", // ⚠️ INI ID SUMEDANG. Kalau di Komerce ID-nya beda, kasih tau gw ya!
+      origin: process.env.RAJAONGKIR_ORIGIN_ID || "440", // Ambil dari env, default 440 (Sumedang)
       destination: body.kotaTujuan,
       weight: String(body.berat ?? 1000),
       courier: body.ekspedisi.toLowerCase(),

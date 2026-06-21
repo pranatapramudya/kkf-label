@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const apiKey = process.env.SHIPPING_API_KEY;
+  const apiKey = process.env.RAJAONGKIR_API_KEY;
   if (!apiKey)
     return NextResponse.json({ pesan: "API Key kosong" }, { status: 500 });
 

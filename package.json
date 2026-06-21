@@ -23,7 +23,8 @@
     "react-barcode": "^1.6.1",
     "react-dom": "^19.0.0",
     "recharts": "^3.8.1",
-    "swiper": "^12.2.0"
+    "swiper": "^12.2.0",
+    "swr": "^2.4.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.4.0",
