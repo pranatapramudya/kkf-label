@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { hapusProduk } from "./actions";
 import {
@@ -12,14 +12,19 @@ import {
 } from "lucide-react";
 
 export default function TabelProduk({ dataProduk }: { dataProduk: any[] }) {
-  // Paginasi
-  const [halamanSaatIni, setHalamanSaatIni] = useState(1);
-  const itemPerHalaman = 7;
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const indexTerakhir = halamanSaatIni * itemPerHalaman;
-  const indexPertama = indexTerakhir - itemPerHalaman;
-  const produkTampil = dataProduk.slice(indexPertama, indexTerakhir);
-  const totalHalaman = Math.ceil(dataProduk.length / itemPerHalaman);
+  // Reset halaman saat dataProduk berubah (karena filter)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [dataProduk]);
+
+  const totalPages = Math.ceil(dataProduk.length / itemsPerPage);
+  const produkTampil = dataProduk.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // STATE MODAL MODERN
   const [modalHapus, setModalHapus] = useState({
@@ -227,25 +232,23 @@ export default function TabelProduk({ dataProduk }: { dataProduk: any[] }) {
       {/* =========================================
           NAVIGASI PAGINASI (GLOBAL)
       ========================================= */}
-      {totalHalaman > 1 && (
-        <div className="p-4 border-t border-pink-50 flex flex-col sm:flex-row justify-between items-center gap-4 bg-zinc-50/50">
-          <span className="text-xs text-zinc-400 font-medium">
-            Halaman {halamanSaatIni} dari {totalHalaman}
+      {totalPages > 1 && (
+        <div className="p-4 border-t border-pink-50 flex items-center justify-between bg-zinc-50/50">
+          <span className="text-sm text-zinc-500 font-medium">
+            Halaman {currentPage} dari {totalPages}
           </span>
-          <div className="flex gap-2 w-full sm:w-auto">
+          <div className="flex gap-2">
             <button
-              onClick={() => setHalamanSaatIni((p) => Math.max(p - 1, 1))}
-              disabled={halamanSaatIni === 1}
-              className="flex-1 sm:flex-none px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-semibold text-zinc-600 disabled:opacity-40 hover:bg-zinc-50 transition-colors"
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 text-sm border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               Sebelumnya
             </button>
             <button
-              onClick={() =>
-                setHalamanSaatIni((p) => Math.min(p + 1, totalHalaman))
-              }
-              disabled={halamanSaatIni === totalHalaman}
-              className="flex-1 sm:flex-none px-4 py-2 bg-white border border-zinc-200 rounded-xl text-xs font-semibold text-zinc-600 disabled:opacity-40 hover:bg-zinc-50 transition-colors"
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 text-sm border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               Selanjutnya
             </button>

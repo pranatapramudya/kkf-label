@@ -7,6 +7,14 @@ export default function RfmTable() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const currentData = data.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   useEffect(() => {
     fetch("/api/admin/rfm")
       .then((res) => res.json())
@@ -75,14 +83,14 @@ export default function RfmTable() {
             </tr>
           </thead>
           <tbody className="block w-full md:table-row-group">
-            {data.length === 0 ? (
+            {currentData.length === 0 ? (
               <tr className="block w-full md:table-row">
                 <td colSpan={5} className="block md:table-cell text-center py-8 text-zinc-400 italic">
                   Belum ada data pelanggan.
                 </td>
               </tr>
             ) : (
-              data.map((user, idx) => (
+              currentData.map((user, idx) => (
                 <tr key={idx} className="block w-full mb-4 border border-pink-100 rounded-xl p-4 shadow-sm md:table-row md:border-b md:border-pink-50 md:rounded-none md:p-0 md:shadow-none hover:bg-pink-50/30 transition-colors md:mb-0 last:border-0">
                   <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-right md:text-left">
                     <span className="md:hidden font-bold text-zinc-400">Pelanggan:</span>
@@ -116,6 +124,29 @@ export default function RfmTable() {
           </tbody>
         </table>
       </div>
+      {totalPages > 1 && (
+        <div className="p-4 border-t border-pink-50 flex items-center justify-between bg-zinc-50/50">
+          <span className="text-sm text-zinc-500 font-medium">
+            Halaman {currentPage} dari {totalPages}
+          </span>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 text-sm border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              Sebelumnya
+            </button>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 text-sm border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+            >
+              Selanjutnya
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

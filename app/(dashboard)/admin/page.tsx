@@ -516,7 +516,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
   const [sedangUpdate, setSedangUpdate] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemPerPage = 10;
+  const itemsPerPage = 10;
 
   const tahunSekarang = new Date().getFullYear();
   const [bulanExport, setBulanExport] = useState("semua");
@@ -561,10 +561,10 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
     fetchPesanan();
   }, []);
 
-  const totalPages = Math.ceil(daftarPesanan.length / itemPerPage);
+  const totalPages = Math.ceil(daftarPesanan.length / itemsPerPage);
   const dataTampil = daftarPesanan.slice(
-    (currentPage - 1) * itemPerPage,
-    currentPage * itemPerPage,
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
   );
 
   const exportCSV = () => {
@@ -715,7 +715,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                     >
                       <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 text-zinc-500 font-medium px-2">
                         <span className="md:hidden font-bold text-zinc-400">No:</span>
-                        <span>{(currentPage - 1) * itemPerPage + index + 1}</span>
+                        <span>{(currentPage - 1) * itemsPerPage + index + 1}</span>
                       </td>
                       <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 font-bold text-zinc-900 px-2">
                         <span className="md:hidden font-bold text-zinc-400">Invoice:</span>
@@ -728,10 +728,10 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                             {p.namaPenerima}
                           </span>
                           <div className="flex flex-col gap-0.5 text-[10px] text-zinc-500 items-end md:items-start">
-                            <span className="flex items-center gap-1.5 justify-end md:justify-start">
-                              <span className="truncate">{p.emailPenerima}</span>
-                              <Mail size={10} className="text-soft-pink-500 md:hidden block" />
-                              <Mail size={10} className="text-soft-pink-500 hidden md:block" />
+                            <span className="flex items-center gap-1.5 justify-end md:justify-start min-w-fit">
+                              <span className="truncate max-w-[150px] sm:max-w-xs">{p.emailPenerima}</span>
+                              <Mail size={10} className="text-soft-pink-500 md:hidden block shrink-0" />
+                              <Mail size={10} className="text-soft-pink-500 hidden md:block shrink-0" />
                             </span>
                             <span className="flex items-center gap-1.5 justify-end md:justify-start">
                               <span>{p.teleponPenerima}</span>
@@ -775,28 +775,27 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                 )}
               </tbody>
             </table>
-
             {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-pink-50 pt-5 mt-2">
-                <p className="text-xs text-zinc-500 font-medium">
+              <div className="p-4 border-t border-pink-50 flex items-center justify-between bg-zinc-50/50">
+                <span className="text-sm text-zinc-500 font-medium">
                   Halaman {currentPage} dari {totalPages}
-                </p>
+                </span>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                     disabled={currentPage === 1}
-                    className="p-2 bg-zinc-50 text-zinc-600 rounded-lg hover:bg-zinc-100 disabled:opacity-50 transition border border-zinc-200 shadow-sm"
+                    className="px-4 py-2 text-sm border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
                   >
-                    <ChevronLeft size={16} />
+                    Sebelumnya
                   </button>
                   <button
                     onClick={() =>
                       setCurrentPage((p) => Math.min(totalPages, p + 1))
                     }
                     disabled={currentPage === totalPages}
-                    className="p-2 bg-zinc-50 text-zinc-600 rounded-lg hover:bg-zinc-100 disabled:opacity-50 transition border border-zinc-200 shadow-sm"
+                    className="px-4 py-2 text-sm border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
                   >
-                    <ChevronRight size={16} />
+                    Selanjutnya
                   </button>
                 </div>
               </div>
@@ -1329,24 +1328,18 @@ export default function HalamanAdmin() {
           )}
 
           {tabAktif === "analitik" && (
-            <div className="space-y-6 w-full animate-in fade-in zoom-in-95 duration-300">
+            <div className="space-y-3 w-full animate-in fade-in zoom-in-95 duration-300">
               
               {/* TABS NAVIGASI ANALITIK */}
-              <div className="flex flex-nowrap overflow-x-auto whitespace-nowrap w-full gap-4 pb-2 scrollbar-hide bg-white p-1.5 rounded-xl border border-pink-100 shadow-sm [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                {[
-                  { id: "ringkasan", label: "Ringkasan Performa" },
-                  { id: "profitability", label: "Profitability (Margin)" },
-                  { id: "rfm", label: "Analisis Pelanggan (RFM)" },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setAnalitikTabAktif(tab.id)}
-                    className={`flex-shrink-0 px-4 py-2 text-sm md:text-base rounded-lg font-bold transition-all truncate ${analitikTabAktif === tab.id ? "bg-soft-pink-600 text-white shadow-md" : "text-zinc-500 hover:text-zinc-900 hover:bg-pink-50"}`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
+              <select
+                value={analitikTabAktif}
+                onChange={(e) => setAnalitikTabAktif(e.target.value)}
+                className="w-full md:w-72 p-2.5 text-sm font-bold text-zinc-700 bg-white border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 shadow-sm cursor-pointer outline-none"
+              >
+                <option value="ringkasan">Ringkasan Performa</option>
+                <option value="profitability">Profitability (Margin)</option>
+                <option value="rfm">Analisis Pelanggan (RFM)</option>
+              </select>
 
               {/* HEADER RINGKASAN */}
               {analitikTabAktif === "ringkasan" && (

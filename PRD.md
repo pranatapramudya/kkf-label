@@ -1,14 +1,16 @@
-# PRD: Final Scroll & Layout Unlocking (v20.0)
+# PRD: Universal Admin Table Pagination (v24.0)
 
 ## 1. Objective
-Membuka kunci *vertical scrolling* pada halaman admin dan memperbaiki *layout breaking* (melebar ke kanan) pada bagian filter "Hari Ini - Minggu Ini - Bulanan - Juni".
+Mengimplementasikan sistem *Pagination* (Halaman Next/Previous) pada seluruh tabel data di halaman Admin untuk membatasi tampilan maksimal 10 baris per halaman, meningkatkan performa *rendering*, dan merapikan UI.
 
 ## 2. Scope of Work
-- **Unlocking Scroll:** Menghapus properti `h-screen` dan `overflow-hidden` pada container utama yang mencegah halaman di-scroll ke bawah.
-- **Filter Row Wrapping:** Memperbaiki layout filter agar bisa turun ke baris berikutnya (wrap) jika layar tidak cukup, mencegah *layout* melebar ke kanan.
-- **Main Container Reset:** Memastikan semua *root wrapper* memiliki `min-h-screen` (bukan `h-screen`) dan `overflow-y-auto`.
+- **Target Components:** Semua komponen tabel di dasbor admin (misal: Tabel Pesanan, Tabel Ulasan, Tabel RFM).
+- **State Management:** Menambahkan logika *client-side pagination* menggunakan `useState` untuk melacak `currentPage`.
+- **Data Slicing:** Memotong array data asli agar hanya me-render 10 item yang sesuai dengan halaman aktif.
+- **UI Navigation:** Menambahkan kontrol navigasi (tombol "Sebelumnya" dan "Selanjutnya", beserta indikator "Halaman X dari Y") di bagian bawah setiap tabel.
 
 ## 3. Strict Guidelines
-- **Vertical Freedom:** Halaman admin wajib bisa di-scroll ke bawah jika konten melebihi tinggi layar.
-- **Horizontal Stability:** Tidak boleh ada *horizontal scroll* yang disebabkan oleh elemen yang "maksa" melebar (seperti area filter/tanggal).
-- **Layout Integrity:** Tidak merusak *fluidity* yang sudah dibangun di tahap sebelumnya.
+- **Limit:** Fix 10 baris data per halaman (Items Per Page = 10).
+- **UX Fallbacks:** - Tombol "Sebelumnya" harus *disabled* jika berada di halaman 1.
+  - Tombol "Selanjutnya" harus *disabled* jika berada di halaman terakhir.
+- **Styling:** Kontrol navigasi harus berada di bawah tabel, memiliki desain yang serasi (border/background Tailwind), dan responsif di mobile.

@@ -487,12 +487,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
       </div>
 
       <div className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-zinc-200 p-3 px-4 flex items-center gap-3 z-[90] pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.1)]">
-        <button className="flex flex-col items-center justify-center text-zinc-500 hover:text-soft-pink-600 px-2 transition-colors">
-          <MessageCircle size={22} />
-          <span className="text-[9px] font-bold mt-1">Chat</span>
-        </button>
-        {/* Share Button Mobile */}
-        <ShareButton produkId={produk.id} />
+
         <button
           onClick={() => {
             setTipeAksi("keranjang");
