@@ -1,43 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
-import { ProdukKartu } from "./ProdukKartu";
+import { useState } from "react";
+import { ProductCarousel } from "./ProductCarousel";
 
-export function Katalog() {
-  const [produkDariDb, setProdukDariDb] = useState<any[]>([]);
+export function Katalog({ semuaProduk = [] }: { semuaProduk?: any[] }) {
   const [kategoriAktif, setKategoriAktif] = useState("Semua");
-  const [sedangMemuat, setSedangMemuat] = useState(true);
-
-  useEffect(() => {
-    const tarikDataKatalog = async () => {
-      try {
-        const respons = await fetch("/api/admin/produk");
-        if (respons.ok) {
-          const data = await respons.json();
-          setProdukDariDb(data);
-        }
-      } catch (error) {
-        console.error("Gagal narik data katalog:", error);
-      } finally {
-        setSedangMemuat(false);
-      }
-    };
-
-    tarikDataKatalog();
-  }, []);
 
   const daftarKategori = [
     "Semua",
     ...Array.from(
-      new Set(produkDariDb.map((p) => p.kategori?.nama).filter(Boolean)),
+      new Set(semuaProduk.map((p) => p.kategori?.nama).filter(Boolean)),
     ),
   ];
 
   const produkTampil =
     kategoriAktif === "Semua"
-      ? produkDariDb
-      : produkDariDb.filter((p) => p.kategori?.nama === kategoriAktif);
+      ? semuaProduk
+      : semuaProduk.filter((p) => p.kategori?.nama === kategoriAktif);
 
   return (
     <section
@@ -50,7 +29,7 @@ export function Katalog() {
             Katalog kkf-label
           </p>
           <h2 className="text-3xl font-bold text-zinc-900">
-            Pilihan paling disukai
+            Semua Produk
           </h2>
         </div>
 
@@ -71,24 +50,15 @@ export function Katalog() {
         </div>
       </div>
 
-      {sedangMemuat ? (
-        <div className="flex flex-col items-center justify-center py-24">
-          <Loader2 className="w-10 h-10 animate-spin text-soft-pink-500 mb-4" />
-          <p className="text-zinc-500 font-medium">
-            Menyiapkan etalase toko...
-          </p>
-        </div>
-      ) : produkTampil.length === 0 ? (
+      {produkTampil.length === 0 ? (
         <div className="text-center py-24 bg-pink-50/40 rounded-3xl border-2 border-dashed border-pink-200">
           <p className="text-zinc-500 font-medium text-lg">
             Belum ada produk untuk kategori "{kategoriAktif}" nih.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-6">
-          {produkTampil.map((item) => (
-            <ProdukKartu key={item.id} produk={item} />
-          ))}
+        <div className="mt-4">
+          <ProductCarousel products={produkTampil} />
         </div>
       )}
     </section>

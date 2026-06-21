@@ -1,33 +1,28 @@
 "use client";
 import { useState, useEffect } from "react";
 
-const ulasan = [
-  {
-    nama: "Alya",
-    lokasi: "Bandung",
-    teks: "Bahannya jatuh dan ukurannya pas...",
-  },
-  {
-    nama: "Nadia",
-    lokasi: "Surabaya",
-    teks: "Checkout mudah, paket cepat sampai...",
-  },
-  {
-    nama: "Rara",
-    lokasi: "Jakarta",
-    teks: "Suka detail minimalis, produk rapi.",
-  },
-];
-
 export function SliderUlasan() {
+  const [ulasan, setUlasan] = useState<any[]>([]);
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
+    fetch("/api/ulasan")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.length > 0) setUlasan(data);
+      })
+      .catch((err) => console.error("Gagal load ulasan:", err));
+  }, []);
+
+  useEffect(() => {
+    if (ulasan.length <= 1) return;
     const timer = setInterval(() => {
       setIndex((i) => (i === ulasan.length - 1 ? 0 : i + 1));
     }, 5000); // Ganti tiap 5 detik
     return () => clearInterval(timer);
-  }, []);
+  }, [ulasan.length]);
+
+  if (ulasan.length === 0) return null;
 
   return (
     <div className="relative overflow-hidden h-40">

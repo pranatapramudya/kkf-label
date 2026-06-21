@@ -19,17 +19,7 @@ export function TestimonialSection() {
       .catch((err) => console.error(err));
   }, []);
 
-  // Kalau data asli belum ada, fallback pakai default (atau kosong)
-  const dataUlasan = ulasanReal.length > 0 ? ulasanReal : [
-    {
-      id: "dummy1",
-      nama: "Alya",
-      lokasi: "Bandung",
-      rating: 5,
-      teks: "Bahannya jatuh dan ukurannya pas. Warnanya juga lembut banget, persis gaya yang aku cari.",
-    }
-  ];
-
+  const dataUlasan = ulasanReal;
   useEffect(() => {
     if (isHovered || dataUlasan.length <= 1) return;
     const timer = setInterval(() => {
@@ -37,7 +27,9 @@ export function TestimonialSection() {
     }, 4000);
 
     return () => clearInterval(timer);
-  }, [isHovered]);
+  }, [isHovered, dataUlasan.length]);
+
+  if (ulasanReal.length === 0) return null;
 
   return (
     // FIX: Tambahkan overflow-hidden di section utama agar tidak ada elemen yang bocor ke samping layar HP

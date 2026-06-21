@@ -16,6 +16,7 @@ export async function PUT(
       judul,
       kategori,
       hargaNormal,
+      costPrice,
       diskon,
       deskripsi,
       daftarVarian,
@@ -39,13 +40,14 @@ export async function PUT(
       0,
     );
 
-    // Update Data Induk Produk + FOTONYA + VIDEONYA
+    // Update Data Induk Produk + FOTONYA + VIDEONYA + HPP
     await prisma.product.update({
       where: { id: id },
       data: {
         nama: judul,
         deskripsi: deskripsi,
         harga: hargaNormal,
+        costPrice: Number(costPrice || 0),
         diskonPersen: diskon,
         stokTotal: stokTotal,
         kategoriId: kategoriDb.id,

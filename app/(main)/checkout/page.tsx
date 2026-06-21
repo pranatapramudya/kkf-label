@@ -36,6 +36,8 @@ const DropdownPencarian = ({
   onChange,
   placeholder,
   disabled,
+  valueKey = "id",
+  labelKey = "name",
 }: any) => {
   const [buka, setBuka] = useState(false);
   const [kataKunci, setKataKunci] = useState("");
@@ -50,9 +52,9 @@ const DropdownPencarian = ({
     return () => document.removeEventListener("mousedown", klikLuar);
   }, []);
 
-  const opsiTerpilih = options.find((o: any) => o.id === value);
+  const opsiTerpilih = options.find((o: any) => o[valueKey] === value);
   const opsiDifilter = options.filter((o: any) =>
-    o.name.toLowerCase().includes(kataKunci.toLowerCase()),
+    o[labelKey]?.toLowerCase().includes(kataKunci.toLowerCase()),
   );
 
   return (
@@ -68,7 +70,7 @@ const DropdownPencarian = ({
         }`}
       >
         <span className="truncate">
-          {opsiTerpilih ? opsiTerpilih.name : placeholder}
+          {opsiTerpilih ? opsiTerpilih[labelKey] : placeholder}
         </span>
         <ChevronDown
           size={16}
@@ -96,20 +98,20 @@ const DropdownPencarian = ({
             ) : (
               opsiDifilter.map((opsi: any) => (
                 <li
-                  key={opsi.id}
+                  key={opsi[valueKey]}
                   onClick={() => {
-                    onChange(opsi.id);
+                    onChange(opsi[valueKey]);
                     setBuka(false);
                     setKataKunci("");
                   }}
                   className={`flex cursor-pointer items-center justify-between rounded-lg p-2.5 text-sm transition-colors ${
-                    value === opsi.id
+                    value === opsi[valueKey]
                       ? "bg-soft-pink-50/80 font-bold text-soft-pink-700"
                       : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
                   }`}
                 >
-                  {opsi.name}
-                  {value === opsi.id && (
+                  {opsi[labelKey]}
+                  {value === opsi[valueKey] && (
                     <Check size={16} className="text-soft-pink-600" />
                   )}
                 </li>
@@ -131,8 +133,8 @@ export default function HalamanCheckout() {
   const [emailPenerima, setEmailPenerima] = useState("");
   const [teleponPenerima, setTeleponPenerima] = useState("");
   const [alamatLengkap, setAlamatLengkap] = useState("");
-  const [daftarProvinsi, setDaftarProvinsi] = useState<Wilayah[]>([]);
-  const [daftarKota, setDaftarKota] = useState<Wilayah[]>([]);
+  const [daftarProvinsi, setDaftarProvinsi] = useState<any[]>([]);
+  const [daftarKota, setDaftarKota] = useState<any[]>([]);
   const [provinsiDipilih, setProvinsiDipilih] = useState("");
   const [kotaDipilih, setKotaDipilih] = useState("");
   const [ekspedisiDipilih, setEkspedisiDipilih] = useState("jne");
@@ -165,11 +167,11 @@ export default function HalamanCheckout() {
     [daftarKota],
   );
   const namaProvinsi = useMemo(
-    () => daftarProvinsiAman.find((p) => p.id === provinsiDipilih)?.name ?? "",
+    () => daftarProvinsiAman.find((p: any) => p.province_id === provinsiDipilih)?.province ?? "",
     [daftarProvinsiAman, provinsiDipilih],
   );
   const namaKota = useMemo(
-    () => daftarKotaAman.find((k) => k.id === kotaDipilih)?.name ?? "",
+    () => daftarKotaAman.find((k: any) => k.city_id === kotaDipilih)?.city_name ?? "",
     [daftarKotaAman, kotaDipilih],
   );
 
@@ -194,10 +196,12 @@ export default function HalamanCheckout() {
       try {
         const respons = await fetch("/api/wilayah/provinsi");
         const data = await respons.json();
-        const formatAman = Array.isArray(data)
-          ? data.map((item: any) => ({
-              id: String(item.id),
-              name: item.nama || item.name,
+        
+        const parsedData = data.rajaongkir?.results || data.data || (Array.isArray(data) ? data : []);
+        const formatAman = Array.isArray(parsedData)
+          ? parsedData.map((item: any) => ({
+              province_id: String(item.province_id || item.id),
+              province: item.province || item.nama || item.name,
             }))
           : [];
         setDaftarProvinsi(formatAman);
@@ -221,11 +225,12 @@ export default function HalamanCheckout() {
           `/api/wilayah/kabupaten/${provinsiDipilih}`,
         );
         const data = await respons.json();
-        const formatAman = Array.isArray(data)
-          ? data.map((item: any) => ({
-              id: String(item.id),
-              name: item.nama || item.name,
-              kodepos: item.kodepos,
+        const parsedData = data.rajaongkir?.results || data.data || (Array.isArray(data) ? data : []);
+        const formatAman = Array.isArray(parsedData)
+          ? parsedData.map((item: any) => ({
+              city_id: String(item.city_id || item.id),
+              city_name: item.city_name || (item.type ? item.type + " " + item.city_name : "") || item.nama || item.name,
+              kodepos: item.postal_code || item.kodepos,
             }))
           : [];
         setDaftarKota(formatAman);
@@ -473,6 +478,8 @@ export default function HalamanCheckout() {
                       value={provinsiDipilih}
                       onChange={setProvinsiDipilih}
                       placeholder="Pilih Provinsi..."
+                      valueKey="province_id"
+                      labelKey="province"
                     />
                   </div>
 
@@ -486,6 +493,8 @@ export default function HalamanCheckout() {
                       onChange={setKotaDipilih}
                       placeholder="Pilih Kota..."
                       disabled={!provinsiDipilih || daftarKotaAman.length === 0}
+                      valueKey="city_id"
+                      labelKey="city_name"
                     />
                   </div>
 

@@ -4,6 +4,7 @@ import { ProdukKartu } from "@/components/ProdukKartu";
 import { TestimonialSection } from "@/components/TestimonialSection";
 import { Katalog } from "@/components/Katalog";
 import { AutoRefresh } from "@/components/AutoRefresh"; // <--- Import komponen gaibnya
+import { ProductCarousel } from "@/components/ProductCarousel";
 
 const prisma = new PrismaClient();
 
@@ -14,6 +15,20 @@ export default async function HalamanUtama() {
     orderBy: { dibuatPada: "desc" },
     take: 4,
   });
+
+  const semuaProdukLengkap = await prisma.product.findMany({
+    where: { aktif: true },
+    include: { ulasan: true, kategori: true },
+  });
+
+  const topProducts = semuaProdukLengkap
+    .filter((p) => {
+      if (!p.ulasan || p.ulasan.length === 0) return false;
+      const rataRata =
+        p.ulasan.reduce((acc, curr) => acc + curr.rating, 0) / p.ulasan.length;
+      return rataRata >= 4.5;
+    })
+    .slice(0, 5); // Ambil maksimal 5 teratas
 
   return (
     <div>
@@ -38,6 +53,14 @@ export default async function HalamanUtama() {
                 Lihat Katalog
                 <ArrowRight size={18} />
               </a>
+              {topProducts && topProducts.length > 0 && (
+                <a
+                  href="#pilihan-disukai"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-zinc-200 bg-white px-8 py-3.5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                >
+                  Pilihan Paling Disukai
+                </a>
+              )}
             </div>
           </div>
 
@@ -86,7 +109,23 @@ export default async function HalamanUtama() {
         ))}
       </section>
 
-      <Katalog />
+      {topProducts && topProducts.length > 0 && (
+        <section id="pilihan-disukai" className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+          <div className="flex flex-col mb-8 gap-1">
+            <p className="text-soft-pink-500 font-bold text-sm uppercase tracking-wider">
+              Highly Rated
+            </p>
+            <h2 className="text-3xl font-bold text-zinc-900">
+              Pilihan Paling Disukai
+            </h2>
+          </div>
+          <div className="mt-4">
+            <ProductCarousel products={topProducts} />
+          </div>
+        </section>
+      )}
+
+      <Katalog semuaProduk={semuaProdukLengkap} />
       <TestimonialSection />
     </div>
   );

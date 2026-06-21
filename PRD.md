@@ -1,16 +1,14 @@
-# PRD: Custom Free Allowlist (v31.0)
+# PRD: Scalable Analytics Pagination (v42.0)
 
 ## 1. Objective
-Membuat sistem *Allowlist* kustom di level aplikasi (Server-Side) untuk membatasi akses dasbor admin hanya kepada 4 email spesifik, sebagai alternatif gratis dari fitur Clerk Pro.
+Menerapkan sistem *pagination* (3 data per halaman) pada *Horizontal Bar Chart* untuk menjaga densitas visual yang konsisten dan *clean*, terlepas dari berapa banyak produk yang ada.
 
 ## 2. Scope of Work
-- **Server-Side Authorization:** Menggunakan fungsi `currentUser()` dari `@clerk/nextjs/server` di dalam *root layout* admin (`app/(dashboard)/layout.tsx`).
-- **Email Validation:** Mengekstrak alamat email pengguna yang sedang *login* dan mencocokkannya dengan array `ALLOWED_EMAILS`.
-- **Rejection Logic:** Jika pengguna *login* dengan email di luar daftar tersebut, sistem akan langsung melakukan `redirect` ke halaman utama (`/`) atau merender komponen "Akses Ditolak".
+- **Pagination State:** Mengimplementasikan `useState` untuk melacak `currentPage`.
+- **Data Slicing:** Membuat fungsi kalkulasi untuk memotong array data (misal: `data.slice(page * 3, page * 3 + 3)`).
+- **Navigation Controls:** Menambahkan tombol navigasi (Prev/Next) yang minimalis dan *user-friendly* tepat di bawah *chart*.
+- **State Guardrails:** Tombol "Prev" harus di- `disabled` jika `currentPage === 0`, dan tombol "Next" di- `disabled` jika `(currentPage + 1) * 3 >= data.length`.
 
 ## 3. Strict Guidelines
-- **Hardcoded Security:** Array email di-*hardcode* dengan aman di sisi server agar tidak bisa dimanipulasi dari *client*.
-- **List Email yang Diizinkan:** 1. pranatapramudya39@gmail.com
-  2. pranajaya52@gmail.com
-  3. kkflabel@gmail.com
-  4. uwenkuswendi5@gmail.com
+- **Responsive Navigation:** Tombol navigasi harus terlihat jelas tapi tidak mengganggu *layout* utama. Gunakan ikon (Chevron) untuk menghemat ruang.
+- **Smooth Transition:** Tidak perlu animasi kompleks, cukup *re-render* data yang konsisten saat halaman berpindah.

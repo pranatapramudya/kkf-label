@@ -28,6 +28,9 @@ export default function FormEditClient({ produkAwal }: { produkAwal: any }) {
   const [hargaNormal, setHargaNormal] = useState(
     formatRibuan(produkAwal.harga.toString()),
   );
+  const [costPrice, setCostPrice] = useState(
+    formatRibuan(produkAwal.costPrice?.toString() || "0"),
+  );
   const [diskon, setDiskon] = useState(
     produkAwal.diskonPersen?.toString() || "0",
   );
@@ -140,6 +143,7 @@ export default function FormEditClient({ produkAwal }: { produkAwal: any }) {
       setTeksLoading("Menyimpan Perubahan ke Database...");
 
       const hargaMurni = parseInt(hargaNormal.replace(/\./g, "") || "0", 10);
+      const costPriceMurni = parseInt(costPrice.replace(/\./g, "") || "0", 10);
       const diskonMurni = parseInt(diskon.replace(/\./g, "") || "0", 10);
       const varianMurni = daftarVarian.map((v: any) => ({
         id: v.id || undefined,
@@ -155,6 +159,7 @@ export default function FormEditClient({ produkAwal }: { produkAwal: any }) {
           judul,
           kategori,
           hargaNormal: hargaMurni,
+          costPrice: costPriceMurni,
           diskon: diskonMurni,
           deskripsi,
           daftarVarian: varianMurni,
@@ -214,7 +219,7 @@ export default function FormEditClient({ produkAwal }: { produkAwal: any }) {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
             <div className="relative">
               <label className="block text-sm font-bold text-zinc-700 mb-1.5">
                 Kategori
@@ -277,7 +282,7 @@ export default function FormEditClient({ produkAwal }: { produkAwal: any }) {
 
             <div>
               <label className="block text-sm font-bold text-zinc-700 mb-1.5">
-                Harga Normal
+                Harga Jual
               </label>
               <div className="relative w-full">
                 <span className="absolute left-4 top-3.5 text-sm font-bold text-zinc-400">
@@ -293,6 +298,26 @@ export default function FormEditClient({ produkAwal }: { produkAwal: any }) {
                 />
               </div>
             </div>
+            
+            <div>
+              <label className="block text-sm font-bold text-zinc-700 mb-1.5">
+                HPP (Modal)
+              </label>
+              <div className="relative w-full">
+                <span className="absolute left-4 top-3.5 text-sm font-bold text-zinc-400">
+                  Rp
+                </span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  required
+                  value={costPrice}
+                  onChange={(e) => setCostPrice(formatRibuan(e.target.value))}
+                  className="w-full border border-zinc-300 py-3 pl-11 pr-4 rounded-xl focus:outline-none focus:border-soft-pink-500 transition"
+                />
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-bold text-zinc-700 mb-1.5">
                 Diskon Promo (%)
