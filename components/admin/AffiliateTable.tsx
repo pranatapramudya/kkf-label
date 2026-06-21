@@ -36,12 +36,12 @@ export default function AffiliateTable() {
           <p className="text-xs text-zinc-500">Performa penjualan berdasarkan link referral (?ref=)</p>
         </div>
       </div>
-      <div className="overflow-x-auto">
+      <div className="w-full overflow-x-auto">
         <table className="w-full text-left text-sm whitespace-nowrap">
           <thead>
             <tr className="border-b border-pink-100 text-zinc-500">
               <th className="pb-3 font-semibold px-2">Nama Mitra</th>
-              <th className="pb-3 font-semibold px-2">WhatsApp</th>
+              <th className="pb-3 font-semibold px-2 hidden md:table-cell">WhatsApp</th>
               <th className="pb-3 font-semibold px-2 text-center">Total Pesanan Sukses</th>
               <th className="pb-3 font-semibold px-2 text-right">Total Pendapatan Dihasilkan</th>
             </tr>
@@ -60,7 +60,7 @@ export default function AffiliateTable() {
                     <Link size={14} className="text-zinc-400" />
                     {af.nama || af.affiliateId}
                   </td>
-                  <td className="py-4 px-2 font-medium text-zinc-600">
+                  <td className="py-4 px-2 font-medium text-zinc-600 hidden md:table-cell">
                     {af.whatsapp || "-"}
                   </td>
                   <td className="py-4 px-2 text-center font-medium text-emerald-600">

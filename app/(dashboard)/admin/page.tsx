@@ -52,7 +52,8 @@ import PromosiTab from "@/components/admin/PromosiTab";
 import { useClerk, UserButton } from "@clerk/nextjs";
 import ProfitabilityChart from "@/components/admin/ProfitabilityChart";
 import RfmTable from "@/components/admin/RfmTable";
-import AffiliateTable from "@/components/admin/AffiliateTable";
+import RingkasanAnalitik from "@/components/admin/RingkasanAnalitik";
+
 import UlasanTable from "@/components/admin/UlasanTable";
 
 // ==========================================
@@ -682,9 +683,9 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
             <p className="text-sm font-medium">Menarik data transaksi...</p>
           </div>
         ) : (
-          <div className="overflow-x-auto pb-4">
-            <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead>
+          <div className="w-full pb-4 px-4 md:px-0">
+            <table className="block w-full md:table text-left text-sm md:whitespace-nowrap">
+              <thead className="hidden md:table-header-group">
                 <tr className="border-b border-pink-100 text-zinc-500">
                   <th className="pb-3 font-semibold px-2 w-10 text-center">
                     No
@@ -696,12 +697,12 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                   <th className="pb-3 font-semibold px-2 text-right">Aksi</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="block w-full md:table-row-group">
                 {dataTampil.length === 0 ? (
-                  <tr>
+                  <tr className="block w-full md:table-row">
                     <td
                       colSpan={6}
-                      className="text-center py-8 text-zinc-400 font-medium"
+                      className="block md:table-cell text-center py-8 text-zinc-400 font-medium"
                     >
                       Belum ada pesanan masuk
                     </td>
@@ -710,54 +711,64 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                   dataTampil.map((p, index) => (
                     <tr
                       key={p.id}
-                      className="border-b border-pink-50 last:border-0 hover:bg-pink-50/30 transition-colors"
+                      className="block w-full mb-4 border border-pink-100 rounded-xl p-4 shadow-sm md:table-row md:border-b md:border-pink-50 md:rounded-none md:p-0 md:shadow-none hover:bg-pink-50/30 transition-colors md:mb-0 last:border-0"
                     >
-                      <td className="py-4 text-center text-zinc-500 font-medium px-2">
-                        {(currentPage - 1) * itemPerPage + index + 1}
+                      <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 text-zinc-500 font-medium px-2">
+                        <span className="md:hidden font-bold text-zinc-400">No:</span>
+                        <span>{(currentPage - 1) * itemPerPage + index + 1}</span>
                       </td>
-                      <td className="py-4 font-bold text-zinc-900 px-2">
-                        {p.kodePesanan}
+                      <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 font-bold text-zinc-900 px-2">
+                        <span className="md:hidden font-bold text-zinc-400">Invoice:</span>
+                        <span>{p.kodePesanan}</span>
                       </td>
-                      <td className="py-4 text-zinc-600 px-2">
-                        <div className="flex flex-col gap-1 w-48">
-                          <span className="font-bold text-zinc-900 truncate">
+                      <td className="flex justify-between items-start md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 text-zinc-600 px-2">
+                        <span className="md:hidden font-bold text-zinc-400">Pelanggan:</span>
+                        <div className="flex flex-col gap-1 w-48 md:w-auto text-right md:text-left ml-auto md:ml-0">
+                          <span className="font-bold text-zinc-900 truncate block">
                             {p.namaPenerima}
                           </span>
-                          <div className="flex flex-col gap-0.5 text-[10px] text-zinc-500">
-                            <span className="flex items-center gap-1.5">
-                              <Mail size={10} className="text-soft-pink-500" />
+                          <div className="flex flex-col gap-0.5 text-[10px] text-zinc-500 items-end md:items-start">
+                            <span className="flex items-center gap-1.5 justify-end md:justify-start">
                               <span className="truncate">{p.emailPenerima}</span>
+                              <Mail size={10} className="text-soft-pink-500 md:hidden block" />
+                              <Mail size={10} className="text-soft-pink-500 hidden md:block" />
                             </span>
-                            <span className="flex items-center gap-1.5">
-                              <Phone size={10} className="text-soft-pink-500" />
-                              {p.teleponPenerima}
+                            <span className="flex items-center gap-1.5 justify-end md:justify-start">
+                              <span>{p.teleponPenerima}</span>
+                              <Phone size={10} className="text-soft-pink-500 md:hidden block" />
+                              <Phone size={10} className="text-soft-pink-500 hidden md:block" />
                             </span>
                           </div>
                         </div>
                       </td>
-                      <td className="py-4 font-bold text-soft-pink-600 px-2">
-                        {formatRupiah(p.total)}
+                      <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 font-bold text-soft-pink-600 px-2">
+                        <span className="md:hidden font-bold text-zinc-400">Total:</span>
+                        <span>{formatRupiah(p.total)}</span>
                       </td>
-                      <td className="py-4 px-2">
+                      <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2">
+                        <span className="md:hidden font-bold text-zinc-400">Status:</span>
                         <span
                           className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase ${p.statusPesanan === "SELESAI" || p.statusPesanan === "SAMPAI" ? "bg-emerald-100 text-emerald-700" : p.statusPesanan === "DIKIRIM" ? "bg-blue-100 text-blue-700" : p.statusPesanan === "DIBATALKAN" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}
                         >
                           {p.statusPesanan.replace("_", " ")}
                         </span>
                       </td>
-                      <td className="py-4 text-right px-2 flex justify-end gap-2">
-                        <button
-                          onClick={() => bukaModalEdit(p)}
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:bg-sky-50 px-3 py-1.5 rounded-lg transition border border-sky-100 shadow-sm"
-                        >
-                          <Package size={14} /> Proses
-                        </button>
-                        <button
-                          onClick={() => setSelectedInvoice(p)}
-                          className="inline-flex items-center gap-1.5 text-xs font-bold text-soft-pink-600 hover:bg-soft-pink-50 px-3 py-1.5 rounded-lg transition border border-pink-100 shadow-sm"
-                        >
-                          <Printer size={14} /> Cetak
-                        </button>
+                      <td className="flex justify-between items-center md:table-cell py-3 md:py-4 md:border-0 px-2">
+                        <span className="md:hidden font-bold text-zinc-400">Aksi:</span>
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => bukaModalEdit(p)}
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:bg-sky-50 px-3 py-1.5 rounded-lg transition border border-sky-100 shadow-sm"
+                          >
+                            <Package size={14} /> Proses
+                          </button>
+                          <button
+                            onClick={() => setSelectedInvoice(p)}
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-soft-pink-600 hover:bg-soft-pink-50 px-3 py-1.5 rounded-lg transition border border-pink-100 shadow-sm"
+                          >
+                            <Printer size={14} /> Cetak
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -1041,6 +1052,7 @@ export default function HalamanAdmin() {
   const { signOut } = useClerk();
 
   const [tabAktif, setTabAktif] = useState("analitik");
+  const [analitikTabAktif, setAnalitikTabAktif] = useState("ringkasan");
   const [terakhirDiperbarui, setTerakhirDiperbarui] = useState("");
   const [sedangRefresh, setSedangRefresh] = useState(false);
   const [modeTambah, setModeTambah] = useState(false);
@@ -1212,63 +1224,71 @@ export default function HalamanAdmin() {
   ) as string[];
 
   return (
-    <div className="fixed top-0 left-0 w-full h-[100dvh] z-[100] flex bg-pink-50/30 text-zinc-900 font-sans overflow-hidden">
-      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-pink-100 z-50">
-        <div className="p-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img
-              src="/logo-kkf.png"
-              alt="KKF Label"
-              className="h-10 w-10 rounded-md object-cover border border-pink-100 shadow-sm"
-            />
-            <div>
-              <p className="text-[10px] font-bold text-soft-pink-600 uppercase tracking-wider">
-                Workspace
-              </p>
-              <h1 className="text-xl font-bold text-zinc-900 tracking-tight">
-                KKF LABEL
-              </h1>
+    <div className="w-full min-h-screen bg-white overflow-x-hidden">
+      <div className="flex flex-col md:flex-row w-full h-auto min-h-screen relative">
+        
+        {/* SIDEBAR ADMIN */}
+        <aside className="hidden md:flex flex-col w-64 bg-zinc-50 border-r border-pink-100 z-10 shrink-0">
+          <div className="p-6 flex items-center justify-between border-b border-pink-100">
+            <div className="flex items-center gap-3">
+              <img
+                src="/logo-kkf.png"
+                alt="KKF Label"
+                className="h-10 w-10 rounded-md object-cover border border-pink-100 shadow-sm bg-white"
+              />
+              <div>
+                <p className="text-[10px] font-bold text-soft-pink-600 uppercase tracking-wider">
+                  Admin Panel
+                </p>
+                <h1 className="text-xl font-bold text-zinc-900 tracking-tight">
+                  KKF LABEL
+                </h1>
+              </div>
             </div>
           </div>
-        </div>
-        <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
-          {daftarMenu.map((menu) => (
+          <nav className="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto">
+            {daftarMenu.map((menu) => (
+              <button
+                key={menu.id}
+                onClick={() => {
+                  setTabAktif(menu.id);
+                  setModeTambah(false);
+                }}
+                className={`w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex items-center gap-3 ${
+                  tabAktif === menu.id
+                    ? "bg-soft-pink-100/70 text-soft-pink-700 font-bold shadow-sm"
+                    : "hover:bg-pink-50 text-zinc-600"
+                }`}
+              >
+                <menu.ikon size={20} /> {menu.label}
+              </button>
+            ))}
+          </nav>
+          <div className="p-4 border-t border-pink-100 flex flex-col gap-3 bg-white">
             <button
-              key={menu.id}
-              onClick={() => {
-                setTabAktif(menu.id);
-                setModeTambah(false);
+              onClick={async () => {
+                await signOut();
+                window.location.href = "/";
               }}
-              className={`w-full text-left px-4 py-3 rounded-xl transition-all font-medium flex items-center gap-3 ${tabAktif === menu.id ? "bg-soft-pink-100/70 text-soft-pink-700 font-bold shadow-sm" : "hover:bg-pink-50 text-zinc-600"}`}
+              className="flex items-center justify-center gap-2 text-red-500 bg-red-50 hover:bg-red-100 w-full px-4 py-3 rounded-xl font-bold transition outline-none shadow-sm border border-red-100"
             >
-              <menu.ikon size={20} /> {menu.label}
+              <LogOut size={18} /> Keluar Sistem
             </button>
-          ))}
-        </nav>
-        <div className="p-4 border-t border-pink-100 flex flex-col gap-3">
-          <button
-            onClick={async () => {
-              await signOut();
-              window.location.href = "/";
-            }}
-            className="flex items-center justify-center gap-2 text-red-500 bg-red-50 hover:bg-red-100 w-full px-4 py-3 rounded-xl font-bold transition outline-none shadow-sm border border-red-100"
-          >
-            <LogOut size={18} /> Keluar Sistem
-          </button>
-        </div>
-      </aside>
+          </div>
+        </aside>
 
-      <div className="flex-1 flex flex-col min-w-0 bg-zinc-50/50 relative h-full">
-        <header className="md:hidden shrink-0 bg-white border-b border-pink-100 p-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-zinc-900">KKF-LABEL-ADMIN</span>
-          </div>
-          <div className="bg-white p-1 rounded-full border border-pink-100 shadow-sm flex items-center justify-center shrink-0 w-10 h-10">
-            <UserButton
-              appearance={{ elements: { userButtonAvatarBox: "w-8 h-8" } }}
-            />
-          </div>
-        </header>
+        {/* MAIN CONTENT AREA */}
+        <div className="flex-1 flex flex-col min-w-0 bg-white relative">
+          <header className="md:hidden shrink-0 bg-white border-b border-pink-100 p-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-zinc-900">KKF-LABEL-ADMIN</span>
+            </div>
+            <div className="bg-white p-1 rounded-full border border-pink-100 shadow-sm flex items-center justify-center shrink-0 w-10 h-10">
+              <UserButton
+                appearance={{ elements: { userButtonAvatarBox: "w-8 h-8" } }}
+              />
+            </div>
+          </header>
 
         <div className="shrink-0 px-4 md:px-8 py-4 md:pt-8 pb-0 flex flex-col sm:flex-row justify-between sm:items-end gap-2">
           <h2 className="text-2xl font-bold text-zinc-900 tracking-tight capitalize">
@@ -1309,278 +1329,124 @@ export default function HalamanAdmin() {
           )}
 
           {tabAktif === "analitik" && (
-            <div className="space-y-6 max-w-6xl animate-in fade-in zoom-in-95 duration-300">
-              <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-                <div>
-                  <h3 className="font-bold text-zinc-900 text-lg">
-                    Ringkasan Performa
-                  </h3>
-                  <p className="text-sm text-zinc-500">
-                    Database live dari server PostgreSQL KKF-Label.
-                  </p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full xl:w-fit">
-                  <div className="flex items-center overflow-x-auto bg-white p-1 rounded-xl border border-pink-100 shadow-sm w-full sm:w-fit whitespace-nowrap [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                    {["hari", "minggu"].map((filter) => (
-                      <button
-                        key={filter}
-                        onClick={() => setFilterWaktu(filter)}
-                        className={`px-4 py-1.5 text-[11px] sm:text-xs rounded-lg capitalize transition-all shrink-0 ${filterWaktu === filter ? "bg-pink-100 text-pink-700 font-bold shadow-sm" : "text-zinc-500 hover:text-zinc-900 font-medium"}`}
-                      >
-                        {filter === "hari" ? "Hari Ini" : "Minggu Ini"}
-                      </button>
-                    ))}
-                    <button
-                        onClick={() => setFilterWaktu("bulanan")}
-                        className={`px-4 py-1.5 text-[11px] sm:text-xs rounded-lg capitalize transition-all shrink-0 ${filterWaktu === "bulanan" ? "bg-pink-100 text-pink-700 font-bold shadow-sm" : "text-zinc-500 hover:text-zinc-900 font-medium"}`}
-                      >
-                        Bulanan
-                    </button>
-                  </div>
-                  {filterWaktu === "bulanan" && (
-                    <>
-                      <div className="shrink-0 w-full sm:w-32 z-[60]">
-                        <DropdownMewah
-                          value={filterBulan}
-                          options={opsiBulanGlobal}
-                          onChange={setFilterBulan}
-                          placeholder="Pilih Bulan"
-                          widthClass="w-full"
-                        />
-                      </div>
-                      <div className="shrink-0 w-full sm:w-28 z-[60]">
-                        <DropdownMewah
-                          value={filterTahun}
-                          options={daftarTahun.map((tahun) => ({
-                            value: tahun.toString(),
-                            label: tahun.toString(),
-                          }))}
-                          onChange={setFilterTahun}
-                          placeholder="Tahun"
-                          widthClass="w-full"
-                        />
-                      </div>
-                    </>
-                  )}
-                </div>
+            <div className="space-y-6 w-full animate-in fade-in zoom-in-95 duration-300">
+              
+              {/* TABS NAVIGASI ANALITIK */}
+              <div className="flex flex-nowrap overflow-x-auto whitespace-nowrap w-full gap-4 pb-2 scrollbar-hide bg-white p-1.5 rounded-xl border border-pink-100 shadow-sm [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {[
+                  { id: "ringkasan", label: "Ringkasan Performa" },
+                  { id: "profitability", label: "Profitability (Margin)" },
+                  { id: "rfm", label: "Analisis Pelanggan (RFM)" },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setAnalitikTabAktif(tab.id)}
+                    className={`flex-shrink-0 px-4 py-2 text-sm md:text-base rounded-lg font-bold transition-all truncate ${analitikTabAktif === tab.id ? "bg-soft-pink-600 text-white shadow-md" : "text-zinc-500 hover:text-zinc-900 hover:bg-pink-50"}`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
 
-              {memuatAnalitik ? (
-                <div className="flex flex-col items-center justify-center py-20 text-zinc-500 gap-2">
-                  <Loader2
-                    className="animate-spin text-soft-pink-500"
-                    size={32}
-                  />
-                  <p className="text-sm font-medium">
-                    Sinkronisasi data dari Prisma...
-                  </p>
-                </div>
-              ) : (
+              {/* HEADER RINGKASAN */}
+              {analitikTabAktif === "ringkasan" && (
                 <>
-                  <section className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-                    {statistikRingkas.map((st) => (
-                      <article
-                        key={st.judul}
-                        className="rounded-2xl border border-pink-100 bg-white p-5 shadow-sm relative overflow-hidden group"
-                      >
-                        <div className="flex items-start justify-between gap-4 relative z-10">
-                          <div>
-                            <p className="text-sm font-bold text-zinc-500">
-                              {st.judul}
-                            </p>
-                            <p className="mt-2 text-2xl font-black text-zinc-900">
-                              {st.nilai}
-                            </p>
-                          </div>
-                          <span className="grid h-12 w-12 place-items-center rounded-full bg-soft-pink-50 text-soft-pink-600 transition-transform group-hover:scale-110">
-                            <st.ikon size={24} />
-                          </span>
-                        </div>
-                        <p className="mt-4 flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 w-fit px-2.5 py-1 rounded-md relative z-10">
-                          <TrendingUp size={14} /> {st.tren}
-                        </p>
-                      </article>
-                    ))}
-                  </section>
-
-                  <section className="grid gap-6 lg:grid-cols-3">
-                    <div className="lg:col-span-2 rounded-2xl border border-pink-100 bg-white p-5 md:p-6 shadow-sm">
-                      <div className="mb-6">
-                        <h3 className="font-bold text-zinc-900">
-                          Tren Pendapatan Real-Time
-                        </h3>
-                        <p className="text-xs text-zinc-500">
-                          Pendapatan kotor dari tabel Pesanan.
-                        </p>
-                      </div>
-                      <div className="h-[250px] w-full text-xs">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart
-                            data={dataAnalitik.grafikPenjualan}
-                            margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
-                          >
-                            <CartesianGrid
-                              strokeDasharray="3 3"
-                              vertical={false}
-                              stroke="#fce7f3"
-                            />
-                            <XAxis
-                              dataKey="hari"
-                              axisLine={false}
-                              tickLine={false}
-                              tick={{ fill: "#71717a" }}
-                              dy={10}
-                            />
-                            <YAxis
-                              axisLine={false}
-                              tickLine={false}
-                              tick={{ fill: "#71717a" }}
-                              tickFormatter={(value) => `Rp${value / 1000}k`}
-                            />
-                            <Tooltip
-                              contentStyle={{
-                                borderRadius: "12px",
-                                border: "none",
-                                boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                              }}
-                              formatter={(value: any) => [
-                                `Rp ${Number(value).toLocaleString("id-ID")}`,
-                                "Pendapatan",
-                              ]}
-                            />
-                            <Line
-                              type="monotone"
-                              dataKey="total"
-                              stroke="#db2777"
-                              strokeWidth={3}
-                              dot={{
-                                r: 4,
-                                fill: "#db2777",
-                                strokeWidth: 2,
-                                stroke: "#fff",
-                              }}
-                              activeDot={{ r: 6 }}
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
+                  <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 mt-2">
+                    <div>
+                      <h3 className="font-bold text-zinc-900 text-lg">
+                        Ringkasan Performa
+                      </h3>
+                      <p className="text-sm text-zinc-500">
+                        Database live dari server PostgreSQL KKF-Label.
+                      </p>
                     </div>
 
-                    <div className="rounded-2xl border border-pink-100 bg-white p-5 md:p-6 shadow-sm flex flex-col">
-                      <div className="mb-6 flex justify-between items-start gap-2">
-                        <div>
-                          <h3 className="font-bold text-zinc-900">
-                            Top Produk Live
-                          </h3>
-                          <p className="text-[10px] text-zinc-500">
-                            Berdasarkan{" "}
-                            {modeGrafikTop === "dilihat"
-                              ? "klik pengunjung"
-                              : "unit terjual"}
-                            .
-                          </p>
-                        </div>
-                        <div className="flex bg-zinc-50 p-1 rounded-lg border border-zinc-200 shrink-0">
+                    <div className="flex flex-wrap items-center gap-2 w-full xl:w-fit">
+                      <div className="flex items-center bg-white p-1 rounded-xl border border-pink-100 shadow-sm flex-shrink-0">
+                        {["hari", "minggu"].map((filter) => (
                           <button
-                            onClick={() => setModeGrafikTop("terjual")}
-                            className={`p-1.5 rounded-md transition-all ${modeGrafikTop === "terjual" ? "bg-white shadow-sm text-soft-pink-600" : "text-zinc-400 hover:text-zinc-600"}`}
+                            key={filter}
+                            onClick={() => setFilterWaktu(filter)}
+                            className={`flex-shrink-0 px-4 py-1.5 text-xs md:text-sm rounded-lg capitalize transition-all whitespace-nowrap truncate ${filterWaktu === filter ? "bg-pink-100 text-pink-700 font-bold shadow-sm" : "text-zinc-500 hover:text-zinc-900 font-medium"}`}
                           >
-                            <CartIcon size={14} />
+                            {filter === "hari" ? "Hari Ini" : "Minggu Ini"}
                           </button>
-                          <button
-                            onClick={() => setModeGrafikTop("dilihat")}
-                            className={`p-1.5 rounded-md transition-all ${modeGrafikTop === "dilihat" ? "bg-white shadow-sm text-soft-pink-600" : "text-zinc-400 hover:text-zinc-600"}`}
+                        ))}
+                        <button
+                            onClick={() => setFilterWaktu("bulanan")}
+                            className={`flex-shrink-0 px-4 py-1.5 text-xs md:text-sm rounded-lg capitalize transition-all whitespace-nowrap truncate ${filterWaktu === "bulanan" ? "bg-pink-100 text-pink-700 font-bold shadow-sm" : "text-zinc-500 hover:text-zinc-900 font-medium"}`}
                           >
-                            <MousePointerClick size={14} />
-                          </button>
-                        </div>
+                            Bulanan
+                        </button>
                       </div>
-                      <div className="flex-1 w-full text-xs min-h-[200px]">
-                        {dataGrafikTopAktif.length === 0 ? (
-                          <div className="w-full h-full flex items-center justify-center text-zinc-400 italic">
-                            Belum ada data
+                      {filterWaktu === "bulanan" && (
+                        <>
+                          <div className="shrink-0 w-full sm:w-32 z-[60]">
+                            <DropdownMewah
+                              value={filterBulan}
+                              options={opsiBulanGlobal}
+                              onChange={setFilterBulan}
+                              placeholder="Pilih Bulan"
+                              widthClass="w-full"
+                            />
                           </div>
-                        ) : (
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart
-                              data={dataGrafikTopAktif}
-                              layout="vertical"
-                              margin={{
-                                top: 0,
-                                right: 0,
-                                left: -20,
-                                bottom: 0,
-                              }}
-                            >
-                              <CartesianGrid
-                                strokeDasharray="3 3"
-                                horizontal={false}
-                                stroke="#fce7f3"
-                              />
-                              <XAxis
-                                type="number"
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: "#71717a" }}
-                              />
-                              <YAxis
-                                dataKey="nama"
-                                type="category"
-                                axisLine={false}
-                                tickLine={false}
-                                tick={{ fill: "#3f3f46", fontSize: 10 }}
-                                width={90}
-                                tickFormatter={(value) =>
-                                  value.length > 12
-                                    ? value.substring(0, 12) + "..."
-                                    : value
-                                }
-                              />
-                              <Tooltip
-                                cursor={{ fill: "#fdf2f8" }}
-                                contentStyle={{
-                                  borderRadius: "12px",
-                                  border: "none",
-                                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)",
-                                }}
-                                formatter={(value: any) => [
-                                  `${value} ${modeGrafikTop === "terjual" ? "Pcs" : "Views"}`,
-                                  modeGrafikTop === "terjual"
-                                    ? "Terjual"
-                                    : "Dilihat",
-                                ]}
-                              />
-                              <Bar
-                                dataKey="jumlah"
-                                fill="#f472b6"
-                                radius={[0, 4, 4, 0]}
-                                barSize={24}
-                              />
-                            </BarChart>
-                          </ResponsiveContainer>
-                        )}
-                      </div>
+                          <div className="shrink-0 w-full sm:w-28 z-[60]">
+                            <DropdownMewah
+                              value={filterTahun}
+                              options={daftarTahun.map((tahun) => ({
+                                value: tahun.toString(),
+                                label: tahun.toString(),
+                              }))}
+                              onChange={setFilterTahun}
+                              placeholder="Tahun"
+                              widthClass="w-full"
+                            />
+                          </div>
+                        </>
+                      )}
                     </div>
-                  </section>
-                  <ProfitabilityChart />
-                  <RfmTable />
-                  <AffiliateTable />
+                  </div>
+
+                  {memuatAnalitik ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-zinc-500 gap-2">
+                      <Loader2
+                        className="animate-spin text-soft-pink-500"
+                        size={32}
+                      />
+                      <p className="text-sm font-medium">
+                        Sinkronisasi data dari Prisma...
+                      </p>
+                    </div>
+                  ) : (
+                    <RingkasanAnalitik
+                      statistikRingkas={statistikRingkas}
+                      dataAnalitik={dataAnalitik}
+                      modeGrafikTop={modeGrafikTop}
+                      setModeGrafikTop={setModeGrafikTop}
+                      dataGrafikTopAktif={dataGrafikTopAktif}
+                    />
+                  )}
                 </>
               )}
 
+              {analitikTabAktif === "profitability" && (
+                <ProfitabilityChart />
+              )}
 
+              {analitikTabAktif === "rfm" && (
+                <RfmTable />
+              )}
             </div>
           )}
 
           {tabAktif === "ulasan" && (
-            <div className="space-y-6 max-w-6xl animate-in fade-in zoom-in-95 duration-300">
+            <div className="space-y-6 w-full animate-in fade-in zoom-in-95 duration-300">
               <UlasanTable />
             </div>
           )}
 
           {tabAktif === "produk" && (
-            <div className="space-y-6 max-w-6xl">
+            <div className="space-y-6 w-full">
               {!modeTambah ? (
                 <>
                   <div className="flex items-center justify-between gap-4">
@@ -1770,6 +1636,7 @@ export default function HalamanAdmin() {
           })}
         </div>
       </nav>
+      </div>
     </div>
   );
 }

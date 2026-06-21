@@ -275,24 +275,7 @@ export default function HalamanAkunSaya() {
       </div>
 
       <div className="px-4 -mt-10 max-w-3xl mx-auto relative z-20">
-        {/* 🔥 SUNTIKAN UI GATEKEEPER AFFILIATE 🔥 */}
-        {dataPesanan.some(p => p.statusPesanan === "SELESAI" || p.statusPesanan === "SAMPAI") && (
-          <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-2xl shadow-lg border border-indigo-500 p-4 mb-5 flex justify-between items-center text-white relative overflow-hidden animate-in fade-in slide-in-from-top-2">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2"></div>
-            <div className="relative z-10 flex-1">
-              <h3 className="font-black text-sm mb-1 flex items-center gap-1.5"><Star size={14} className="fill-amber-400 text-amber-400" /> Untung Bersama KKF!</h3>
-              <p className="text-[10px] text-indigo-100 font-medium">Kamu terpilih menjadi mitra. Dapatkan komisi dengan membagikan link produk.</p>
-            </div>
-            <div className="relative z-10 shrink-0 ml-3">
-              <button 
-                onClick={() => router.push(`/affiliate/daftar?email=${encodeURIComponent(kontak)}`)}
-                className="bg-white text-indigo-600 hover:bg-indigo-50 px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm whitespace-nowrap"
-              >
-                Daftar Affiliate
-              </button>
-            </div>
-          </div>
-        )}
+
 
         {/* Navigasi Status */}
         <div className="bg-white rounded-2xl shadow-md border border-pink-50 p-4 mb-5">
@@ -362,11 +345,12 @@ export default function HalamanAkunSaya() {
         </div>
 
         {/* List Pesanan */}
-        <div className="space-y-4">
-          {loading ? (
-            <div className="flex justify-center py-10">
-              <Loader2 className="animate-spin text-pink-500" />
-            </div>
+        <div className="w-full overflow-x-auto">
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-4">
+            {loading ? (
+              <div className="col-span-1 md:col-span-2 flex justify-center py-10">
+                <Loader2 className="animate-spin text-pink-500" />
+              </div>
           ) : pesananTampil.length === 0 ? (
             <div className="text-center py-12 bg-white rounded-2xl border border-pink-50 shadow-sm">
               <ShoppingBag size={32} className="text-zinc-200 mx-auto mb-3" />
@@ -476,6 +460,7 @@ export default function HalamanAkunSaya() {
               </div>
             ))
           )}
+        </div>
         </div>
       </div>
 

@@ -63,9 +63,9 @@ export default function RfmTable() {
           <p className="text-xs text-zinc-500">Segmentasi berdasarkan Recency, Frequency, Monetary.</p>
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm whitespace-nowrap">
-          <thead>
+      <div className="w-full">
+        <table className="block w-full md:table text-left text-sm md:whitespace-nowrap">
+          <thead className="hidden md:table-header-group">
             <tr className="border-b border-pink-100 text-zinc-500">
               <th className="pb-3 font-semibold px-2">Pelanggan</th>
               <th className="pb-3 font-semibold px-2 text-center">Recency (Hari)</th>
@@ -74,24 +74,37 @@ export default function RfmTable() {
               <th className="pb-3 font-semibold px-2">Segmen</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="block w-full md:table-row-group">
             {data.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="text-center py-8 text-zinc-400 italic">
+              <tr className="block w-full md:table-row">
+                <td colSpan={5} className="block md:table-cell text-center py-8 text-zinc-400 italic">
                   Belum ada data pelanggan.
                 </td>
               </tr>
             ) : (
               data.map((user, idx) => (
-                <tr key={idx} className="border-b border-pink-50 hover:bg-pink-50/30 transition-colors">
-                  <td className="py-4 px-2">
-                    <p className="font-bold text-zinc-900">{user.nama}</p>
-                    <p className="text-xs text-zinc-500">{user.email}</p>
+                <tr key={idx} className="block w-full mb-4 border border-pink-100 rounded-xl p-4 shadow-sm md:table-row md:border-b md:border-pink-50 md:rounded-none md:p-0 md:shadow-none hover:bg-pink-50/30 transition-colors md:mb-0 last:border-0">
+                  <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-right md:text-left">
+                    <span className="md:hidden font-bold text-zinc-400">Pelanggan:</span>
+                    <div className="text-right md:text-left">
+                      <p className="font-bold text-zinc-900">{user.nama}</p>
+                      <p className="text-xs text-zinc-500">{user.email}</p>
+                    </div>
                   </td>
-                  <td className="py-4 px-2 text-center font-medium text-zinc-700">{user.recency} Hari</td>
-                  <td className="py-4 px-2 text-center font-medium text-zinc-700">{user.frequency}x</td>
-                  <td className="py-4 px-2 font-bold text-soft-pink-600">{formatRupiah(user.monetary)}</td>
-                  <td className="py-4 px-2">
+                  <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-center md:text-center font-medium text-zinc-700">
+                    <span className="md:hidden font-bold text-zinc-400">Recency:</span>
+                    <span>{user.recency} Hari</span>
+                  </td>
+                  <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-center md:text-center font-medium text-zinc-700">
+                    <span className="md:hidden font-bold text-zinc-400">Frequency:</span>
+                    <span>{user.frequency}x</span>
+                  </td>
+                  <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 font-bold text-soft-pink-600">
+                    <span className="md:hidden font-bold text-zinc-400">Monetary:</span>
+                    <span>{formatRupiah(user.monetary)}</span>
+                  </td>
+                  <td className="flex justify-between items-center md:table-cell py-3 md:py-4 md:border-0 px-2">
+                    <span className="md:hidden font-bold text-zinc-400">Segmen:</span>
                     <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase ${getSegmentStyle(user.segment)}`}>
                       {getSegmentIcon(user.segment)}
                       {user.segment}

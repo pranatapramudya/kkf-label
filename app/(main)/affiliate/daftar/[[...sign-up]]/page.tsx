@@ -66,7 +66,7 @@ export default async function AffiliateDaftarServer({
 
       <div className="w-full lg:w-1/2 flex flex-col justify-start lg:justify-center items-center px-6 pb-16 lg:p-16 relative z-10">
         {!isEligible ? (
-          <div className="bg-white p-8 rounded-3xl shadow-xl border border-red-100 max-w-sm text-center animate-in fade-in zoom-in-95">
+          <div className="bg-white p-4 md:p-8 rounded-3xl shadow-xl border border-red-100 max-w-sm text-center animate-in fade-in zoom-in-95">
             <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertTriangle size={32} />
             </div>

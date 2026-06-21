@@ -22,7 +22,7 @@ export async function GET() {
       rating: u.rating,
       comment: u.comment,
       dibuatPada: u.dibuatPada,
-      balasanAdmin: u.balasanAdmin,
+      adminReply: u.adminReply,
       // Prioritaskan namaGuest jika ada, kalau tidak pakai nama akun
       namaReviewer: u.namaGuest || u.pengguna?.nama || "Anonim",
     }));
@@ -32,6 +32,26 @@ export async function GET() {
     console.error("🔥 Error Fetch Ulasan:", error.message);
     return NextResponse.json(
       { pesan: "Gagal menarik data ulasan" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const { id, adminReply } = await req.json();
+    if (!id) return NextResponse.json({ pesan: "ID Ulasan diperlukan" }, { status: 400 });
+
+    const ulasan = await prisma.review.update({
+      where: { id },
+      data: { adminReply },
+    });
+
+    return NextResponse.json({ pesan: "Balasan berhasil disimpan", ulasan });
+  } catch (error: any) {
+    console.error("🔥 Error Balas Ulasan:", error.message);
+    return NextResponse.json(
+      { pesan: "Gagal menyimpan balasan ulasan" },
       { status: 500 }
     );
   }

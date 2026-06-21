@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
-import { Loader2, Star } from "lucide-react";
-import { maskName } from "@/lib/masking";
+import { Loader2, Star, MessageSquareReply, X } from "lucide-react";
 
 export default function UlasanTable() {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  // State untuk Modal Balasan
+  const [selectedReview, setSelectedReview] = useState<any>(null);
+  const [replyText, setReplyText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const fetchUlasan = () => {
     fetch("/api/admin/ulasan")
       .then((res) => res.json())
       .then((resData) => {
@@ -17,7 +21,32 @@ export default function UlasanTable() {
         console.error(err);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    fetchUlasan();
   }, []);
+
+  const handleBalas = async () => {
+    if (!replyText.trim() || !selectedReview) return;
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/admin/ulasan", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: selectedReview.id, adminReply: replyText }),
+      });
+      if (res.ok) {
+        fetchUlasan();
+        setSelectedReview(null);
+        setReplyText("");
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -29,59 +58,120 @@ export default function UlasanTable() {
   }
 
   return (
-    <div className="rounded-2xl border border-pink-100 bg-white shadow-sm overflow-hidden mb-8">
-      <div className="p-5 md:p-6 border-b border-pink-100 flex justify-between items-end">
-        <div>
-          <h3 className="font-bold text-zinc-900">Daftar Ulasan Pelanggan</h3>
-          <p className="text-xs text-zinc-500">Feedback langsung dari pembeli terverifikasi.</p>
+    <>
+      <div className="rounded-2xl border border-pink-100 bg-white shadow-sm overflow-hidden mb-8">
+        <div className="p-5 md:p-6 border-b border-pink-100 flex justify-between items-end">
+          <div>
+            <h3 className="font-bold text-zinc-900">Daftar Ulasan Pelanggan</h3>
+            <p className="text-xs text-zinc-500">Feedback langsung dari pembeli terverifikasi.</p>
+          </div>
         </div>
-      </div>
-      <div className="overflow-x-auto pb-4">
-        <table className="w-full text-left text-sm whitespace-nowrap">
-          <thead>
-            <tr className="border-b border-pink-100 text-zinc-500">
-              <th className="pb-3 font-semibold px-4 pt-4">Pelanggan</th>
-              <th className="pb-3 font-semibold px-2 pt-4">Produk</th>
-              <th className="pb-3 font-semibold px-2 pt-4">Rating</th>
-              <th className="pb-3 font-semibold px-2 pt-4 min-w-[200px]">Komentar</th>
-              <th className="pb-3 font-semibold px-2 pt-4">Tanggal</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="text-center py-8 text-zinc-400 font-medium">
-                  Belum ada ulasan masuk.
-                </td>
+        <div className="w-full pb-4 px-4 md:px-0">
+          <table className="block w-full md:table text-left text-sm md:whitespace-nowrap">
+            <thead className="hidden md:table-header-group">
+              <tr className="border-b border-pink-100 text-zinc-500">
+                <th className="pb-3 font-semibold px-4 pt-4">Pelanggan</th>
+                <th className="pb-3 font-semibold px-2 pt-4">Produk</th>
+                <th className="pb-3 font-semibold px-2 pt-4">Rating</th>
+                <th className="pb-3 font-semibold px-2 pt-4 min-w-[200px]">Komentar</th>
+                <th className="pb-3 font-semibold px-2 pt-4">Tanggal</th>
+                <th className="pb-3 font-semibold px-4 pt-4 text-right">Aksi</th>
               </tr>
-            ) : (
-              data.map((u) => (
-                <tr key={u.id} className="border-b border-pink-50 hover:bg-pink-50/30 transition-colors">
-                  <td className="py-4 px-4">
-                    <p className="font-bold text-zinc-900">{u.namaReviewer}</p>
-                  </td>
-                  <td className="py-4 px-2 text-zinc-600 font-medium">
-                    {u.namaProduk}
-                  </td>
-                  <td className="py-4 px-2">
-                    <div className="flex text-amber-400">
-                      {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={14} className={i < u.rating ? "fill-current" : "text-zinc-300"} />
-                      ))}
-                    </div>
-                  </td>
-                  <td className="py-4 px-2 text-zinc-700 whitespace-normal min-w-[200px]">
-                    {u.comment}
-                  </td>
-                  <td className="py-4 px-2 text-xs text-zinc-500">
-                    {new Date(u.dibuatPada).toLocaleDateString("id-ID")}
+            </thead>
+            <tbody className="block w-full md:table-row-group">
+              {data.length === 0 ? (
+                <tr className="block w-full md:table-row">
+                  <td colSpan={6} className="block md:table-cell text-center py-8 text-zinc-400 font-medium">
+                    Belum ada ulasan masuk.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                data.map((u) => (
+                  <tr key={u.id} className="block w-full mb-4 border border-pink-100 rounded-xl p-4 shadow-sm md:table-row md:border-b md:border-pink-50 md:rounded-none md:p-0 md:shadow-none hover:bg-pink-50/30 transition-colors md:mb-0 last:border-0">
+                    <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 md:px-4">
+                      <span className="md:hidden font-bold text-zinc-400">Pelanggan:</span>
+                      <p className="font-bold text-zinc-900">{u.namaReviewer}</p>
+                    </td>
+                    <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-right md:text-left">
+                      <span className="md:hidden font-bold text-zinc-400">Produk:</span>
+                      <span className="text-zinc-600 font-medium whitespace-normal md:whitespace-nowrap truncate md:overflow-visible w-48 md:w-auto text-right md:text-left">{u.namaProduk}</span>
+                    </td>
+                    <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2">
+                      <span className="md:hidden font-bold text-zinc-400">Rating:</span>
+                      <div className="flex text-amber-400">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} size={14} className={i < u.rating ? "fill-current" : "text-zinc-300"} />
+                        ))}
+                      </div>
+                    </td>
+                    <td className="flex flex-col md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-zinc-700 whitespace-normal min-w-[200px]">
+                      <span className="md:hidden font-bold text-zinc-400 mb-1">Komentar:</span>
+                      <p>{u.comment}</p>
+                      {u.adminReply && (
+                        <div className="mt-2 bg-pink-50 p-2 rounded text-xs text-pink-700 border border-pink-100">
+                          <strong>Balasan Admin:</strong> {u.adminReply}
+                        </div>
+                      )}
+                    </td>
+                    <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-xs text-zinc-500">
+                      <span className="md:hidden font-bold text-zinc-400">Tanggal:</span>
+                      <span>{new Date(u.dibuatPada).toLocaleDateString("id-ID")}</span>
+                    </td>
+                    <td className="flex justify-between items-center md:table-cell py-3 md:py-4 md:border-0 px-2 md:px-4 text-right">
+                      <span className="md:hidden font-bold text-zinc-400">Aksi:</span>
+                      <button
+                        onClick={() => {
+                          setSelectedReview(u);
+                          setReplyText(u.adminReply || "");
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-soft-pink-50 text-soft-pink-600 hover:bg-soft-pink-100 rounded-lg text-xs font-bold transition-colors border border-soft-pink-200"
+                      >
+                        <MessageSquareReply size={14} /> Balas
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+
+      {selectedReview && (
+        <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative animate-in zoom-in-95">
+            <button
+              onClick={() => setSelectedReview(null)}
+              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 transition"
+            >
+              <X size={20} />
+            </button>
+            <h3 className="font-bold text-lg text-zinc-900 mb-4">Balas Ulasan Pelanggan</h3>
+            <div className="mb-4 bg-zinc-50 p-3 rounded-xl border border-zinc-100">
+              <p className="text-xs text-zinc-500 mb-1">Komentar dari <span className="font-bold text-zinc-900">{selectedReview.namaReviewer}</span></p>
+              <p className="text-sm text-zinc-700">{selectedReview.comment}</p>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-zinc-700 mb-2">Pesan Balasan</label>
+                <textarea
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  placeholder="Tuliskan pesan terima kasih atau tanggapan Anda..."
+                  className="w-full h-32 p-3 border border-zinc-200 rounded-xl focus:border-soft-pink-500 focus:ring-1 focus:ring-soft-pink-500 outline-none text-sm resize-none"
+                />
+              </div>
+              <button
+                onClick={handleBalas}
+                disabled={submitting || !replyText.trim()}
+                className="w-full py-3 bg-soft-pink-600 hover:bg-soft-pink-700 text-white rounded-xl font-bold disabled:opacity-50 transition-colors flex justify-center items-center gap-2"
+              >
+                {submitting ? <Loader2 size={18} className="animate-spin" /> : "Kirim Balasan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

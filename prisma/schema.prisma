@@ -177,7 +177,7 @@ model Review {
   pesanan     Order     @relation(fields: [pesananId], references: [id], onDelete: Cascade)
   rating      Int
   comment     String
-  balasanAdmin String?
+  adminReply String?
   imageUrl    String?
   videoUrl    String?
   dibuatPada  DateTime  @default(now())

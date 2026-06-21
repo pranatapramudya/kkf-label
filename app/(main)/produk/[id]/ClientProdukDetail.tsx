@@ -418,7 +418,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
           </div>
 
           {/* 🔥 FIX: Ulasan Realtime 🔥 */}
-          <section className="mt-8 rounded-2xl border border-pink-100 bg-zinc-50/50 p-5 md:p-7 w-full overflow-hidden">
+          <section className="mt-8 rounded-2xl border border-pink-100 bg-zinc-50/50 p-4 md:p-8 w-full overflow-hidden">
             <h2 className="font-semibold text-zinc-900">Ulasan Pelanggan</h2>
             <div className="mt-4 space-y-4">
               {!produk.ulasan || produk.ulasan.length === 0 ? (
@@ -428,14 +428,21 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                   </p>
                 </div>
               ) : (
-                produk.ulasan.map((ulasan: any, idx: number) => (
+                produk.ulasan.map((ulasan: any, idx: number) => {
+                  const maskName = (name: string) => {
+                    if (!name) return "";
+                    return name.charAt(0) + "***" + name.slice(-1);
+                  };
+                  const namaAsli = ulasan.namaGuest || "Pelanggan Setia KKF";
+                  const namaMasked = maskName(namaAsli);
+                  return (
                   <div
                     key={idx}
                     className="border-b border-pink-50 pb-4 last:border-0 last:pb-0 animate-in fade-in"
                   >
                     <div className="flex justify-between items-start mb-1.5">
                       <span className="text-xs font-bold text-zinc-800 bg-white px-2 py-0.5 rounded-md border border-zinc-100 shadow-sm">
-                        {ulasan.namaGuest || "Pelanggan Setia KKF"}
+                        {namaMasked}
                       </span>
                       <span className="text-[10px] font-medium text-zinc-400">
                         {new Date(ulasan.dibuatPada).toLocaleDateString(
@@ -460,8 +467,19 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                     <p className="text-sm leading-relaxed text-zinc-600 break-words">
                       {ulasan.comment}
                     </p>
+
+                    {ulasan.adminReply && (
+                      <div className="mt-3 bg-zinc-100/80 p-3 rounded-lg border border-zinc-200">
+                        <p className="text-[10px] font-bold text-soft-pink-600 uppercase mb-1">
+                          Balasan KKF Label:
+                        </p>
+                        <p className="text-xs text-zinc-700 leading-relaxed">
+                          {ulasan.adminReply}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                ))
+                )})
               )}
             </div>
           </section>

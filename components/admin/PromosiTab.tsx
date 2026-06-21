@@ -60,7 +60,7 @@ export default function PromosiTab() {
   const bodyEmail = encodeURIComponent(`${isiPesan}\n\nKode Diskon: ${kodeDiskon}\n\n~ Admin KKF Label`);
 
   return (
-    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300 max-w-6xl">
+    <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300 w-full">
       <div className="grid md:grid-cols-3 gap-6">
         {/* KOLOM KIRI: FORM PROMO */}
         <div className="md:col-span-1 space-y-6">

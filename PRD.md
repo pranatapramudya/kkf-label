@@ -1,28 +1,14 @@
-# PRD (Product Requirements Document) - KKF Label v5.9
+# PRD: Final Scroll & Layout Unlocking (v20.0)
 
-## 1. Overview
-Finalisasi pengalaman pengguna (UX) untuk Dashboard Affiliate: Integrasi profil mandiri, navigasi mobile yang bersih, dan sistem deep-link produk.
+## 1. Objective
+Membuka kunci *vertical scrolling* pada halaman admin dan memperbaiki *layout breaking* (melebar ke kanan) pada bagian filter "Hari Ini - Minggu Ini - Bulanan - Juni".
 
-## 2. Fitur Utama (Sprint Goal)
+## 2. Scope of Work
+- **Unlocking Scroll:** Menghapus properti `h-screen` dan `overflow-hidden` pada container utama yang mencegah halaman di-scroll ke bawah.
+- **Filter Row Wrapping:** Memperbaiki layout filter agar bisa turun ke baris berikutnya (wrap) jika layar tidak cukup, mencegah *layout* melebar ke kanan.
+- **Main Container Reset:** Memastikan semua *root wrapper* memiliki `min-h-screen` (bukan `h-screen`) dan `overflow-y-auto`.
 
-### A. Affiliate Profile Management
-- **Self-Service:** Integrasi `<UserProfile />` dari Clerk di rute `/affiliate/profil` untuk update data akun (nama, email, foto, password).
-- **Security:** Hanya bisa diakses oleh role `affiliate`.
-
-### B. Mobile Navigation (Dashboard)
-- **UI Decoupling:** Menghapus Bottom Nav belanja di rute `(dashboard)`.
-- **Hamburger Menu:** Menambahkan Mobile Header dengan *hamburger menu* untuk navigasi internal dashboard (Dashboard, Profil, Riwayat, Logout).
-
-### C. WhatsApp Withdrawal System
-- **Integration:** Tombol "Tarik Saldo" pada Dashboard.
-- **Auto-Message:** Saat diklik, user diarahkan ke link `https://wa.me/62...` dengan pesan otomatis: "Halo Admin, saya ingin melakukan penarikan komisi. [Data Nama/Jumlah Saldo/Rekening]".
-
-### D. Product Deep-Link Generator
-- **Smart Link:** Tombol "Bagikan Produk" di halaman detail produk.
-- **Dynamic Logic:** Tombol ini otomatis mengambil `ref=ID_AFFILIATE` dan URL produk saat ini, lalu menyalinnya ke clipboard.
-
-## 3. STRICT PROTOCOL
-- Gunakan `process.env.NEXT_PUBLIC_BASE_URL` untuk link.
-- Gunakan komponen Clerk resmi (`<UserProfile />`).
-- Dashboard wajib responsif (mobile header harus rapi).
-- Zero dummy data: Tarik data real dari tabel `Affiliate` dan `Order`.
+## 3. Strict Guidelines
+- **Vertical Freedom:** Halaman admin wajib bisa di-scroll ke bawah jika konten melebihi tinggi layar.
+- **Horizontal Stability:** Tidak boleh ada *horizontal scroll* yang disebabkan oleh elemen yang "maksa" melebar (seperti area filter/tanggal).
+- **Layout Integrity:** Tidak merusak *fluidity* yang sudah dibangun di tahap sebelumnya.
