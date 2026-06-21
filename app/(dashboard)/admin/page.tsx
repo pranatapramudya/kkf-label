@@ -622,6 +622,39 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
     });
   };
 
+  const [sedangSyncMidtrans, setSedangSyncMidtrans] = useState(false);
+
+  const syncMidtrans = async () => {
+    if (!pesananDiedit) return;
+    setSedangSyncMidtrans(true);
+    try {
+      const res = await fetch(`/api/admin/pesanan/${pesananDiedit.id}/sync-midtrans`, {
+        method: "POST"
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.pesan || "Gagal sync dengan Midtrans");
+      
+      if (tampilkanNotifikasi) {
+        tampilkanNotifikasi(data.pesan, data.sukses ? "sukses" : "gagal");
+      } else {
+        alert(data.pesan);
+      }
+
+      if (data.statusPesanan && data.statusPesanan !== pesananDiedit.statusPesanan) {
+        setPesananDiedit(null);
+        fetchPesanan();
+      }
+    } catch (err: any) {
+      if (tampilkanNotifikasi) {
+        tampilkanNotifikasi(err.message, "gagal");
+      } else {
+        alert(err.message);
+      }
+    } finally {
+      setSedangSyncMidtrans(false);
+    }
+  };
+
   const simpanUpdatePesanan = async (e: React.FormEvent) => {
     e.preventDefault();
     setSedangUpdate(true);
@@ -827,6 +860,27 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                 <X size={18} />
               </button>
             </div>
+
+            {pesananDiedit.statusPesanan === "MENUNGGU_PEMBAYARAN" && (
+              <div className="mb-5 bg-amber-50 p-4 rounded-xl border border-amber-100 flex flex-col gap-3 animate-in fade-in zoom-in-95">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="text-amber-500 shrink-0 mt-0.5" size={16} />
+                  <p className="text-xs text-amber-800 leading-snug font-medium">
+                    Pembayaran belum terkonfirmasi otomatis (mungkin Delay Webhook). Verifikasi manual ke Midtrans untuk menghindari bukti transfer palsu.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={syncMidtrans}
+                  disabled={sedangSyncMidtrans}
+                  className="w-full bg-white border border-amber-200 text-amber-700 hover:bg-amber-100 font-bold py-2.5 rounded-lg text-xs flex items-center justify-center gap-2 transition disabled:opacity-50"
+                >
+                  {sedangSyncMidtrans ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                  Cek Status Pembayaran Midtrans
+                </button>
+              </div>
+            )}
+
             <form onSubmit={simpanUpdatePesanan} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-zinc-700 mb-1.5">
@@ -843,26 +897,21 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                   <option value="MENUNGGU_PEMBAYARAN">
                     Menunggu Pembayaran
                   </option>
-                  <option value="DIBAYAR">Sudah Dibayar</option>
                   <option value="DIPROSES">Sedang Diproses (Dikemas)</option>
                   <option value="DIKIRIM">Dikirim (Dalam Perjalanan)</option>
-                  <option value="SAMPAI">Paket Sampai</option>
                   <option value="SELESAI">Selesai (Diterima Pembeli)</option>
                   <option value="DIBATALKAN">Dibatalkan</option>
                 </select>
               </div>
               <div>
                 <label className="block text-xs font-bold text-zinc-700 mb-1.5">
-                  Kurir / Ekspedisi (Opsional)
+                  Kurir / Ekspedisi Pilihan Pembeli
                 </label>
                 <input
                   type="text"
-                  placeholder="Contoh: SPX, JNT, JNE"
-                  value={formEdit.ekspedisi}
-                  onChange={(e) =>
-                    setFormEdit({ ...formEdit, ekspedisi: e.target.value })
-                  }
-                  className="w-full border border-zinc-300 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm uppercase"
+                  readOnly={true}
+                  value={pesananDiedit?.ekspedisi || "Belum dipilih"}
+                  className="w-full border border-zinc-200 p-3 rounded-xl bg-zinc-100 cursor-not-allowed text-zinc-500 text-sm font-bold uppercase focus:outline-none"
                 />
               </div>
               <div>

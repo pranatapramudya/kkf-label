@@ -75,10 +75,19 @@ export default function HalamanAkunSaya() {
   const tarikDataPesanan = async (infoKontak: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/pesanan/user?kontak=${infoKontak}`);
-      if (res.ok) setDataPesanan(await res.json());
+      const kontakBersih = infoKontak.trim();
+      const res = await fetch(`/api/pesanan/user?kontak=${encodeURIComponent(kontakBersih)}`, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        console.log("[Pesanan Saya] Fetch berhasil:", data.length, "pesanan");
+        setDataPesanan(data);
+      } else {
+        console.error("[Pesanan Saya] Fetch gagal, status:", res.status);
+        setDataPesanan([]);
+      }
     } catch (e) {
-      console.error(e);
+      console.error("[Pesanan Saya] Network error:", e);
+      setDataPesanan([]);
     } finally {
       setLoading(false);
     }
@@ -183,16 +192,22 @@ export default function HalamanAkunSaya() {
     }
   };
 
-  const listBelumBayar = dataPesanan.filter(
-    (p) => p.statusPesanan === "MENUNGGU_PEMBAYARAN",
-  );
-  const listDikemas = dataPesanan.filter(
-    (p) => p.statusPesanan === "DIBAYAR" || p.statusPesanan === "DIPROSES",
-  );
-  const listDikirim = dataPesanan.filter(
-    (p) => p.statusPesanan === "DIKIRIM" || p.statusPesanan === "SAMPAI",
-  );
-  const listUlasan = dataPesanan.filter((p) => p.statusPesanan === "SELESAI");
+  const listBelumBayar = dataPesanan.filter((p) => {
+    const s = p.statusPesanan?.toUpperCase() || "";
+    return s.includes("MENUNGGU") || s.includes("PENDING");
+  });
+  const listDikemas = dataPesanan.filter((p) => {
+    const s = p.statusPesanan?.toUpperCase() || "";
+    return s.includes("PROSES") || s.includes("KEMAS");
+  });
+  const listDikirim = dataPesanan.filter((p) => {
+    const s = p.statusPesanan?.toUpperCase() || "";
+    return s.includes("KIRIM");
+  });
+  const listUlasan = dataPesanan.filter((p) => {
+    const s = p.statusPesanan?.toUpperCase() || "";
+    return s.includes("SELESAI");
+  });
 
   const pesananTampil =
     tabAktif === "belum_bayar"
@@ -359,7 +374,18 @@ export default function HalamanAkunSaya() {
               </p>
             </div>
           ) : (
-            pesananTampil.map((order) => (
+            pesananTampil.map((order) => {
+              let totalDiskon = 0;
+              order.item.forEach((itm: any) => {
+                // Tarik harga katalog asli, fallback ke harga beli jika null
+                const hargaAsli = itm.produk?.harga || itm.harga; 
+                const hargaBeli = itm.harga; // Ini harga yang udah dipotong diskon di DB
+                if (hargaAsli > hargaBeli) {
+                  totalDiskon += (hargaAsli - hargaBeli) * itm.jumlah;
+                }
+              });
+
+              return (
               <div
                 key={order.id}
                 className="bg-white rounded-2xl shadow-sm border border-pink-100 p-4 animate-in fade-in slide-in-from-bottom-2"
@@ -371,9 +397,9 @@ export default function HalamanAkunSaya() {
                   </span>
                   <span
                     className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-md tracking-wider ${
-                      order.statusPesanan === "SELESAI"
+                      order.statusPesanan?.toUpperCase() === "SELESAI"
                         ? "bg-emerald-100 text-emerald-700"
-                        : order.statusPesanan === "MENUNGGU_PEMBAYARAN"
+                        : order.statusPesanan?.toUpperCase() === "MENUNGGU_PEMBAYARAN" || order.statusPesanan?.toUpperCase() === "PENDING"
                           ? "bg-amber-100 text-amber-700"
                           : "bg-pink-100 text-pink-700"
                     }`}
@@ -402,21 +428,42 @@ export default function HalamanAkunSaya() {
                         <span className="text-[11px] font-bold text-zinc-600">
                           x{itm.jumlah}
                         </span>
-                        <span className="text-xs font-black text-pink-600">
-                          {formatRupiah(itm.harga)}
-                        </span>
+                        <div className="flex flex-col items-end">
+                          {/* Tampilkan harga coret JIKA harga asli lebih besar dari harga beli */}
+                          {(itm.produk?.harga || itm.harga) > itm.harga && (
+                            <span className="text-[10px] text-gray-400 line-through">
+                              {formatRupiah(itm.produk?.harga || itm.harga)}
+                            </span>
+                          )}
+                          {/* WAJIB nampilin item.harga sebagai harga bayar! */}
+                          <span className="text-xs font-black text-pink-600">
+                            {formatRupiah(itm.harga)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
                 ))}
 
-                <div className="flex justify-between items-center pt-3 border-t border-dashed border-zinc-200 mt-3">
-                  <span className="text-xs text-zinc-500 font-medium">
-                    Total Belanja:
-                  </span>
-                  <span className="text-sm font-black text-zinc-900">
-                    {formatRupiah(order.total)}
-                  </span>
+                <div className="pt-3 border-t border-dashed border-zinc-200 mt-3 space-y-1.5">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[11px] text-zinc-500 font-medium">Ongkos Kirim:</span>
+                    <span className="text-[11px] font-bold text-zinc-700">{formatRupiah(order.ongkir || 0)}</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-[11px] text-zinc-500 font-medium">Total Diskon:</span>
+                    <span className={`text-[11px] ${totalDiskon > 0 ? "text-red-500 font-medium" : "text-zinc-700 font-bold"}`}>
+                      {totalDiskon > 0 ? `- ${formatRupiah(totalDiskon)}` : "-"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pt-1.5 mt-1.5 border-t border-zinc-100">
+                    <span className="text-xs text-zinc-500 font-bold">
+                      Total Belanja:
+                    </span>
+                    <span className="text-sm font-black text-zinc-900">
+                      {formatRupiah(order.total)}
+                    </span>
+                  </div>
                 </div>
 
                 {/* 🔥 PERUBAHAN TOMBOL AKSI: Ada tombol Lacak di mode Dikirim 🔥 */}
@@ -458,7 +505,8 @@ export default function HalamanAkunSaya() {
                   )}
                 </div>
               </div>
-            ))
+            );
+            })
           )}
         </div>
         </div>

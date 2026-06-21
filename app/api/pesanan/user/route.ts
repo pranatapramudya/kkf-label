@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 const prisma = new PrismaClient();
 
 // FUNGSI NARIK DATA PESANAN PEMBELI + FOTO REALTIME
@@ -15,22 +18,30 @@ export async function GET(req: Request) {
     );
 
   try {
+    const kontakLower = kontak.trim().toLowerCase();
+
     const pesanan = await prisma.order.findMany({
       where: {
-        OR: [{ emailPenerima: kontak }, { teleponPenerima: kontak }],
+        OR: [
+          { emailPenerima: { equals: kontakLower, mode: "insensitive" } },
+          { teleponPenerima: kontak.trim() },
+        ],
       },
-      // 🔥 FIX: Ambil data item pesanan SEKALIGUS narik foto dari tabel Produk
       include: {
         item: {
           include: {
-            produk: { select: { fotoUtama: true } },
+            produk: { select: { fotoUtama: true, harga: true, hargaCoret: true, diskonPersen: true } },
           },
         },
       },
       orderBy: { dibuatPada: "desc" },
     });
+
+    console.log(`[API Pesanan User] Kontak: "${kontak}" | Hasil: ${pesanan.length} pesanan ditemukan`);
+
     return NextResponse.json(pesanan);
   } catch (error) {
+    console.error("[API Pesanan User] ERROR:", error);
     return NextResponse.json(
       { error: "Gagal menarik data pesanan" },
       { status: 500 },

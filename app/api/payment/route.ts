@@ -41,11 +41,15 @@ export async function POST(permintaan: Request) {
         // Cek stok produk utama
         const produkDb = await tx.product.findUnique({
           where: { id: idProduk },
-          select: { stokTotal: true, nama: true }
+          select: { stokTotal: true, nama: true, harga: true, diskonPersen: true }
         });
         if (!produkDb || produkDb.stokTotal < itm.jumlah) {
           throw new Error(`Stok produk ${produkDb?.nama || itm.nama} tidak mencukupi (Tersedia: ${produkDb?.stokTotal || 0}).`);
         }
+
+        // Kalkulasi harga diskon yang valid dari DB
+        const diskonPersen = produkDb.diskonPersen || 0;
+        itm.hargaValid = Math.round(produkDb.harga - (produkDb.harga * (diskonPersen / 100)));
 
         // Cek stok varian jika ada
         if (idVarian && idVarian !== idProduk) {
@@ -82,9 +86,9 @@ export async function POST(permintaan: Request) {
               namaProduk: itm.nama,
               ukuran: itm.ukuran,
               warna: itm.warna,
-              harga: itm.hargaCoret || itm.harga,
+              harga: itm.hargaValid || itm.harga,
               jumlah: itm.jumlah,
-              total: itm.harga * itm.jumlah,
+              total: (itm.hargaValid || itm.harga) * itm.jumlah,
               varianId: (itm.idVarian && itm.idVarian !== (itm.idProduk || itm.id)) ? itm.idVarian : null,
             })),
           },
