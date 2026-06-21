@@ -1,46 +1,28 @@
-PRD (Product Requirements Document) - KKF Label v4.1
-1. Deskripsi Proyek
-KKF Label adalah aplikasi e-commerce premium terintegrasi yang melayani penjualan produk, manajemen pesanan admin, otomatisasi logistik, dan payment gateway.
+# PRD (Product Requirements Document) - KKF Label v5.9
 
-2. Tech Stack
-Frontend/Backend: Next.js (App Router), TypeScript, TailwindCSS.
+## 1. Overview
+Finalisasi pengalaman pengguna (UX) untuk Dashboard Affiliate: Integrasi profil mandiri, navigasi mobile yang bersih, dan sistem deep-link produk.
 
-Database & ORM: PostgreSQL, Prisma.
+## 2. Fitur Utama (Sprint Goal)
 
-3. Fitur yang SUDAH Selesai
-Sistem Autentikasi & Pelanggan: Katalog, checkout, lacak resi, Floating CS WA.
+### A. Affiliate Profile Management
+- **Self-Service:** Integrasi `<UserProfile />` dari Clerk di rute `/affiliate/profil` untuk update data akun (nama, email, foto, password).
+- **Security:** Hanya bisa diakses oleh role `affiliate`.
 
-Manajemen & Analitik: Dashboard admin, cetak resi thermal, kalkulator profit.
+### B. Mobile Navigation (Dashboard)
+- **UI Decoupling:** Menghapus Bottom Nav belanja di rute `(dashboard)`.
+- **Hamburger Menu:** Menambahkan Mobile Header dengan *hamburger menu* untuk navigasi internal dashboard (Dashboard, Profil, Riwayat, Logout).
 
-Integrasi Logistik & Pembayaran: Biteship (Webhook) & Midtrans.
+### C. WhatsApp Withdrawal System
+- **Integration:** Tombol "Tarik Saldo" pada Dashboard.
+- **Auto-Message:** Saat diklik, user diarahkan ke link `https://wa.me/62...` dengan pesan otomatis: "Halo Admin, saya ingin melakukan penarikan komisi. [Data Nama/Jumlah Saldo/Rekening]".
 
-Stok Realtime: Prisma Transaction (decrement) varian dan stok utama.
+### D. Product Deep-Link Generator
+- **Smart Link:** Tombol "Bagikan Produk" di halaman detail produk.
+- **Dynamic Logic:** Tombol ini otomatis mengambil `ref=ID_AFFILIATE` dan URL produk saat ini, lalu menyalinnya ke clipboard.
 
-UI Promosi: Tampilan responsif (tabel di desktop, card di mobile).
-
-4. Tugas Saat Ini (To-Do List untuk AI Agent) - FINAL POLISH
-Tolong baca dan eksekusi 3 perbaikan (Bug Fix & UI Cleanup) di bawah ini langsung pada codebase:
-
-1. Hapus Logo Admin Redundan di Header
-
-Masalah: Di bagian header navigasi atas Admin, terdapat logo gambar KKF di sebelah kiri teks "KKF-LABEL-ADMIN". Ini berlebihan karena di sebelah kanan sudah ada avatar profil dari sistem Clerk.
-
-Solusi: Scan komponen header admin Anda (mungkin di dalam sistem SPA admin). Temukan dan hapus elemen <img> logo KKF yang berada di sisi kiri tersebut agar header terlihat lebih bersih dan minimalis.
-
-2. Fix Bug Tautan Broadcast Email (Tag Anchor & URL Encoding)
-
-File target: Komponen UI Promosi (Tabel dan Card pelanggan).
-
-Masalah: Tombol "Kirim via Email" tidak merespon saat diklik.
-
-Solusi: Jangan gunakan <button onClick="...">. Ubah tombol menjadi tag HTML <a> murni. Gunakan href dengan skema mailto: dan pastikan variabel teks menggunakan encodeURIComponent.
-
-Contoh: href={"mailto:" + emailPenerima + "?subject=" + encodeURIComponent(judulPromo) + "&body=" + encodeURIComponent(isiPesan)}
-
-3. Tambahkan Silent Auto-Refresh di Frontend (Polling 15 Detik)
-
-File target: Halaman utama pelanggan (katalog produk).
-
-Masalah: Perubahan stok yang terjadi di database harus diperbarui di layar pembeli tanpa refresh manual, namun me-refresh setiap 1 detik akan membuat server down dan limit Vercel habis.
-
-Solusi: Buat mekanisme Silent Background Polling (misal menggunakan useEffect dengan useRouter().refresh()) yang hanya berjalan setiap 15 detik (15000 ms). Pastikan proses ini berjalan diam-diam di background tanpa memunculkan indikator loading penuh yang mengganggu UX pembeli.
+## 3. STRICT PROTOCOL
+- Gunakan `process.env.NEXT_PUBLIC_BASE_URL` untuk link.
+- Gunakan komponen Clerk resmi (`<UserProfile />`).
+- Dashboard wajib responsif (mobile header harus rapi).
+- Zero dummy data: Tarik data real dari tabel `Affiliate` dan `Order`.

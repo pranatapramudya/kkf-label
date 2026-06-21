@@ -3,38 +3,37 @@
 import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 
-const ulasanDummy = [
-  {
-    id: 1,
-    nama: "Alya",
-    lokasi: "Bandung",
-    rating: 5,
-    teks: "Bahannya jatuh dan ukurannya pas. Warnanya juga lembut banget, persis gaya yang aku cari.",
-  },
-  {
-    id: 2,
-    nama: "Nadia",
-    lokasi: "Surabaya",
-    rating: 5,
-    teks: "Checkout mudah, paket cepat sampai, dan dress-nya bisa dipakai kerja maupun acara santai.",
-  },
-  {
-    id: 3,
-    nama: "Rara",
-    lokasi: "Jakarta",
-    rating: 4,
-    teks: "Suka detail minimalisnya. Katalog terasa clean dan produknya gampang dibandingkan.",
-  },
-];
+import { maskName } from "@/lib/masking";
 
 export function TestimonialSection() {
   const [index, setIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [ulasanReal, setUlasanReal] = useState<any[]>([]);
 
   useEffect(() => {
-    if (isHovered) return;
+    fetch("/api/ulasan")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.length > 0) setUlasanReal(data);
+      })
+      .catch((err) => console.error(err));
+  }, []);
+
+  // Kalau data asli belum ada, fallback pakai default (atau kosong)
+  const dataUlasan = ulasanReal.length > 0 ? ulasanReal : [
+    {
+      id: "dummy1",
+      nama: "Alya",
+      lokasi: "Bandung",
+      rating: 5,
+      teks: "Bahannya jatuh dan ukurannya pas. Warnanya juga lembut banget, persis gaya yang aku cari.",
+    }
+  ];
+
+  useEffect(() => {
+    if (isHovered || dataUlasan.length <= 1) return;
     const timer = setInterval(() => {
-      setIndex((prev) => (prev === ulasanDummy.length - 1 ? 0 : prev + 1));
+      setIndex((prev) => (prev === dataUlasan.length - 1 ? 0 : prev + 1));
     }, 4000);
 
     return () => clearInterval(timer);
@@ -62,7 +61,7 @@ export function TestimonialSection() {
           className="flex w-full transition-transform duration-700 ease-in-out"
           style={{ transform: `translateX(-${index * 100}%)` }}
         >
-          {ulasanDummy.map((u) => (
+          {dataUlasan.map((u) => (
             // FIX: Gunakan w-full flex-none agar setiap ulasan ukurannya mengunci pas 100% layar
             <div
               key={u.id}
@@ -89,7 +88,7 @@ export function TestimonialSection() {
 
               <div className="mt-5">
                 <p className="font-bold text-zinc-900 text-sm sm:text-base">
-                  {u.nama}
+                  {maskName(u.nama)}
                 </p>
                 <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
                   {u.lokasi}
@@ -100,7 +99,7 @@ export function TestimonialSection() {
         </div>
 
         <div className="absolute bottom-3 sm:bottom-4 left-0 right-0 flex justify-center gap-1.5">
-          {ulasanDummy.map((_, i) => (
+          {dataUlasan.map((_, i) => (
             <button
               key={i}
               onClick={() => setIndex(i)}

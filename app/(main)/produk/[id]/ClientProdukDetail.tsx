@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useKeranjang } from "@/context/CartContext";
 import { formatRupiah } from "@/lib/format";
+import ShareButton from "./ShareButton";
 
 export default function ClientProdukDetail({ produk }: { produk: any }) {
   const { tambahItem } = useKeranjang();
@@ -280,10 +281,16 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
             {produk.nama}
           </h1>
 
-          <div className="mt-3 flex items-center gap-2 text-sm text-zinc-600">
-            <Star size={16} className="fill-amber-400 text-amber-400" />
-            <span className="font-semibold text-zinc-900">4.9</span>
-            <span>({produk.ulasan?.length || 0} ulasan)</span>
+          {/* Share Button (Desktop) */}
+          <div className="mt-3 flex items-center gap-3">
+            <div className="flex items-center gap-2 text-sm text-zinc-600">
+              <Star size={16} className="fill-amber-400 text-amber-400" />
+              <span className="font-semibold text-zinc-900">4.9</span>
+              <span>({produk.ulasan?.length || 0} ulasan)</span>
+            </div>
+            <div className="ml-auto">
+              <ShareButton produkId={produk.id} />
+            </div>
           </div>
 
           <div className="mt-5 flex items-center gap-3 border-b border-pink-50 pb-5">
@@ -466,6 +473,8 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
           <MessageCircle size={22} />
           <span className="text-[9px] font-bold mt-1">Chat</span>
         </button>
+        {/* Share Button Mobile */}
+        <ShareButton produkId={produk.id} />
         <button
           onClick={() => {
             setTipeAksi("keranjang");

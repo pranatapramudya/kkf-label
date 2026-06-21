@@ -34,3 +34,32 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function GET() {
+  try {
+    const ulasan = await prisma.review.findMany({
+      orderBy: { dibuatPada: "desc" },
+      take: 20, // Tampilkan maksimal 20 ulasan terbaru
+      include: {
+        pengguna: { select: { nama: true } },
+      },
+    });
+
+    const data = ulasan.map((u) => ({
+      id: u.id,
+      nama: u.namaGuest || u.pengguna?.nama || "Anonim",
+      rating: u.rating,
+      teks: u.comment,
+      lokasi: "Indonesia", // Lokasi default sementara karena ga disimpen di Review
+    }));
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Gagal mengambil data ulasan" },
+      { status: 500 },
+    );
+  }
+}
+

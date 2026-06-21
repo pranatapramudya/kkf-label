@@ -41,11 +41,19 @@ import {
   ChevronDown,
   X,
   LogOut,
+  MessageSquare,
+  Mail,
+  Phone,
 } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
+import { maskName } from "@/lib/masking";
 import TabelProduk from "./produk/TabelProduk";
 import PromosiTab from "@/components/admin/PromosiTab";
 import { useClerk, UserButton } from "@clerk/nextjs";
+import ProfitabilityChart from "@/components/admin/ProfitabilityChart";
+import RfmTable from "@/components/admin/RfmTable";
+import AffiliateTable from "@/components/admin/AffiliateTable";
+import UlasanTable from "@/components/admin/UlasanTable";
 
 // ==========================================
 // 🔥 KOMPONEN DROPDOWN MEWAH
@@ -125,6 +133,7 @@ function FormTambahProduk({
   const [kategori, setKategori] = useState("");
   const [deskripsi, setDeskripsi] = useState("");
   const [hargaNormal, setHargaNormal] = useState("");
+  const [costPrice, setCostPrice] = useState("");
   const [diskon, setDiskon] = useState("");
   const [daftarVarian, setDaftarVarian] = useState([
     { ukuran: "", warna: "", stok: "" },
@@ -192,6 +201,7 @@ function FormTambahProduk({
           judul,
           kategori,
           hargaNormal: hargaMurni,
+          costPrice: parseFloat(costPrice.replace(/\./g, "").replace(/,/g, ".") || "0"),
           diskon: diskonMurni,
           deskripsi,
           daftarVarian: varianMurni,
@@ -237,7 +247,7 @@ function FormTambahProduk({
             placeholder="Contoh: Dress Vintage Soft Pink"
           />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           <div className="relative">
             <label className="block text-sm font-bold text-zinc-700 mb-1.5">
               Kategori
@@ -310,6 +320,24 @@ function FormTambahProduk({
                 required
                 value={hargaNormal}
                 onChange={(e) => setHargaNormal(formatRibuan(e.target.value))}
+                className="w-full border border-zinc-300 py-3 pl-11 pr-4 rounded-xl focus:outline-none focus:border-soft-pink-500 transition"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-bold text-zinc-700 mb-1.5">
+              HPP (Modal)
+            </label>
+            <div className="relative w-full">
+              <span className="absolute left-4 top-3.5 text-sm font-bold text-zinc-400">
+                Rp
+              </span>
+              <input
+                type="text"
+                inputMode="numeric"
+                required
+                value={costPrice}
+                onChange={(e) => setCostPrice(formatRibuan(e.target.value))}
                 className="w-full border border-zinc-300 py-3 pl-11 pr-4 rounded-xl focus:outline-none focus:border-soft-pink-500 transition"
               />
             </div>
@@ -691,7 +719,21 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                         {p.kodePesanan}
                       </td>
                       <td className="py-4 text-zinc-600 px-2">
-                        {p.namaPenerima}
+                        <div className="flex flex-col gap-1 w-48">
+                          <span className="font-bold text-zinc-900 truncate">
+                            {p.namaPenerima}
+                          </span>
+                          <div className="flex flex-col gap-0.5 text-[10px] text-zinc-500">
+                            <span className="flex items-center gap-1.5">
+                              <Mail size={10} className="text-soft-pink-500" />
+                              <span className="truncate">{p.emailPenerima}</span>
+                            </span>
+                            <span className="flex items-center gap-1.5">
+                              <Phone size={10} className="text-soft-pink-500" />
+                              {p.teleponPenerima}
+                            </span>
+                          </div>
+                        </div>
                       </td>
                       <td className="py-4 font-bold text-soft-pink-600 px-2">
                         {formatRupiah(p.total)}
@@ -1155,6 +1197,7 @@ export default function HalamanAdmin() {
     { id: "analitik", ikon: BarChart2, label: "Analitik" },
     { id: "produk", ikon: Package, label: "Produk" },
     { id: "pesanan", ikon: ShoppingCart, label: "Pesanan" },
+    { id: "ulasan", ikon: MessageSquare, label: "Ulasan" },
     { id: "promosi", ikon: Megaphone, label: "Promosi" },
   ];
 
@@ -1520,8 +1563,19 @@ export default function HalamanAdmin() {
                       </div>
                     </div>
                   </section>
+                  <ProfitabilityChart />
+                  <RfmTable />
+                  <AffiliateTable />
                 </>
               )}
+
+
+            </div>
+          )}
+
+          {tabAktif === "ulasan" && (
+            <div className="space-y-6 max-w-6xl animate-in fade-in zoom-in-95 duration-300">
+              <UlasanTable />
             </div>
           )}
 

@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import { cookies } from "next/headers";
 
 const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
+    // Baca Affiliate cookie
+    const cookieStore = await cookies();
+    const affiliateRef = cookieStore.get("affiliate_ref")?.value || null;
 
     // Bikin nomor invoice otomatis ala startup (Contoh: KKF-24068912)
     const tanggal = new Date();
@@ -16,6 +21,30 @@ export async function POST(req: Request) {
 
     // Simpan pesanan dan kurangi stok menggunakan Prisma Transaction
     const orderBaru = await prisma.$transaction(async (tx) => {
+      // 1. PRE-FLIGHT CHECK: Validasi stok semua item
+      for (const itm of body.items) {
+        // Cek stok produk utama
+        const produkDb = await tx.product.findUnique({
+          where: { id: itm.idProduk },
+          select: { stokTotal: true, nama: true }
+        });
+        if (!produkDb || produkDb.stokTotal < itm.jumlah) {
+          throw new Error(`Stok produk ${produkDb?.nama || itm.nama} tidak mencukupi (Tersedia: ${produkDb?.stokTotal || 0}).`);
+        }
+
+        // Cek stok varian jika ada
+        if (itm.idVarian && itm.idVarian !== itm.idProduk) {
+          const varianDb = await tx.productVariant.findUnique({
+            where: { id: itm.idVarian },
+            select: { stok: true, ukuran: true, warna: true }
+          });
+          if (!varianDb || varianDb.stok < itm.jumlah) {
+            throw new Error(`Stok varian ${varianDb?.ukuran} - ${varianDb?.warna} tidak mencukupi (Tersedia: ${varianDb?.stok || 0}).`);
+          }
+        }
+      }
+
+      // 2. Buat Order
       const order = await tx.order.create({
         data: {
           kodePesanan: kodeInvoice,
@@ -30,6 +59,8 @@ export async function POST(req: Request) {
           ongkir: body.ongkir,
           total: body.total,
           statusPesanan: "MENUNGGU_PEMBAYARAN",
+          source: affiliateRef ? "AFFILIATE" : "ORGANIC",
+          affiliateId: affiliateRef,
           item: {
             create: body.items.map((itm: any) => ({
               produkId: itm.idProduk,
@@ -45,7 +76,7 @@ export async function POST(req: Request) {
         },
       });
 
-      // Pemotongan Stok Otomatis
+      // 3. Pemotongan Stok Otomatis
       for (const itm of body.items) {
         // Kurangi stok total di tabel Produk
         await tx.product.update({
@@ -73,8 +104,8 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("🔥 Error Checkout:", error.message);
     return NextResponse.json(
-      { pesan: "Gagal memproses pesanan." },
-      { status: 500 },
+      { pesan: error.message || "Gagal memproses pesanan." },
+      { status: 400 },
     );
   }
 }

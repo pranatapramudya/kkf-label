@@ -33,6 +33,13 @@ enum StatusTransaksi {
   REFUND
 }
 
+enum OrderSource {
+  ADS
+  WA
+  AFFILIATE
+  ORGANIC
+}
+
 model User {
   id           String      @id @default(cuid())
   nama         String
@@ -46,6 +53,7 @@ model User {
   kodePos      String?
   pesanan      Order[]
   ulasan       Review[]
+  affiliate    Affiliate?
   dibuatPada   DateTime    @default(now())
   diubahPada   DateTime    @updatedAt
 }
@@ -66,6 +74,7 @@ model Product {
   slug           String           @unique
   deskripsi      String
   harga          Int
+  costPrice      Float            @default(0)
   hargaCoret     Int?
   diskonPersen   Int              @default(0)
   fotoUtama      String
@@ -113,6 +122,8 @@ model Order {
   ongkir             Int
   total              Int
   statusPesanan      StatusPesanan   @default(MENUNGGU_PEMBAYARAN)
+  source             OrderSource     @default(ORGANIC)
+  affiliateId        String?
   item               OrderItem[]
   transaksi          Transaction?
   ulasan             Review[]
@@ -176,3 +187,14 @@ model Review {
   @@unique([produkId, pesananId])
 }
 
+model Affiliate {
+  id          String   @id // Menggunakan ID Clerk (affiliateId)
+  namaLengkap String
+  whatsapp    String
+  namaBank    String?
+  noRekening  String?
+  userId      String?  @unique // Opsi relasi ke tabel User lokal jika ada
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  dibuatPada  DateTime @default(now())
+  diubahPada  DateTime @updatedAt
+}

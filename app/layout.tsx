@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Footer } from "@/components/Footer";
-import { Navbar } from "@/components/Navbar";
-import { FloatingCSButton } from "@/components/FloatingCSButton";
 import { PenyediaKeranjang } from "@/context/CartContext";
 import { ClerkProvider } from "@clerk/nextjs";
 
@@ -19,14 +16,10 @@ export default function RootLayout({
 }) {
   return (
     <ClerkProvider>
-      {/* 🔥 FIX: Tambahkan suppressHydrationWarning di html dan body! */}
       <html lang="id" suppressHydrationWarning>
         <body className="font-sans antialiased" suppressHydrationWarning>
           <PenyediaKeranjang>
-            <Navbar />
-            <main className="min-h-screen pt-20">{children}</main>
-            <Footer />
-            <FloatingCSButton />
+            {children}
           </PenyediaKeranjang>
         </body>
       </html>

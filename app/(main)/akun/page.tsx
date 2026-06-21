@@ -275,6 +275,25 @@ export default function HalamanAkunSaya() {
       </div>
 
       <div className="px-4 -mt-10 max-w-3xl mx-auto relative z-20">
+        {/* 🔥 SUNTIKAN UI GATEKEEPER AFFILIATE 🔥 */}
+        {dataPesanan.some(p => p.statusPesanan === "SELESAI" || p.statusPesanan === "SAMPAI") && (
+          <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-2xl shadow-lg border border-indigo-500 p-4 mb-5 flex justify-between items-center text-white relative overflow-hidden animate-in fade-in slide-in-from-top-2">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl transform translate-x-1/2 -translate-y-1/2"></div>
+            <div className="relative z-10 flex-1">
+              <h3 className="font-black text-sm mb-1 flex items-center gap-1.5"><Star size={14} className="fill-amber-400 text-amber-400" /> Untung Bersama KKF!</h3>
+              <p className="text-[10px] text-indigo-100 font-medium">Kamu terpilih menjadi mitra. Dapatkan komisi dengan membagikan link produk.</p>
+            </div>
+            <div className="relative z-10 shrink-0 ml-3">
+              <button 
+                onClick={() => router.push(`/affiliate/daftar?email=${encodeURIComponent(kontak)}`)}
+                className="bg-white text-indigo-600 hover:bg-indigo-50 px-4 py-2 rounded-xl text-xs font-bold transition shadow-sm whitespace-nowrap"
+              >
+                Daftar Affiliate
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Navigasi Status */}
         <div className="bg-white rounded-2xl shadow-md border border-pink-50 p-4 mb-5">
           <div className="flex items-center justify-between border-b border-pink-50 pb-3 mb-4">
