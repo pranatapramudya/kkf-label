@@ -725,20 +725,22 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                       </td>
                       <td className="flex justify-between items-start md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 text-zinc-600 px-2">
                         <span className="md:hidden font-bold text-zinc-400">Pelanggan:</span>
-                        <div className="flex flex-col gap-1 w-48 md:w-auto text-right md:text-left ml-auto md:ml-0">
+                        <div className="flex flex-col gap-1 min-w-0 flex-1 text-right md:text-left ml-auto md:ml-0 w-full md:w-auto">
                           <span className="font-bold text-zinc-900 truncate block">
                             {p.namaPenerima}
                           </span>
-                          <div className="flex flex-col gap-0.5 text-[10px] text-zinc-500 items-end md:items-start">
-                            <span className="flex items-center gap-1.5 justify-end md:justify-start min-w-fit">
-                              <span className="truncate max-w-[150px] sm:max-w-xs">{p.emailPenerima}</span>
+                          <div className="flex flex-col gap-0.5 text-[10px] text-zinc-500 items-end md:items-start min-w-0 w-full">
+                            <span className="flex items-center gap-1.5 justify-end md:justify-start min-w-0 w-full">
+                              <span className="block w-full max-w-[180px] sm:max-w-[250px] md:max-w-none truncate text-xs md:text-sm">
+                                {p.emailPenerima}
+                              </span>
                               <Mail size={10} className="text-soft-pink-500 md:hidden block shrink-0" />
                               <Mail size={10} className="text-soft-pink-500 hidden md:block shrink-0" />
                             </span>
                             <span className="flex items-center gap-1.5 justify-end md:justify-start">
                               <span>{p.teleponPenerima}</span>
-                              <Phone size={10} className="text-soft-pink-500 md:hidden block" />
-                              <Phone size={10} className="text-soft-pink-500 hidden md:block" />
+                              <Phone size={10} className="text-soft-pink-500 md:hidden block shrink-0" />
+                              <Phone size={10} className="text-soft-pink-500 hidden md:block shrink-0" />
                             </span>
                           </div>
                         </div>
@@ -1059,8 +1061,14 @@ export default function HalamanAdmin() {
   });
   const pendingCount = pendingData?.count || 0;
 
+  const { data: unreadData } = useSWR("/api/admin/ulasan/unread", fetcher, {
+    refreshInterval: 10000,
+  });
+  const unrepliedCount = unreadData?.count || 0;
+
   const [tabAktif, setTabAktif] = useState("analitik");
   const [analitikTabAktif, setAnalitikTabAktif] = useState("ringkasan");
+  const [isDropdownAnalitikOpen, setIsDropdownAnalitikOpen] = useState(false);
   const [terakhirDiperbarui, setTerakhirDiperbarui] = useState("");
   const [sedangRefresh, setSedangRefresh] = useState(false);
   const [modeTambah, setModeTambah] = useState(false);
@@ -1276,6 +1284,11 @@ export default function HalamanAdmin() {
                     {pendingCount}
                   </span>
                 )}
+                {menu.id === "ulasan" && unrepliedCount > 0 && (
+                  <span className="ml-auto bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full animate-pulse shadow-sm">
+                    {unrepliedCount}
+                  </span>
+                )}
               </button>
             ))}
           </nav>
@@ -1347,15 +1360,40 @@ export default function HalamanAdmin() {
             <div className="space-y-3 w-full animate-in fade-in zoom-in-95 duration-300">
               
               {/* TABS NAVIGASI ANALITIK */}
-              <select
-                value={analitikTabAktif}
-                onChange={(e) => setAnalitikTabAktif(e.target.value)}
-                className="w-full md:w-72 p-2.5 text-sm font-bold text-zinc-700 bg-white border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500 shadow-sm cursor-pointer outline-none"
-              >
-                <option value="ringkasan">Ringkasan Performa</option>
-                <option value="profitability">Profitability (Margin)</option>
-                <option value="rfm">Analisis Pelanggan (RFM)</option>
-              </select>
+              <div className="relative w-full md:w-72">
+                <button
+                  onClick={() => setIsDropdownAnalitikOpen(!isDropdownAnalitikOpen)}
+                  className="w-full bg-white border border-gray-200 text-gray-700 py-2.5 px-4 rounded-lg flex justify-between items-center text-sm font-bold shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                >
+                  <span>
+                    {analitikTabAktif === "ringkasan" ? "Ringkasan Performa" :
+                     analitikTabAktif === "profitability" ? "Profitability (Margin)" :
+                     "Analisis Pelanggan (RFM)"}
+                  </span>
+                  <ChevronDown className={`text-gray-400 transition-transform ${isDropdownAnalitikOpen ? "rotate-180" : ""}`} size={16} />
+                </button>
+
+                {isDropdownAnalitikOpen && (
+                  <ul className="absolute top-full left-0 mt-1 w-full md:w-72 bg-white border border-gray-100 rounded-lg shadow-xl z-50 overflow-hidden">
+                    {[
+                      { id: "ringkasan", label: "Ringkasan Performa" },
+                      { id: "profitability", label: "Profitability (Margin)" },
+                      { id: "rfm", label: "Analisis Pelanggan (RFM)" }
+                    ].map((item) => (
+                      <li
+                        key={item.id}
+                        onClick={() => {
+                          setAnalitikTabAktif(item.id);
+                          setIsDropdownAnalitikOpen(false);
+                        }}
+                        className={`px-4 py-3 cursor-pointer transition-colors text-sm font-bold ${analitikTabAktif === item.id ? "bg-pink-50 text-pink-600" : "text-gray-700 hover:bg-pink-50 hover:text-pink-600"}`}
+                      >
+                        {item.label}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
 
               {/* HEADER RINGKASAN */}
               {analitikTabAktif === "ringkasan" && (
@@ -1634,6 +1672,16 @@ export default function HalamanAdmin() {
                   className={`absolute transition-all duration-300 ease-in-out flex items-center justify-center ${isActive ? "-top-5 h-14 w-14 bg-soft-pink-600 text-white rounded-full shadow-lg border-4 border-pink-50" : "top-2 h-8 w-8 text-zinc-400 hover:text-soft-pink-500"}`}
                 >
                   <menu.ikon size={isActive ? 24 : 22} />
+                  {menu.id === "pesanan" && pendingCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-sm">
+                      {pendingCount > 99 ? "99+" : pendingCount}
+                    </span>
+                  )}
+                  {menu.id === "ulasan" && unrepliedCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full animate-pulse shadow-sm">
+                      {unrepliedCount > 99 ? "99+" : unrepliedCount}
+                    </span>
+                  )}
                 </div>
                 <span
                   className={`absolute transition-all duration-300 font-bold ${isActive ? "bottom-1 text-[10px] text-soft-pink-600" : "bottom-1.5 text-[9px] text-zinc-500"}`}

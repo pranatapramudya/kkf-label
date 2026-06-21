@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
+import crypto from "crypto";
 
 const prisma = new PrismaClient();
 
@@ -7,10 +8,17 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
-    const { order_id, transaction_status, fraud_status } = body;
+    const { order_id, status_code, gross_amount, signature_key, transaction_status, fraud_status } = body;
 
-    if (!order_id) {
+    if (!order_id || !signature_key || !status_code || !gross_amount) {
       return NextResponse.json({ message: "Invalid payload" }, { status: 400 });
+    }
+
+    const serverKey = process.env.MIDTRANS_SERVER_KEY || "";
+    const hash = crypto.createHash("sha512").update(order_id + status_code + gross_amount + serverKey).digest("hex");
+
+    if (hash !== signature_key) {
+      return NextResponse.json({ message: "Invalid Signature" }, { status: 403 });
     }
 
     const order = await prisma.order.findUnique({

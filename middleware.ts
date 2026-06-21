@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 // Kunci pintu khusus rute /admin dan /affiliate/*
 const isProtectedRoute = createRouteMatcher([
   "/admin(.*)",
+  "/api/admin(.*)",
   "/affiliate/dashboard(.*)",
   "/affiliate/profil(.*)",
 ]);
@@ -16,8 +17,11 @@ export default clerkMiddleware(async (auth, req) => {
     // 🔥 FIX: Wajib pakai 'await' karena di versi terbaru auth() adalah Promise
     const { userId } = await auth();
 
-    // Kalau KTP kosong, tendang paksa ke sign-in
+    // Kalau KTP kosong, tendang paksa ke sign-in atau return 401
     if (!userId) {
+      if (req.nextUrl.pathname.startsWith("/api/")) {
+        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      }
       return NextResponse.redirect(new URL("/sign-in", req.url));
     }
   }
