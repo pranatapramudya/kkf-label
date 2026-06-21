@@ -13,7 +13,7 @@ export default async function HalamanUtama() {
     where: { aktif: true },
     include: { kategori: true },
     orderBy: { dibuatPada: "desc" },
-    take: 4,
+    take: 2,
   });
 
   const semuaProdukLengkap = await prisma.product.findMany({
