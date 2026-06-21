@@ -1,13 +1,13 @@
-# PRD: Checkout Item Price Integrity Fix (v51.0)
+# PRD: Prisma Schema Alignment & Build Fix (v52.0)
 
 ## 1. Objective
-Memperbaiki *bug* pada API *Checkout* di mana sistem menyimpan harga normal produk ke dalam tabel `OrderItem`, alih-alih menyimpan harga aktual setelah dipotong `diskonPersen`.
+Menyelesaikan *type error* pada saat *build* di Vercel akibat ketidaksesuaian antara nama kolom pada kode `route.ts` dengan skema `prisma.schema`.
 
 ## 2. Scope of Work
-- **Checkout API Logic:** Mengubah fungsi POST saat *checkout* (atau *server action* yang menyimpan pesanan ke Prisma).
-- **Price Calculation Map:** Saat melakukan *mapping* keranjang belanja ke objek `orderItems`, pastikan variabel `harga` yang disimpan adalah harga setelah diskon.
-  - Rumus: `hargaBeli = produk.harga - (produk.harga * (produk.diskonPersen / 100))`
-- **Database Insertion:** Memastikan payload `prisma.pesanan.create` menyimpan `hargaBeli` tersebut ke *field* `harga` di tabel *Order Item*.
+- **Schema Verification:** Melakukan sinkronisasi antara objek `data` di Prisma `update` dengan model `Pesanan` di `prisma/schema.prisma`.
+- **Typo Correction:** Memastikan tidak ada kolom imajiner (seperti `statusTransaksi` jika tidak didefinisikan di skema).
+- **Type Casting:** Memastikan penggunaan `as any` diminimalisir atau diganti dengan *Type Assertion* yang benar sesuai Enum/Tipe data di Prisma.
 
 ## 3. Strict Guidelines
-- **Data Consistency:** Kalkulasi harga satuan di `OrderItem` HARUS presisi dan sinkron dengan kalkulasi `Total Belanja` pesanan.
+- **No Imaginary Columns:** Dilarang menambah field di kode `prisma.update` jika belum terdaftar di `schema.prisma`.
+- **Force Re-sync:** Jika kolom memang diperlukan (seperti untuk status Midtrans), wajib menambahkan field tersebut ke `schema.prisma` terlebih dahulu.

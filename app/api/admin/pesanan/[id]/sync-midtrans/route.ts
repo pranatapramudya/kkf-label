@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, StatusPesanan } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
@@ -48,19 +48,16 @@ export async function POST(
 
     const transactionStatus = data.transaction_status;
     
-    let newStatusPesanan = undefined;
-    let newStatusTransaksi = undefined;
+    let newStatusPesanan: StatusPesanan | undefined = undefined;
 
     if (transactionStatus === "settlement" || transactionStatus === "capture") {
-      newStatusPesanan = "DIBAYAR";
-      newStatusTransaksi = "SETTLEMENT";
+      newStatusPesanan = StatusPesanan.DIBAYAR;
     } else if (
       transactionStatus === "deny" ||
       transactionStatus === "cancel" ||
       transactionStatus === "expire"
     ) {
-      newStatusPesanan = "DIBATALKAN";
-      newStatusTransaksi = transactionStatus.toUpperCase();
+      newStatusPesanan = StatusPesanan.DIBATALKAN;
     } else if (transactionStatus === "pending") {
       // Nothing changes but valid check
       return NextResponse.json({
@@ -77,12 +74,11 @@ export async function POST(
     }
 
     // 3. Update Database
-    if (newStatusPesanan && newStatusTransaksi) {
+    if (newStatusPesanan) {
       await prisma.order.update({
         where: { id: id },
         data: {
-          statusPesanan: newStatusPesanan as any,
-          statusTransaksi: newStatusTransaksi as any,
+          statusPesanan: newStatusPesanan,
         },
       });
 
