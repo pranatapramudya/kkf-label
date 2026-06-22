@@ -1,12 +1,14 @@
-# PRD: KKF Label Phase 2.11 - Admin Logout Redirect Destination Fix
+# PRD: KKF Label Phase 2.12 - Middleware Redirect & Meta Theme Color
 
 ## 1. Objective (Tujuan)
-Memperbaiki perilaku pengalihan rute (*redirect*) pasca-keluar (*logout*) pada panel admin agar pengguna diarahkan kembali ke halaman masuk admin (`/admin`), bukan ke halaman beranda utama pelanggan (`/`).
+Memperbaiki aturan pengalihan (*redirect*) pada Middleware agar pengguna yang tidak terautentikasi di rute admin tetap diarahkan ke halaman masuk admin, serta memaksa OS Android khusus (seperti itelOS) untuk menghormati warna *status bar*.
 
 ## 2. Analisis Masalah & Solusi
-- **Masalah:** Komponen *Sign Out* pada Clerk secara bawaan diatur untuk mengarahkan pengguna ke akar domain (`/`) setelah sesi diakhiri. Hal ini membuat aplikasi Android admin memuat halaman utama toko e-commerce.
-- **Solusi:** Memodifikasi komponen pembungkus autentikasi atau tombol *Sign Out* khusus di area admin dengan menambahkan properti `afterSignOutUrl` (atau `redirectUrl`) yang dipaksa menuju rute `/admin`.
+- **Masalah Middleware:** Fitur *logout* tertahan oleh `middleware.ts` yang secara paksa mengalihkan pengguna tamu dari rute `/admin` ke beranda utama `/`.
+  - **Solusi:** Menambahkan logika kondisional pada `clerkMiddleware` untuk memisahkan pengalihan rute publik dan rute admin (`/admin` dikembalikan ke `/admin`).
+- **Masalah Status Bar Custom ROM:** Beberapa perangkat mengabaikan `safe-area` CSS.
+  - **Solusi:** Menambahkan atribut `themeColor` pada ekspor *viewport* utama di Next.js untuk memaksa peramban internal (WebView) menyelaraskan warna perangkat keras dengan aplikasi.
 
 ## 3. Spesifikasi Implementasi
-1. Cari komponen *Sign Out* atau `UserButton` Clerk yang digunakan pada dasbor admin.
-2. Tambahkan atau ubah parameter rute setelah keluar menjadi `afterSignOutUrl="/admin"`.
+1. Edit berkas `middleware.ts`: Tentukan `unauthenticatedUrl` secara spesifik menunjuk ke `/admin` jika permintaan berasal dari rute admin.
+2. Edit berkas `layout.tsx`: Tambahkan `themeColor: '#0f172a'` (atau warna gelap hex Tailwind yang sesuai) ke dalam objek `export const viewport`.

@@ -14,15 +14,25 @@ export default clerkMiddleware(async (auth, req) => {
   let res = NextResponse.next();
 
   if (isProtectedRoute(req)) {
-    // 🔥 FIX: Wajib pakai 'await' karena di versi terbaru auth() adalah Promise
-    const { userId } = await auth();
+    const authObj = await auth();
+    const { userId } = authObj;
 
     // Kalau KTP kosong, tendang paksa ke sign-in atau return 401
     if (!userId) {
       if (req.nextUrl.pathname.startsWith("/api/")) {
         return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
       }
-      return NextResponse.redirect(new URL("/sign-in", req.url));
+      
+      if (req.nextUrl.pathname.startsWith("/admin")) {
+        // Biarkan lolos jika sedang berada tepat di /admin (Halaman Login Admin)
+        if (req.nextUrl.pathname === "/admin") {
+          return NextResponse.next();
+        }
+        // Jika mencoba mengakses sub-rute admin (misal /admin/pesanan), tendang balik ke /admin
+        return NextResponse.redirect(new URL("/admin", req.url));
+      } else {
+        return NextResponse.redirect(new URL("/sign-in", req.url));
+      }
     }
   }
 
