@@ -1290,7 +1290,7 @@ export default function HalamanAdmin() {
   ) as string[];
 
   return (
-    <div className="w-full min-h-screen bg-white overflow-x-hidden">
+    <div className="pt-10 md:pt-0 w-full min-h-screen bg-white overflow-x-hidden">
       <div className="flex flex-col md:flex-row w-full h-auto min-h-screen relative">
         
         {/* SIDEBAR ADMIN */}
