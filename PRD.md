@@ -1,14 +1,17 @@
-# PRD: KKF Label Phase 2.3 - Global Navigation & High-Traffic Scaling (ISR)
+# PRD: KKF Label Phase 2.4 - Audit Stabilitas & Skalabilitas Panel Admin
 
 ## 1. Objective (Tujuan)
-Menghilangkan *delay* saat navigasi kembali ke Beranda melalui logo Navbar, sekaligus membentengi halaman utama (*Home/Catalog*) agar mampu menahan lonjakan trafik masif (ratusan hingga ribuan pengguna bersamaan) tanpa membebani koneksi *database* Prisma.
+Mencegah terjadinya *crash*, *memory leak*, atau *timeout* pada halaman dasbor admin ketika volume pesanan dan data pengguna (Mitra/Customer) mencapai ribuan baris. Panel admin harus tetap responsif dan menyajikan data secara *real-time* tanpa membebani *database*.
 
 ## 2. Analisis Masalah & Solusi
-- **Masalah Navigasi Global:** Klik pada logo perusahaan di komponen Header/Navbar masih memicu *hard reload* atau pemuatan ulang seluruh aset (*Full Page Load*).
-  - **Solusi:** Migrasi elemen pembungkus logo menjadi komponen `<Link>` dari Next.js untuk mempertahankan status SPA (*Single Page Application*).
-- **Masalah Skalabilitas Database (Bottleneck):** Jika 1.000 pengguna mengakses halaman depan secara bersamaan, *server* akan menjalankan 1.000 *query* ke *database*.
-  - **Solusi:** Mengimplementasikan fitur **ISR (Incremental Static Regeneration)** pada halaman utama. Next.js akan menyimpan (*cache*) hasil *query* halaman beranda selama durasi tertentu (misal: 60 detik). Ribuan pengunjung dalam rentang waktu tersebut hanya akan membebani *database* sebanyak 1 kali pemanggilan, memastikan pemuatan halaman sangat ringan dan super cepat.
+- **Masalah Overload Data (Fatal):** Menarik seluruh data pesanan dengan `prisma.pesanan.findMany()` tanpa batas akan menyebabkan *Out of Memory* pada *serverless function* dan membuat peramban (*browser*) admin *freeze*.
+  - **Solusi:** Wajib mengimplementasikan *Server-Side Pagination* (Paginasi di sisi peladen). Server hanya boleh mengirimkan maksimal 20-50 data pesanan per halaman.
+- **Masalah Pencarian Lambat (Bottleneck):** Ketika admin mencari nama pelanggan atau nomor resi di antara puluhan ribu data, *database* akan melakukan *Full Table Scan* yang sangat berat.
+  - **Solusi:** Menambahkan *Database Indexing* (`@@index`) pada kolom yang sering dicari di `schema.prisma`.
+- **Masalah Data Basi (Caching Conflict):** Konfigurasi *layout* Next.js secara *default* mungkin menahan *cache*, membuat pesanan baru tidak langsung muncul.
+  - **Solusi:** Memaksa rute admin menjadi sepenuhnya dinamis (*force-dynamic*).
 
 ## 3. Spesifikasi Implementasi
-1. **Komponen Header/Navbar:** Modifikasi elemen `<a href="/">` atau struktur serupa yang membungkus gambar logo menjadi `<Link href="/">`.
-2. **Route Halaman Utama (`app/(main)/page.tsx`):** Tambahkan direktif *Route Segment Config* berupa `export const revalidate = 60;` untuk mengaktifkan ISR. Halaman akan di- *cache* dan diperbarui otomatis di latar belakang setiap 60 detik tanpa mengganggu pengalaman pengguna.
+1. **Server-Side Pagination:** Modifikasi *query* Prisma di halaman daftar pesanan (`/admin/pesanan`) dengan parameter `take` (limit) dan `skip` (offset).
+2. **Prisma Indexing:** Tambahkan `@@index([statusPesanan])` dan `@@index([createdAt])` pada model `Pesanan` (atau `Order`) di `schema.prisma`.
+3. **Dynamic Route:** Tambahkan `export const dynamic = 'force-dynamic';` pada setiap halaman utama admin agar data selalu aktual 100%.

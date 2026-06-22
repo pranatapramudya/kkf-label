@@ -518,7 +518,8 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
   const [sedangUpdate, setSedangUpdate] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 20;
 
   const tahunSekarang = new Date().getFullYear();
   const [bulanExport, setBulanExport] = useState("semua");
@@ -547,11 +548,16 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
     label: (tahunSekarang - i).toString(),
   }));
 
-  const fetchPesanan = async () => {
+  const fetchPesanan = async (page = 1) => {
     setSedangMemuat(true);
     try {
-      const res = await fetch("/api/admin/pesanan");
-      if (res.ok) setDaftarPesanan(await res.json());
+      const res = await fetch(`/api/admin/pesanan?page=${page}`);
+      if (res.ok) {
+        const json = await res.json();
+        setDaftarPesanan(json.data);
+        setTotalPages(json.totalPages || 1);
+        setCurrentPage(json.page || 1);
+      }
     } catch (e) {
       console.error("Gagal memuat pesanan", e);
     } finally {
@@ -560,14 +566,11 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
   };
 
   useEffect(() => {
-    fetchPesanan();
+    fetchPesanan(1);
   }, []);
 
-  const totalPages = Math.ceil(daftarPesanan.length / itemsPerPage);
-  const dataTampil = daftarPesanan.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage,
-  );
+  // Data tampil diambil langsung dari daftarPesanan karena API sudah mem-paginate
+  const dataTampil = daftarPesanan;
 
   const exportCSV = () => {
     let dataDifilter = daftarPesanan.filter((p) => {
@@ -642,7 +645,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
 
       if (data.statusPesanan && data.statusPesanan !== pesananDiedit.statusPesanan) {
         setPesananDiedit(null);
-        fetchPesanan();
+        fetchPesanan(currentPage);
       }
     } catch (err: any) {
       if (tampilkanNotifikasi) {
@@ -675,7 +678,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
       else alert("Status pesanan berhasil diupdate!");
 
       setPesananDiedit(null);
-      fetchPesanan();
+      fetchPesanan(currentPage);
     } catch (err: any) {
       if (tampilkanNotifikasi)
         tampilkanNotifikasi("Gagal: " + err.message, "gagal");
@@ -819,16 +822,14 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                 </span>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    onClick={() => fetchPesanan(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
                     className="px-4 py-2 text-sm border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
                   >
                     Sebelumnya
                   </button>
                   <button
-                    onClick={() =>
-                      setCurrentPage((p) => Math.min(totalPages, p + 1))
-                    }
+                    onClick={() => fetchPesanan(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
                     className="px-4 py-2 text-sm border rounded-md bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
                   >

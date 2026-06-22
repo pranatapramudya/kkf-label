@@ -129,6 +129,9 @@ model Order {
   ulasan             Review[]
   dibuatPada         DateTime        @default(now())
   diubahPada         DateTime        @updatedAt
+
+  @@index([statusPesanan])
+  @@index([dibuatPada])
 }
 
 model OrderItem {

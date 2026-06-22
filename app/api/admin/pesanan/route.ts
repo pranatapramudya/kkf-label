@@ -6,13 +6,29 @@ export const dynamic = "force-dynamic";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const pesanan = await prisma.order.findMany({
-      orderBy: { dibuatPada: "desc" },
-      include: { item: true },
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const take = 20;
+    const skip = (page - 1) * take;
+
+    const [pesanan, total] = await Promise.all([
+      prisma.order.findMany({
+        orderBy: { dibuatPada: "desc" },
+        include: { item: true },
+        take,
+        skip,
+      }),
+      prisma.order.count(),
+    ]);
+
+    return NextResponse.json({
+      data: pesanan,
+      total,
+      page,
+      totalPages: Math.ceil(total / take)
     });
-    return NextResponse.json(pesanan);
   } catch (error) {
     return NextResponse.json(
       { pesan: "Gagal menarik data pesanan" },
