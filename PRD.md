@@ -1,14 +1,12 @@
-# PRD: KKF Label Phase 2.12 - Middleware Redirect & Meta Theme Color
+# PRD: KKF Label Phase 2.13 - Middleware Clerk V5 Restoration
 
 ## 1. Objective (Tujuan)
-Memperbaiki aturan pengalihan (*redirect*) pada Middleware agar pengguna yang tidak terautentikasi di rute admin tetap diarahkan ke halaman masuk admin, serta memaksa OS Android khusus (seperti itelOS) untuk menghormati warna *status bar*.
+Mengembalikan `clerkMiddleware` sebagai mesin utama autentikasi untuk mencegah pengalihan liar ke beranda pelanggan (`/`), dan menyelesaikan kesalahan TypeScript (*Type Error*) tanpa mengorbankan keamanan rute.
 
 ## 2. Analisis Masalah & Solusi
-- **Masalah Middleware:** Fitur *logout* tertahan oleh `middleware.ts` yang secara paksa mengalihkan pengguna tamu dari rute `/admin` ke beranda utama `/`.
-  - **Solusi:** Menambahkan logika kondisional pada `clerkMiddleware` untuk memisahkan pengalihan rute publik dan rute admin (`/admin` dikembalikan ke `/admin`).
-- **Masalah Status Bar Custom ROM:** Beberapa perangkat mengabaikan `safe-area` CSS.
-  - **Solusi:** Menambahkan atribut `themeColor` pada ekspor *viewport* utama di Next.js untuk memaksa peramban internal (WebView) menyelaraskan warna perangkat keras dengan aplikasi.
+- **Masalah:** Agen AI sebelumnya menghapus `clerkMiddleware`, yang mengakibatkan kegagalan pembacaan sesi di sisi peladen. Komponen klien Clerk tidak dapat memvalidasi token dan memicu pengalihan mundur ke *frontend* (`/`).
+- **Solusi:** Memulihkan struktur `clerkMiddleware` resmi dan mengekstrak `userId` secara langsung dari objek sinkron `auth()` untuk menghindari galat pemanggilan metode `.protect()` pada Clerk V5.
 
 ## 3. Spesifikasi Implementasi
-1. Edit berkas `middleware.ts`: Tentukan `unauthenticatedUrl` secara spesifik menunjuk ke `/admin` jika permintaan berasal dari rute admin.
-2. Edit berkas `layout.tsx`: Tambahkan `themeColor: '#0f172a'` (atau warna gelap hex Tailwind yang sesuai) ke dalam objek `export const viewport`.
+1. Timpa seluruh isi `middleware.ts` dengan konfigurasi `clerkMiddleware`.
+2. Gunakan pengecekan `if (isAdminRoute(req) && !userId)` dengan pengecualian pada rute dasar `/admin` agar halaman masuk (*sign-in*) tetap dapat diakses oleh pengguna yang belum terautentikasi.
