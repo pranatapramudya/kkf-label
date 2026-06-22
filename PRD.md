@@ -1,12 +1,12 @@
-# PRD: KKF Label Phase 2.6 - WebView Navigation Fix & Auto-Update Validation
+# PRD: KKF Label Phase 2.7 - Otomatisasi Penamaan Output APK (Gradle Configuration)
 
 ## 1. Objective (Tujuan)
-Memastikan aplikasi Android (Capacitor) menahan seluruh aktivitas navigasi tetap di dalam *WebView* internal (layar penuh) dan tidak melempar pengguna ke peramban eksternal (Google Chrome).
+Menghilangkan proses *rename* manual setiap kali melakukan *build* aplikasi Android. Berkas keluaran dari Android Studio harus secara otomatis bernama `Admin-KKF-LABEL.apk` bukan nama *default* bawaan sistem (`app-debug.apk`).
 
 ## 2. Analisis Masalah & Solusi
-- **Masalah:** Saat aplikasi diluncurkan atau pengguna melakukan klik/navigasi di Dasbor Admin, Capacitor mendeteksi perpindahan rute sebagai tautan eksternal yang tidak dikenal, sehingga mendelegasikan URL tersebut ke aplikasi peramban bawaan OS (Chrome).
-- **Solusi:** Menambahkan properti `allowNavigation` (Daftar Putih / *Whitelist*) pada berkas konfigurasi Capacitor. Ini akan menginstruksikan sistem Android bahwa seluruh URL yang berada di bawah domain Vercel tersebut adalah bagian integral dari aplikasi lokal.
+- **Masalah:** Gradle secara bawaan akan memberikan nama `app-[buildType].apk` (contoh: `app-debug.apk` atau `app-release.apk`) pada setiap hasil kompilasi.
+- **Solusi:** Memodifikasi konfigurasi `build.gradle` pada level modul aplikasi (`android/app/build.gradle`). Dengan mengintervensi objek `applicationVariants`, sistem akan memaksa penggantian nama berkas (`outputFileName`) tepat sebelum proses kompilasi selesai.
 
 ## 3. Spesifikasi Implementasi
-1. Modifikasi `capacitor.config.ts`: Tambahkan `allowNavigation: ['kkf-label.vercel.app']` ke dalam objek `server`.
-2. Eksekusi `npx cap sync android` untuk menyuntikkan daftar putih tersebut ke dalam berkas manifes *native* Android.
+1. Modifikasi berkas `android/app/build.gradle`.
+2. Tambahkan blok logika `applicationVariants.all` di dalam penutup blok `android { ... }` untuk menimpa parameter `outputFileName` menjadi `Admin-KKF-LABEL.apk`.
