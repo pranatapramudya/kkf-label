@@ -1,15 +1,15 @@
-# PRD: KKF Label Phase 2.8 - WebView Wildcard Whitelist & App Icon Generation
+# PRD: KKF Label Phase 2.9 - Auth Redirect Fix & Package ID Cache Busting
 
 ## 1. Objective (Tujuan)
-Mengunci total navigasi agar 100% *Full Screen* di dalam aplikasi (mencegah kebocoran ke Google Chrome) menggunakan metode *Wildcard*, serta memperbarui ikon aplikasi bawaan menjadi logo resmi KKF Label.
+Memastikan proses autentikasi (Login/Sign-in) tetap tertahan di dalam *WebView* tanpa memicu peramban eksternal, dan membersihkan memori singgahan (*cache*) ikon OS Android yang menampilkan logo aplikasi lama.
 
 ## 2. Analisis Masalah & Solusi
-- **Masalah Navigasi Bocor:** Aturan `allowNavigation` sebelumnya terlalu kaku. Jika Next.js melakukan pengalihan (*redirect*), Capacitor akan mendeteksinya sebagai tautan eksternal.
-  - **Solusi:** Menggunakan parameter *wildcard* (`*.vercel.app` dan `*kkf-label.vercel.app*`) agar semua variasi URL dikenali sebagai domain internal.
-- **Masalah Ikon Usang:** Berkas APK masih menggunakan gambar *placeholder* bawaan Capacitor.
-  - **Solusi:** Memanfaatkan modul `@capacitor/assets` untuk membuat ikon *native* secara otomatis (`hdpi`, `xhdpi`, dll) dari logo KKF Label yang ada di folder `public`.
+- **Masalah Auth Redirect:** Sistem proteksi rute (Middleware Auth) mengalihkan pengguna ke halaman login yang memicu intervensi keamanan Capacitor, sehingga tautan dibuka di Chrome.
+  - **Solusi:** Menerapkan *wildcard* universal `['*']` dan domain spesifik otentikasi pada `allowNavigation` agar seluruh proses peralihan (*redirect*) diizinkan berjalan di dalam aplikasi.
+- **Masalah Ikon Usang (Cache Clash):** Pemindai keamanan Android menampilkan logo proyek lama karena aplikasi menggunakan `appId` yang sama dengan proyek sebelumnya.
+  - **Solusi:** Memperbarui `appId` menjadi identitas yang sepenuhnya unik (contoh: `com.kkflabel.adminapp`) untuk memaksa Android memperlakukan aplikasi ini sebagai entitas baru yang bersih.
 
 ## 3. Spesifikasi Implementasi
-1. Ubah array `allowNavigation` di `capacitor.config.ts` menjadi: `['kkf-label.vercel.app', '*.vercel.app', '*kkf-label.vercel.app*']`.
-2. Pasang pustaka `@capacitor/assets`, salin logo dari `public` ke folder `assets`, dan jalankan perintah *generate*.
-3. Sinkronisasikan ulang dengan `npx cap sync android`.
+1. Ubah `appId` di `capacitor.config.ts` menjadi `com.kkflabel.adminapp`.
+2. Ubah `allowNavigation` menjadi `['*', '*.vercel.app', '*.clerk.com', '*.clerk.accounts.dev']`.
+3. Lakukan sinkronisasi ulang dengan `npx cap sync android`.
