@@ -1345,8 +1345,7 @@ export default function HalamanAdmin() {
           <div className="p-4 border-t border-pink-100 flex flex-col gap-3 bg-white">
             <button
               onClick={async () => {
-                await signOut();
-                window.location.href = "/";
+                await signOut({ redirectUrl: '/admin' });
               }}
               className="flex items-center justify-center gap-2 text-red-500 bg-red-50 hover:bg-red-100 w-full px-4 py-3 rounded-xl font-bold transition outline-none shadow-sm border border-red-100"
             >
@@ -1363,6 +1362,7 @@ export default function HalamanAdmin() {
             </div>
             <div className="bg-white p-1 rounded-full border border-pink-100 shadow-sm flex items-center justify-center shrink-0 w-10 h-10">
               <UserButton
+                afterSignOutUrl="/admin"
                 appearance={{ elements: { userButtonAvatarBox: "w-8 h-8" } }}
               />
             </div>
@@ -1395,6 +1395,7 @@ export default function HalamanAdmin() {
             </button>
             <div className="hidden md:flex items-center justify-center bg-white p-1.5 rounded-full border border-pink-100 shadow-sm hover:shadow-md transition-all shrink-0 w-12 h-12 cursor-pointer">
               <UserButton
+                afterSignOutUrl="/admin"
                 appearance={{ elements: { userButtonAvatarBox: "w-9 h-9" } }}
               />
             </div>
