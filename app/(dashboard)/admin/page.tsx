@@ -1362,7 +1362,6 @@ export default function HalamanAdmin() {
             </div>
             <div className="bg-white p-1 rounded-full border border-pink-100 shadow-sm flex items-center justify-center shrink-0 w-10 h-10">
               <UserButton
-                fallbackRedirectUrl="/admin"
                 appearance={{ elements: { userButtonAvatarBox: "w-8 h-8" } }}
               />
             </div>
@@ -1395,7 +1394,6 @@ export default function HalamanAdmin() {
             </button>
             <div className="hidden md:flex items-center justify-center bg-white p-1.5 rounded-full border border-pink-100 shadow-sm hover:shadow-md transition-all shrink-0 w-12 h-12 cursor-pointer">
               <UserButton
-                fallbackRedirectUrl="/admin"
                 appearance={{ elements: { userButtonAvatarBox: "w-9 h-9" } }}
               />
             </div>
