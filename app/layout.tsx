@@ -24,10 +24,12 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="id" suppressHydrationWarning>
-        <body className="font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]" suppressHydrationWarning>
-          <PenyediaKeranjang>
-            {children}
-          </PenyediaKeranjang>
+        <body className="font-sans antialiased bg-zinc-900" suppressHydrationWarning>
+          <div className="bg-white min-h-screen pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+            <PenyediaKeranjang>
+              {children}
+            </PenyediaKeranjang>
+          </div>
         </body>
       </html>
     </ClerkProvider>
