@@ -7,7 +7,11 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://kkf-label.vercel.app/admin', // 👈 Tembak langsung ke rute admin
     cleartext: true,
-    allowNavigation: ['kkf-label.vercel.app']
+    allowNavigation: [
+      'kkf-label.vercel.app',
+      '*.vercel.app',
+      '*kkf-label.vercel.app*'
+    ]
   }
 };
 
