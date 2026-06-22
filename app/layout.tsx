@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { PenyediaKeranjang } from "@/context/CartContext";
 import { ClerkProvider } from "@clerk/nextjs";
+import SafeAreaProvider from "@/components/SafeAreaProvider";
 
 export const metadata: Metadata = {
   title: "kkf-label | Fashion Wanita Minimalis",
@@ -26,9 +27,11 @@ export default function RootLayout({
     <ClerkProvider afterSignOutUrl="/sign-in">
       <html lang="id" suppressHydrationWarning>
         <body className="font-sans antialiased bg-zinc-900" suppressHydrationWarning>
-          <div className="bg-white min-h-screen pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
+          <div className="bg-white min-h-screen pt-[var(--safe-area-inset-top,env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)]">
             <PenyediaKeranjang>
-              {children}
+              <SafeAreaProvider>
+                {children}
+              </SafeAreaProvider>
             </PenyediaKeranjang>
           </div>
         </body>
