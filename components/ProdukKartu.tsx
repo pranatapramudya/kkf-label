@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
-export function ProdukKartu({ produk }: { produk: any }) {
+export function ProdukKartu({ produk, priority = false }: { produk: any, priority?: boolean }) {
   // PENGAMAN FOTO: Kalau URL kurang dari 5 huruf (misal kosong/asal ketik), paksa pakai logo KKF
   const fotoValid =
     produk.fotoUtama && produk.fotoUtama.length > 5
@@ -24,6 +24,7 @@ export function ProdukKartu({ produk }: { produk: any }) {
   return (
     <Link
       href={`/produk/${produk.id}`}
+      prefetch={true}
       className="group block overflow-hidden rounded-2xl border border-pink-50 bg-white shadow-sm transition hover:shadow-md relative"
     >
       {/* LABEL DISKON (Muncul otomatis kalau ada diskon) */}
@@ -45,6 +46,7 @@ export function ProdukKartu({ produk }: { produk: any }) {
                 src={img}
                 alt={produk.nama || "Produk KKF"}
                 fill
+                priority={priority}
                 className="object-cover"
                 sizes="(max-width: 768px) 50vw, 25vw"
               />

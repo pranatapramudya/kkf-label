@@ -15,10 +15,39 @@ export default async function HalamanDetailProduk({
     where: {
       OR: [{ id: id }, { slug: id }],
     },
-    include: {
-      kategori: true,
-      varian: true,
-      ulasan: true,
+    select: {
+      id: true,
+      nama: true,
+      slug: true,
+      deskripsi: true,
+      harga: true,
+      hargaCoret: true,
+      diskonPersen: true,
+      fotoUtama: true,
+      galeriFoto: true,
+      stokTotal: true,
+      videoUrl: true,
+      kategori: { select: { nama: true } },
+      varian: {
+        select: {
+          id: true,
+          ukuran: true,
+          warna: true,
+          stok: true,
+        },
+      },
+      ulasan: {
+        take: 5,
+        orderBy: { dibuatPada: "desc" },
+        select: {
+          id: true,
+          namaGuest: true,
+          rating: true,
+          comment: true,
+          adminReply: true,
+          dibuatPada: true,
+        },
+      },
     },
   });
 

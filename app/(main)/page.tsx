@@ -1,3 +1,5 @@
+export const revalidate = 60;
+
 import { ArrowRight, Heart, ShieldCheck, Truck } from "lucide-react";
 import { PrismaClient } from "@prisma/client";
 import { ProdukKartu } from "@/components/ProdukKartu";
@@ -11,14 +13,31 @@ const prisma = new PrismaClient();
 export default async function HalamanUtama() {
   const produkReal = await prisma.product.findMany({
     where: { aktif: true },
-    include: { kategori: true },
+    select: {
+      id: true,
+      nama: true,
+      harga: true,
+      diskonPersen: true,
+      fotoUtama: true,
+      kategori: { select: { nama: true } },
+    },
     orderBy: { dibuatPada: "desc" },
     take: 2,
   });
 
   const semuaProdukLengkap = await prisma.product.findMany({
     where: { aktif: true },
-    include: { ulasan: true, kategori: true },
+    select: {
+      id: true,
+      nama: true,
+      harga: true,
+      diskonPersen: true,
+      fotoUtama: true,
+      kategori: { select: { nama: true } },
+      ulasan: { select: { rating: true } },
+    },
+    orderBy: { dibuatPada: "desc" },
+    take: 20,
   });
 
   const topProducts = semuaProdukLengkap
@@ -70,7 +89,7 @@ export default async function HalamanUtama() {
                 key={produk.id}
                 className={indeks % 2 === 0 ? "translate-y-3" : ""}
               >
-                <ProdukKartu produk={produk} />
+                <ProdukKartu produk={produk} priority={indeks < 2} />
               </div>
             ))}
           </div>

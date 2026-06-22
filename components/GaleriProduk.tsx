@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, X, ZoomIn, PlayCircle } from "lucide-react";
+import Image from "next/image";
 
 export function GaleriProduk({
   fotoUtama,
@@ -86,11 +87,13 @@ export function GaleriProduk({
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
         ) : (
-          <img
+          <Image
             src={mediaAktif}
             alt="KKF Label Produk"
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            loading="lazy"
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
+            priority={indexAktif === 0}
+            sizes="(max-width: 768px) 100vw, 50vw"
           />
         )}
 
@@ -149,11 +152,12 @@ export function GaleriProduk({
                     <PlayCircle className="absolute text-white" size={24} />
                   </div>
                 ) : (
-                  <img
+                  <Image
                     src={media}
                     alt={`Thumbnail ${idx}`}
-                    className="object-cover w-full h-full"
-                    loading="lazy"
+                    fill
+                    className="object-cover"
+                    sizes="80px"
                   />
                 )}
               </button>
@@ -174,11 +178,15 @@ export function GaleriProduk({
             <X size={28} />
           </button>
 
-          <img
-            src={mediaAktif}
-            alt="Zoom HD"
-            className="w-full h-full object-contain p-4 md:p-10 animate-in zoom-in-95 duration-300"
-          />
+          <div className="relative w-full h-full p-4 md:p-10 animate-in zoom-in-95 duration-300">
+            <Image
+              src={mediaAktif}
+              alt="Zoom HD"
+              fill
+              className="object-contain"
+              sizes="100vw"
+            />
+          </div>
 
           {totalGambar > 1 && (
             <>

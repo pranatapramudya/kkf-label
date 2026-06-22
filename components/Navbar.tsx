@@ -57,6 +57,7 @@ export function Navbar() {
         <nav className="kontainer-halaman flex h-full w-full items-center justify-between relative z-50">
           <Link
             href="/"
+            prefetch={true}
             className="flex items-center group gap-3"
             onClick={() => setActiveNav("/")}
           >
@@ -75,7 +76,7 @@ export function Navbar() {
 
           {/* Menu Desktop */}
           <div className="hidden md:flex items-center gap-7 text-sm font-medium text-zinc-700">
-            <Link className="transition hover:text-soft-pink-600" href="/">
+            <Link className="transition hover:text-soft-pink-600" href="/" prefetch={true}>
               Katalog
             </Link>
             <Link
