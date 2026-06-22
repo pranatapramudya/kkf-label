@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { PenyediaKeranjang } from "@/context/CartContext";
 import { ClerkProvider } from "@clerk/nextjs";
@@ -9,6 +9,13 @@ export const metadata: Metadata = {
     "Butik fashion wanita modern dengan nuansa soft pink dan minimalist white.",
 };
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: 'cover',
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -17,7 +24,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="id" suppressHydrationWarning>
-        <body className="font-sans antialiased" suppressHydrationWarning>
+        <body className="font-sans antialiased pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]" suppressHydrationWarning>
           <PenyediaKeranjang>
             {children}
           </PenyediaKeranjang>

@@ -1,15 +1,12 @@
-# PRD: KKF Label Phase 2.9 - Auth Redirect Fix & Package ID Cache Busting
+# PRD: KKF Label Phase 2.10 - Notch/Safe Area Inset Optimization
 
 ## 1. Objective (Tujuan)
-Memastikan proses autentikasi (Login/Sign-in) tetap tertahan di dalam *WebView* tanpa memicu peramban eksternal, dan membersihkan memori singgahan (*cache*) ikon OS Android yang menampilkan logo aplikasi lama.
+Memperbaiki antarmuka pengguna (UI) yang menabrak *notch* (poni) atau *status bar* pada ponsel pintar modern tanpa perlu melakukan *build* ulang pada level *native*.
 
 ## 2. Analisis Masalah & Solusi
-- **Masalah Auth Redirect:** Sistem proteksi rute (Middleware Auth) mengalihkan pengguna ke halaman login yang memicu intervensi keamanan Capacitor, sehingga tautan dibuka di Chrome.
-  - **Solusi:** Menerapkan *wildcard* universal `['*']` dan domain spesifik otentikasi pada `allowNavigation` agar seluruh proses peralihan (*redirect*) diizinkan berjalan di dalam aplikasi.
-- **Masalah Ikon Usang (Cache Clash):** Pemindai keamanan Android menampilkan logo proyek lama karena aplikasi menggunakan `appId` yang sama dengan proyek sebelumnya.
-  - **Solusi:** Memperbarui `appId` menjadi identitas yang sepenuhnya unik (contoh: `com.kkflabel.adminapp`) untuk memaksa Android memperlakukan aplikasi ini sebagai entitas baru yang bersih.
+- **Masalah:** Sistem Capacitor dengan layar penuh (*fullscreen*) akan merender konten mulai dari piksel 0 paling atas, yang berisiko tertutup oleh perangkat keras kamera.
+- **Solusi:** Menerapkan instruksi `viewport-fit=cover` pada meta *viewport* Next.js, dan menambahkan utilitas *padding* berbasis *environment variables* bawaan peramban, yaitu `env(safe-area-inset-top)` dan `env(safe-area-inset-bottom)`.
 
 ## 3. Spesifikasi Implementasi
-1. Ubah `appId` di `capacitor.config.ts` menjadi `com.kkflabel.adminapp`.
-2. Ubah `allowNavigation` menjadi `['*', '*.vercel.app', '*.clerk.com', '*.clerk.accounts.dev']`.
-3. Lakukan sinkronisasi ulang dengan `npx cap sync android`.
+1. Ekspor objek `viewport` dengan properti `viewportFit: 'cover'` pada `layout.tsx` utama Next.js.
+2. Tambahkan kelas utilitas Tailwind kustom `pt-[env(safe-area-inset-top)]` dan `pb-[env(safe-area-inset-bottom)]` pada pembungkus (container) layout utama admin/auth.
