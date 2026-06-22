@@ -1,13 +1,12 @@
-# PRD: KKF Label Phase 2.19 - Universal Hardware Safe Area Insets
+# PRD: KKF Label Phase 2.20 - Hardcoded Mobile Layout Spacer untuk Custom ROM
 
 ## 1. Objective (Tujuan)
-Menyelesaikan tumpang tindih antarmuka pengguna pada perangkat dengan *Custom ROM* restriktif (seperti itelOS) dan Android 15+ yang mengabaikan nilai standar `env(safe-area-inset-top)`.
+Menyediakan ruang aman (*safe area*) buatan pada perangkat seluler secara universal tanpa bergantung pada deteksi sensor sistem operasi bawaan perangkat keras yang sering kali tidak akurat pada *Custom ROM* tertentu.
 
 ## 2. Analisis Masalah & Solusi
-- **Masalah:** OS perangkat memaksa mode *edge-to-edge*, menolak konfigurasi `overlaysWebView`, dan peramban internal mengembalikan nilai ruang aman 0 piksel.
-- **Solusi:** Menggunakan pengaya level-perangkat keras `capacitor-plugin-safe-area` untuk secara sinkron mengambil jarak piksel perangkat (*notch/status bar*) dan menyuntikkannya sebagai Variabel CSS global (`--safe-area-inset-top`) yang tahan banting.
+- **Masalah:** Sistem operasi seperti itelOS secara paksa menyembunyikan atau memanipulasi nilai *safe area* menjadi 0 piksel pada komponen *WebView*, sehingga teks *header* tertutup oleh informasi sistem (jam, baterai, sinyal).
+- **Solusi:** Menerapkan padding atas statis (*hardcoded padding-top*) khusus untuk tampilan layar seluler (*mobile viewport*) pada pembungkus komponen utama dasbor admin, dan menonaktifkannya kembali pada tampilan desktop.
 
 ## 3. Spesifikasi Implementasi
-1. Pasang modul `capacitor-plugin-safe-area`.
-2. Buat Komponen Klien (*Client Component*) `SafeAreaProvider` untuk mengeksekusi `SafeArea.getSafeAreaInsets()` pada saat aplikasi dimuat (*mount*), lalu oper nilainya ke objek `document.documentElement.style`.
-3. Ubah utilitas Tailwind menjadi `pt-[var(--safe-area-inset-top,env(safe-area-inset-top))]` agar mendukung ekosistem hibrida (*native* maupun web PC standar).
+1. Buka berkas layout pembungkus utama di area admin.
+2. Tambahkan kelas utilitas Tailwind `pt-10` (setara 40px) khusus untuk layar kecil, dan kembalikan ke ukuran normal di layar besar menggunakan `md:pt-0` (atau disesuaikan dengan layout desktop yang sudah ada).
