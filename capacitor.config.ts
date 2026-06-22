@@ -14,6 +14,13 @@ const config: CapacitorConfig = {
       '*.clerk.accounts.dev',
       '*.google.com'
     ]
+  },
+  plugins: {
+    StatusBar: {
+      overlay: false,
+      backgroundColor: '#ffffff',
+      style: 'DARK'
+    }
   }
 };
 

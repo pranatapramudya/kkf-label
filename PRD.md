@@ -1,8 +1,13 @@
-# PRD: KKF Label Phase 2.16 - Clerk V5 Global Sign-Out Redirect
+# PRD: KKF Label Phase 2.17 - Capacitor Status Bar Overlap Fix
 
 ## 1. Objective (Tujuan)
-Memaksa sistem Clerk V5 untuk mengarahkan pengguna ke halaman otentikasi (`/sign-in`) setelah proses keluar (*logout*), mengesampingkan pengalihan paksa ke rute bawaan (`/`).
+Menyelesaikan masalah antarmuka (UI) di mana *header* aplikasi bertumpuk dengan *Status Bar* bawaan perangkat Android (jam, baterai, sinyal).
 
 ## 2. Analisis Masalah & Solusi
-- **Masalah:** Komponen `<UserButton>` pada versi Clerk V5/Core 2 telah mencabut properti pengalihan individual, sehingga pengakhiran sesi akan selalu dikembalikan ke beranda (`/`), dan mengabaikan *Environment Variables*.
-- **Solusi:** Menambahkan properti `afterSignOutUrl="/sign-in"` secara global pada komponen pelapis utama `<ClerkProvider>`.
+- **Masalah:** Sistem Capacitor secara bawaan merender *WebView* dalam mode *edge-to-edge* (menyeluruh hingga ujung layar), sehingga menabrak elemen perangkat keras (*notch/status bar*) pada antarmuka pengguna.
+- **Solusi:** Memanfaatkan konfigurasi pengaya (plugin) bawaan Capacitor untuk mematikan mode *overlay*, sehingga sistem Android akan menyediakan ruang (ruang khusus) secara otomatis untuk *Status Bar*.
+
+## 3. Spesifikasi Implementasi
+1. Pastikan modul `@capacitor/status-bar` telah diinstal.
+2. Modifikasi berkas `capacitor.config.ts`: Tambahkan blok pengaturan `StatusBar` di dalam objek `plugins` dengan nilai `overlay: false`.
+3. Jalankan `npx cap sync android` untuk menyuntikkan pengaturan ke dalam kerangka *native*.
