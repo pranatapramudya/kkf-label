@@ -2,11 +2,11 @@ export const dynamic = 'force-dynamic';
 import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
-const ALLOWED_EMAILS = [
+const ADMIN_EMAILS = [
+  "kkflabel@gmail.com",
   "pranatapramudya39@gmail.com",
   "pranajaya52@gmail.com",
-  "kkflabel@gmail.com",
-  "uwenkuswendi5@gmail.com"
+  "uwen.rejekismd@gmail.com",
 ];
 
 export default async function AdminLayout({
@@ -17,7 +17,7 @@ export default async function AdminLayout({
   const user = await currentUser();
   const userEmail = user?.emailAddresses[0]?.emailAddress;
 
-  if (!userEmail || !ALLOWED_EMAILS.includes(userEmail)) {
+  if (!userEmail || !ADMIN_EMAILS.includes(userEmail)) {
     redirect('/');
   }
 
