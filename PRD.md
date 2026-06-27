@@ -1,17 +1,32 @@
-# PRD: KKF Label Phase 2.21 - Perbaikan Otorisasi Middleware Clerk untuk Admin
+# Product Requirements Document (PRD)
+**Proyek:** KKF Label
+**Fitur:** Integrasi Vercel Web Analytics
+**Status:** Akan Dikerjakan (To Do)
+**Target Branch:** main / production
 
-## 1. Objective (Tujuan)
-Memastikan seluruh email yang didaftarkan sebagai admin memiliki hak akses penuh ke halaman dasbor admin tanpa terblokir atau terlempar kembali ke halaman pelanggan.
+## 1. Ringkasan Eksekutif
+Sistem pelacakan lalu lintas web (Web Analytics) perlu diaktifkan pada proyek KKF Label untuk mendapatkan visibilitas terhadap jumlah pengunjung dan interaksi halaman. Vercel Web Analytics digunakan karena sifatnya yang terintegrasi secara langsung (*native*), ringan, dan tidak menghambat waktu muat halaman (*loading speed*).
 
-## 2. Analisis Masalah & Solusi
-- **Masalah:** Akun dengan email `uwen.rejekismd@gmail.com` berhasil melakukan autentikasi (login/reset password) di sistem Clerk, namun sistem *middleware* Next.js menolak aksesnya ke *route* admin. Hal ini mengindikasikan adanya kegagalan pencocokan *string array* email statis atau ketergantungan pada *metadata role* yang belum tersinkronisasi.
-- **Solusi:** Memperbarui dan merapikan logika pengecekan otorisasi pada berkas `middleware.ts`. Menambahkan *fallback* atau validasi *hardcoded* untuk *array whitelist* email admin agar rute terlindungi dapat dilewati oleh akun yang terdaftar.
+## 2. Tujuan Sasaran
+- Mengumpulkan metrik jumlah tampilan halaman (*page views*) dan pengunjung unik.
+- Memastikan pemasangan skrip analitik tidak memunculkan masalah performa (*zero-config client overhead*).
+- Mengaktifkan visualisasi data pada Dasbor Vercel.
 
-## 3. Spesifikasi Implementasi
-1. Buka berkas `middleware.ts`.
-2. Validasi ulang *array* yang menyimpan daftar email admin. Pastikan daftar berikut masuk ke dalam *whitelist* tanpa *typo* atau spasi berlebih:
-   - kkflabel@gmail.com
-   - pranatapramudya39@gmail.com
-   - pranajaya52@gmail.com
-   - uwen.rejekismd@gmail.com
-3. Pastikan logika *routing* mengizinkan akses ke rute admin (misal: `/admin/:path*`) jika email *user* yang *login* cocok dengan salah satu dari *array* di atas.
+## 3. Spesifikasi Teknis
+- **Kerangka Kerja (Framework):** Next.js
+- **Modul Utama:** `@vercel/analytics`
+- **Komponen Injeksi:** `<Analytics />`
+- **Lingkungan Eksekusi:** Hanya aktif otomatis pada fase *Production* (Vercel).
+
+## 4. Alur Kerja Implementasi
+1. **Instalasi:** Tambahkan modul `@vercel/analytics` menggunakan pengelola paket (npm/yarn/pnpm) bawaan repositori.
+2. **Pemasangan Komponen:**
+   - Impor `{ Analytics }` dari modul `@vercel/analytics/next`.
+   - Letakkan komponen `<Analytics />` pada Root Layout (file `app/layout.tsx` atau `pages/_app.tsx`).
+3. **Penerapan (Deployment):** Lakukan *commit* dan *push* kode terbaru ke GitHub untuk memicu *build* Vercel.
+4. **Verifikasi:** Pantau Dasbor Vercel KKF Label untuk memastikan status beralih dari "Get Started" menjadi grafik aktif (ingat: mungkin ada *delay* hingga 1-2 menit setelah *build* selesai).
+
+## 5. Kriteria Penerimaan (Acceptance Criteria)
+- [ ] Modul berhasil diinstal tanpa konflik.
+- [ ] Pemasangan komponen `<Analytics />` bebas dari peringatan *linting* atau *error* TypeScript.
+- [ ] Dasbor analitik di Vercel `kkf-label.vercel.app` berhasil menerima data kunjungan.

@@ -3,6 +3,7 @@ import "./globals.css";
 import { PenyediaKeranjang } from "@/context/CartContext";
 import { ClerkProvider } from "@clerk/nextjs";
 import SafeAreaProvider from "@/components/SafeAreaProvider";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "kkf-label | Fashion Wanita Minimalis",
@@ -34,6 +35,7 @@ export default function RootLayout({
               </SafeAreaProvider>
             </PenyediaKeranjang>
           </div>
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
