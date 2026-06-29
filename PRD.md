@@ -1,32 +1,30 @@
-# Product Requirements Document (PRD)
-**Proyek:** KKF Label
-**Fitur:** Integrasi Vercel Web Analytics
-**Status:** Akan Dikerjakan (To Do)
-**Target Branch:** main / production
+# Product Requirements Document (PRD) - KKF Label
+**Platform**: E-Commerce B2C & Admin Dashboard (Web & Android APK via Capacitor)
+**Bahasa Pengantar Code & UI**: Bahasa Indonesia
 
-## 1. Ringkasan Eksekutif
-Sistem pelacakan lalu lintas web (Web Analytics) perlu diaktifkan pada proyek KKF Label untuk mendapatkan visibilitas terhadap jumlah pengunjung dan interaksi halaman. Vercel Web Analytics digunakan karena sifatnya yang terintegrasi secara langsung (*native*), ringan, dan tidak menghambat waktu muat halaman (*loading speed*).
+## 1. Tech Stack
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Database**: PostgreSQL (Supabase)
+- **ORM**: Prisma
+- **Authentication**: Clerk (Multi-role: Admin & Customer)
+- **Payment Gateway**: Midtrans API (QRIS, E-Wallet, Virtual Account)
+- **Logistics API**: Biteship (Cek Ongkir & Generate Resi/Waybill)
 
-## 2. Tujuan Sasaran
-- Mengumpulkan metrik jumlah tampilan halaman (*page views*) dan pengunjung unik.
-- Memastikan pemasangan skrip analitik tidak memunculkan masalah performa (*zero-config client overhead*).
-- Mengaktifkan visualisasi data pada Dasbor Vercel.
+## 2. Arsitektur Database Utama (Prisma Schema Context)
+Sistem memiliki tabel pesanan (Order) yang menyimpan riwayat transaksi. Parameter yang krusial untuk fitur logistik adalah nomor resi pengiriman.
+- Model `Order` berelasi dengan `User` dan `Product`.
+- Status pesanan biasanya: `PENDING`, `PAID`, `PROCESSED`, `SHIPPED`, `COMPLETED`.
+- Kolom untuk menyimpan nomor resi dari Biteship adalah `trackingNumber` (String, opsional/nullable).
 
-## 3. Spesifikasi Teknis
-- **Kerangka Kerja (Framework):** Next.js
-- **Modul Utama:** `@vercel/analytics`
-- **Komponen Injeksi:** `<Analytics />`
-- **Lingkungan Eksekusi:** Hanya aktif otomatis pada fase *Production* (Vercel).
+## 3. Alur Kerja Modul "Pesanan" (Admin Dashboard)
+- **Lokasi UI**: Menu "Pesanan" pada dashboard admin.
+- **Tujuan Utama**: Admin memproses pesanan yang sudah dibayar (`PAID`).
+- **Fitur Cetak & Resi**: Pada detail pesanan, terdapat fitur "Cetak". Saat ini, nomor resi masih berstatus *hardcode* teks "resi menyusul".
+- **Target Integrasi Biteship**: Saat pesanan diproses atau dicetak, sistem harus melakukan POST request ke API Biteship menggunakan `BITESHIP_API_KEY` untuk melakukan `Create Order / Waybill`. Respon resi dari Biteship harus disimpan ke database (Prisma) dan langsung dirender menggantikan teks "resi menyusul".
 
-## 4. Alur Kerja Implementasi
-1. **Instalasi:** Tambahkan modul `@vercel/analytics` menggunakan pengelola paket (npm/yarn/pnpm) bawaan repositori.
-2. **Pemasangan Komponen:**
-   - Impor `{ Analytics }` dari modul `@vercel/analytics/next`.
-   - Letakkan komponen `<Analytics />` pada Root Layout (file `app/layout.tsx` atau `pages/_app.tsx`).
-3. **Penerapan (Deployment):** Lakukan *commit* dan *push* kode terbaru ke GitHub untuk memicu *build* Vercel.
-4. **Verifikasi:** Pantau Dasbor Vercel KKF Label untuk memastikan status beralih dari "Get Started" menjadi grafik aktif (ingat: mungkin ada *delay* hingga 1-2 menit setelah *build* selesai).
-
-## 5. Kriteria Penerimaan (Acceptance Criteria)
-- [ ] Modul berhasil diinstal tanpa konflik.
-- [ ] Pemasangan komponen `<Analytics />` bebas dari peringatan *linting* atau *error* TypeScript.
-- [ ] Dasbor analitik di Vercel `kkf-label.vercel.app` berhasil menerima data kunjungan.
+## 4. Panduan untuk AI Agent
+- Pastikan semua error handling menampilkan notifikasi UI yang jelas (misal menggunakan toast) dalam Bahasa Indonesia.
+- Jangan mengubah flow autentikasi Clerk yang sudah berjalan di Edge/Server components.
+- Lakukan validasi ketersediaan `BITESHIP_API_KEY` di server sebelum mengeksekusi request.

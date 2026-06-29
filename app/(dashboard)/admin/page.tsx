@@ -516,6 +516,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
     nomorResi: "",
   });
   const [sedangUpdate, setSedangUpdate] = useState(false);
+  const [sedangBuatResi, setSedangBuatResi] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -685,6 +686,33 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
       else alert("Gagal update pesanan.");
     } finally {
       setSedangUpdate(false);
+    }
+  };
+
+  const handleBuatResiBiteship = async () => {
+    if (!pesananDiedit) return;
+    setSedangBuatResi(true);
+    try {
+      const res = await fetch(`/api/admin/pesanan/${pesananDiedit.id}/biteship`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.pesan || "Gagal membuat resi.");
+
+      setFormEdit(prev => ({ ...prev, nomorResi: data.resi }));
+      if (tampilkanNotifikasi) {
+        tampilkanNotifikasi("Resi otomatis berhasil dibuat!", "sukses");
+      } else {
+        alert("Resi otomatis berhasil dibuat!");
+      }
+    } catch (err: any) {
+      if (tampilkanNotifikasi) {
+        tampilkanNotifikasi(err.message, "gagal");
+      } else {
+        alert(err.message);
+      }
+    } finally {
+      setSedangBuatResi(false);
     }
   };
 
@@ -919,15 +947,26 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                 <label className="block text-xs font-bold text-zinc-700 mb-1.5">
                   Nomor Resi (Opsional)
                 </label>
-                <input
-                  type="text"
-                  placeholder="Contoh: SPXID12345678"
-                  value={formEdit.nomorResi}
-                  onChange={(e) =>
-                    setFormEdit({ ...formEdit, nomorResi: e.target.value })
-                  }
-                  className="w-full border border-zinc-300 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm font-bold tracking-wide"
-                />
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Contoh: SPXID12345678"
+                    value={formEdit.nomorResi}
+                    onChange={(e) =>
+                      setFormEdit({ ...formEdit, nomorResi: e.target.value })
+                    }
+                    className="w-full border border-zinc-300 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm font-bold tracking-wide"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleBuatResiBiteship}
+                    disabled={sedangBuatResi || !!formEdit.nomorResi}
+                    className="shrink-0 bg-zinc-900 text-white px-4 rounded-xl font-bold text-xs hover:bg-zinc-800 transition disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {sedangBuatResi ? <Loader2 size={14} className="animate-spin" /> : <Package size={14} />}
+                    Buat Resi (Biteship)
+                  </button>
+                </div>
               </div>
               <div className="pt-4 flex gap-3">
                 <button
