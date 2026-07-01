@@ -1,12 +1,19 @@
-# Update PRD: Bug Fix Client-Side Routing (useRouter)
+# Update PRD: Security Patch & Performance Optimization (Pre-Launch)
 
 ## 1. Latar Belakang Masalah
-- **Next.js Error Overlay:** Muncul *error* "1 Issue" pada saat pengguna menekan tombol "Lihat Pesanan Saya" atau "Kembali ke Beranda" di dalam modal sukses pembayaran.
-- **Penyebab:** Kesalahan implementasi *hook* navigasi di Next.js App Router (kemungkinan besar karena *import path* yang salah atau inisialisasi yang tertinggal).
+Berdasarkan hasil audit pre-launch, ditemukan 4 celah (blind spots) krusial pada arsitektur sistem yang harus segera ditambal sebelum aplikasi dirilis ke publik:
+- **Webhook Idempotency:** Risiko pemrosesan ganda pada notifikasi Midtrans yang dapat menyebabkan pengurangan stok berkali-kali untuk satu pesanan.
+- **Backend File Validation:** Validasi ukuran dan jenis file bukti transfer saat ini hanya berada di sisi klien (frontend), sehingga rentan di-bypass menggunakan tools API (seperti Postman).
+- **Race Condition:** Pengurangan stok rentan terhadap *race condition* jika dua pengguna melakukan *checkout* pada milidetik yang sama.
+- **Database Scalability:** Tabel `Order` dan `Product` belum memiliki indeks pencarian, yang berisiko memperlambat performa saat data membesar.
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **App Router Navigation:**
-  - Pastikan komponen yang merender tombol tersebut menggunakan direktif `"use client"`.
-  - Impor *hook* secara eksplisit: `import { useRouter } from 'next/navigation'`. (TIDAK BOLEH menggunakan `next/router`).
-  - Inisialisasi *hook* di dalam komponen utama sebelum fungsi *return*: `const router = useRouter();`.
-  - Bungkus pemanggilan di dalam fungsi *handler* yang benar (contoh: `onClick={() => router.push('/saya')}`).
+- **Keamanan Webhook (Idempotency):**
+  - Validasi `signature_key` dari Midtrans (gabungan `order_id`, `status_code`, `gross_amount`, dan `ServerKey` yang di-hash menggunakan SHA512).
+  - Pastikan sistem mengecek apakah pesanan sudah berstatus `DIBAYAR` di database sebelum melakukan update status dan pengurangan stok. Jika sudah `DIBAYAR`, abaikan webhook (return 200 OK).
+- **Validasi Backend (Storage):**
+  - Di dalam rute `/api/upload-bukti/route.ts`, tambahkan validasi *server-side*: maksimal ukuran *buffer* 3MB dan tipe MIME yang diizinkan hanya `image/jpeg`, `image/png`, dan `image/webp`. Tolak *request* jika tidak sesuai (return 400 Bad Request).
+- **Atomic Transaction (Prisma):**
+  - Bungkus operasi pembuatan pesanan (`prisma.order.create`) dan pengurangan stok produk (`stokTotal: { decrement: x }`) ke dalam `prisma.$transaction` agar terhindar dari *race condition*.
+- **Database Indexing:**
+  - Tambahkan `@@index([kodePesanan])` dan `@@index([statusPesanan])` pada model `Order` di dalam `schema.prisma`.

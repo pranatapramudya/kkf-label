@@ -134,6 +134,7 @@ model Order {
   diubahPada         DateTime        @updatedAt
 
   @@index([statusPesanan])
+  @@index([kodePesanan])
   @@index([dibuatPada])
 }
 

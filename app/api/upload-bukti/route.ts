@@ -22,6 +22,23 @@ export async function POST(req: Request) {
       );
     }
 
+    // Validasi file size (Max 3MB)
+    if (file.size > 3 * 1024 * 1024) {
+      return NextResponse.json(
+        { success: false, message: "Ukuran file tidak boleh melebihi 3MB." },
+        { status: 400 }
+      );
+    }
+
+    // Validasi file type
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      return NextResponse.json(
+        { success: false, message: "Format file tidak didukung. Gunakan JPG, PNG, atau WEBP." },
+        { status: 400 }
+      );
+    }
+
     // 1. Ekstrak file menjadi Buffer agar kompatibel dengan Node.js & Supabase
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
