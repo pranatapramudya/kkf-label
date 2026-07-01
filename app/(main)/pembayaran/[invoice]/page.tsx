@@ -5,10 +5,9 @@ import ClientPembayaran from "./ClientPembayaran";
 const prisma = new PrismaClient();
 
 export default async function HalamanPembayaran(props: {
-  params: Promise<{ invoice: string }> | { invoice: string }
+  params: Promise<{ invoice: string }>
 }) {
-  // Dukungan untuk Next.js 14 dan 15 (params as Promise)
-  const params = await Promise.resolve(props.params);
+  const params = await props.params;
   const invoice = params.invoice;
 
   const order = await prisma.order.findUnique({
