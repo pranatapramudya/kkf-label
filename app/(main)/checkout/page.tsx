@@ -156,6 +156,29 @@ export default function HalamanCheckout() {
   });
 
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [showAllMethods, setShowAllMethods] = useState(false);
+  const [isEditingAddress, setIsEditingAddress] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('kkf_saved_address');
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        if (data.namaPenerima) setNamaPenerima(data.namaPenerima);
+        if (data.teleponPenerima) setTeleponPenerima(data.teleponPenerima);
+        if (data.emailPenerima) setEmailPenerima(data.emailPenerima);
+        if (data.provinsiDipilih) setProvinsiDipilih(data.provinsiDipilih);
+        if (data.kotaDipilih) setKotaDipilih(data.kotaDipilih);
+        if (data.ekspedisiDipilih) setEkspedisiDipilih(data.ekspedisiDipilih);
+        if (data.alamatLengkap) setAlamatLengkap(data.alamatLengkap);
+        setIsEditingAddress(false);
+      } catch (e) {
+        setIsEditingAddress(true);
+      }
+    } else {
+      setIsEditingAddress(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (itemKeranjang.length === 0 && !modalSukses.show && !isRedirecting) router.push("/");
@@ -191,7 +214,8 @@ export default function HalamanCheckout() {
   }, 0);
 
   const totalDiskon = subtotalKotor - subtotalBersih;
-  const totalAkhir = subtotalBersih + (pilihanOngkir?.biaya ?? 0);
+  const BIAYA_LAYANAN = 1000;
+  const totalAkhir = subtotalBersih + (pilihanOngkir?.biaya ?? 0) + BIAYA_LAYANAN;
 
   useEffect(() => {
     async function ambilProvinsi() {
@@ -297,6 +321,17 @@ export default function HalamanCheckout() {
 
     setSedangMembayar(true);
     try {
+      const formDataToSave = {
+        namaPenerima,
+        teleponPenerima,
+        emailPenerima,
+        provinsiDipilih,
+        kotaDipilih,
+        ekspedisiDipilih,
+        alamatLengkap
+      };
+      localStorage.setItem('kkf_saved_address', JSON.stringify(formDataToSave));
+
       const bodyPesanan = {
         nama: namaPenerima,
         email: emailPenerima,
@@ -390,7 +425,7 @@ export default function HalamanCheckout() {
   };
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden bg-pink-50/30 font-sans text-zinc-900 pb-20">
+    <div className="min-h-screen w-full overflow-x-hidden bg-pink-50/30 font-sans text-zinc-900 pb-32">
       {/* 🔥 INI YANG BIKIN POPUP MIDTRANS MUNCUL DI LAYAR 🔥 */}
       <Script
         src="https://app.midtrans.com/snap/snap.js"
@@ -450,7 +485,7 @@ export default function HalamanCheckout() {
 
           <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
             <section className="space-y-5">
-              <div className="kartu-lembut bg-white p-5 md:p-7 rounded-2xl shadow-sm border border-pink-100">
+              <div className="kartu-lembut bg-white p-4 md:p-5 rounded-2xl shadow-sm border border-pink-100">
                 <div className="mb-5 flex items-center gap-2">
                   <MapPin size={20} className="text-soft-pink-500" />
                   <h2 className="font-bold text-zinc-900 text-lg">
@@ -458,101 +493,125 @@ export default function HalamanCheckout() {
                   </h2>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="sm:col-span-1">
-                    <label className="block text-xs font-bold text-zinc-600 mb-1.5">
-                      Nama penerima
-                    </label>
-                    <input
-                      value={namaPenerima}
-                      onChange={(e) => setNamaPenerima(e.target.value)}
-                      className="w-full border border-zinc-200 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm transition"
-                      placeholder="Nama lengkap"
-                    />
+                {!isEditingAddress ? (
+                  <div className="bg-zinc-50 border border-pink-100 rounded-xl p-3 flex gap-3 relative mt-2 shadow-sm">
+                    <MapPin size={20} className="text-red-500 shrink-0 mt-0.5" />
+                    <div className="pr-12">
+                      <p className="font-semibold text-zinc-900 text-sm">{namaPenerima} | {teleponPenerima}</p>
+                      <p className="text-gray-500 text-xs mt-1 leading-relaxed">
+                        {alamatLengkap}<br/>
+                        {namaKota}, {namaProvinsi}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => setIsEditingAddress(true)}
+                      className="absolute top-4 right-4 text-xs font-bold text-soft-pink-600 hover:text-soft-pink-700 transition"
+                    >
+                      Ubah
+                    </button>
                   </div>
-                  <div className="sm:col-span-1">
-                    <label className="block text-xs font-bold text-zinc-600 mb-1.5">
-                      Nomor HP
-                    </label>
-                    <input
-                      type="tel"
-                      value={teleponPenerima}
-                      onChange={(e) => setTeleponPenerima(e.target.value)}
-                      className="w-full border border-zinc-200 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm transition"
-                      placeholder="08xxxxxxxx"
-                    />
-                  </div>
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-zinc-600 mb-1.5">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={emailPenerima}
-                      onChange={(e) => setEmailPenerima(e.target.value)}
-                      className="w-full border border-zinc-200 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm transition"
-                      placeholder="email@contoh.com"
-                    />
-                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-zinc-500 mb-1">
+                          Nama penerima
+                        </label>
+                        <input
+                          value={namaPenerima}
+                          onChange={(e) => setNamaPenerima(e.target.value)}
+                          className="w-full border border-zinc-200 px-3 py-2 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm transition"
+                          placeholder="Nama lengkap"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-zinc-500 mb-1">
+                          Nomor HP
+                        </label>
+                        <input
+                          type="tel"
+                          value={teleponPenerima}
+                          onChange={(e) => setTeleponPenerima(e.target.value)}
+                          className="w-full border border-zinc-200 px-3 py-2 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm transition"
+                          placeholder="08xxxxxxxx"
+                        />
+                      </div>
+                    </div>
 
-                  <div className="sm:col-span-1">
-                    <label className="block text-xs font-bold text-zinc-600 mb-1.5">
-                      Provinsi
-                    </label>
-                    <DropdownPencarian
-                      options={daftarProvinsiAman}
-                      value={provinsiDipilih}
-                      onChange={setProvinsiDipilih}
-                      placeholder="Pilih Provinsi..."
-                      valueKey="province_id"
-                      labelKey="province"
-                    />
-                  </div>
+                    <div>
+                      <label className="block text-xs text-zinc-500 mb-1">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        value={emailPenerima}
+                        onChange={(e) => setEmailPenerima(e.target.value)}
+                        className="w-full border border-zinc-200 px-3 py-2 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm transition"
+                        placeholder="email@contoh.com"
+                      />
+                    </div>
 
-                  <div className="sm:col-span-1">
-                    <label className="block text-xs font-bold text-zinc-600 mb-1.5">
-                      Kota/Kabupaten
-                    </label>
-                    <DropdownPencarian
-                      options={daftarKotaAman}
-                      value={kotaDipilih}
-                      onChange={setKotaDipilih}
-                      placeholder="Pilih Kota..."
-                      disabled={!provinsiDipilih || daftarKotaAman.length === 0}
-                      valueKey="city_id"
-                      labelKey="city_name"
-                    />
-                  </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs text-zinc-500 mb-1">
+                          Provinsi
+                        </label>
+                        <DropdownPencarian
+                          options={daftarProvinsiAman}
+                          value={provinsiDipilih}
+                          onChange={setProvinsiDipilih}
+                          placeholder="Pilih Provinsi..."
+                          valueKey="province_id"
+                          labelKey="province"
+                        />
+                      </div>
 
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-zinc-600 mb-1.5">
-                      Ekspedisi
-                    </label>
-                    <DropdownPencarian
-                      options={daftarEkspedisi.map((e) => ({
-                        id: e.kode,
-                        name: e.nama,
-                      }))}
-                      value={ekspedisiDipilih}
-                      onChange={setEkspedisiDipilih}
-                      placeholder="Pilih Ekspedisi..."
-                      disabled={!kotaDipilih}
-                    />
-                  </div>
+                      <div>
+                        <label className="block text-xs text-zinc-500 mb-1">
+                          Kota/Kabupaten
+                        </label>
+                        <DropdownPencarian
+                          options={daftarKotaAman}
+                          value={kotaDipilih}
+                          onChange={setKotaDipilih}
+                          placeholder="Pilih Kota..."
+                          disabled={!provinsiDipilih || daftarKotaAman.length === 0}
+                          valueKey="city_id"
+                          labelKey="city_name"
+                        />
+                      </div>
+                    </div>
 
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-zinc-600 mb-1.5">
-                      Alamat lengkap
-                    </label>
-                    <textarea
-                      value={alamatLengkap}
-                      onChange={(e) => setAlamatLengkap(e.target.value)}
-                      rows={3}
-                      className="w-full border border-zinc-200 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm transition resize-none"
-                      placeholder="Jalan, No Rumah, RT/RW, Patokan..."
-                    />
+                    <div>
+                      <label className="block text-xs text-zinc-500 mb-1">
+                        Ekspedisi
+                      </label>
+                      <DropdownPencarian
+                        options={daftarEkspedisi.map((e) => ({
+                          id: e.kode,
+                          name: e.nama,
+                        }))}
+                        value={ekspedisiDipilih}
+                        onChange={setEkspedisiDipilih}
+                        placeholder="Pilih Ekspedisi..."
+                        disabled={!kotaDipilih}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-zinc-500 mb-1">
+                        Alamat lengkap
+                      </label>
+                      <textarea
+                        value={alamatLengkap}
+                        onChange={(e) => setAlamatLengkap(e.target.value)}
+                        rows={2}
+                        className="w-full border border-zinc-200 px-3 py-2 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm transition resize-none"
+                        placeholder="Jalan, No Rumah, RT/RW, Patokan..."
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {sedangMemuatWilayah && (
                   <p className="mt-4 flex items-center gap-2 text-sm font-medium text-soft-pink-600">
@@ -675,6 +734,15 @@ export default function HalamanCheckout() {
                   </span>
                 </div>
 
+                <div className="flex justify-between items-center">
+                  <span className="text-zinc-500 font-medium">
+                    Biaya Layanan
+                  </span>
+                  <span className="font-bold text-zinc-900">
+                    {formatRupiah(BIAYA_LAYANAN)}
+                  </span>
+                </div>
+
                 {pilihanOngkir && (
                   <div className="rounded-xl bg-soft-pink-50/50 p-3 text-xs leading-5 text-soft-pink-700 font-medium border border-soft-pink-100">
                     <span className="font-bold uppercase">
@@ -697,7 +765,16 @@ export default function HalamanCheckout() {
                 )}
 
                 <div className="border-t border-pink-100 pt-4 mt-4">
-                  <h3 className="font-bold text-zinc-900 mb-3 text-sm">Metode Pembayaran</h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-bold text-zinc-900 text-sm">Metode Pembayaran</h3>
+                    <button 
+                      onClick={() => setShowAllMethods(!showAllMethods)}
+                      className="text-xs font-bold text-soft-pink-600 hover:text-soft-pink-700 transition"
+                    >
+                      {showAllMethods ? "Tutup" : "Ubah"}
+                    </button>
+                  </div>
+                  
                   <div className="space-y-2 mb-4">
                     {[
                       { id: "MIDTRANS", label: "Otomatis (Virtual Account, QRIS, e-Wallet)", icon: <div className="bg-zinc-800 text-white font-bold text-[10px] w-12 h-7 flex items-center justify-center rounded shrink-0">PAY</div> },
@@ -705,29 +782,27 @@ export default function HalamanCheckout() {
                       { id: "MANUAL_BRI", label: "Transfer Manual BRI", icon: <div className="bg-[#00529C] text-white font-black text-[12px] w-12 h-7 flex items-center justify-center rounded shrink-0 tracking-wide">BRI</div> },
                       { id: "MANUAL_SHOPEEPAY", label: "Transfer Manual ShopeePay", icon: <div className="bg-[#EE4D2D] text-white font-bold text-[8px] w-12 h-7 flex items-center justify-center rounded shrink-0 leading-none text-center">Shopee<br/>Pay</div> },
                       { id: "MANUAL_GOPAY", label: "Transfer Manual GoPay", icon: <div className="bg-[#00AED6] text-white font-bold text-[10px] w-12 h-7 flex items-center justify-center rounded shrink-0">gopay</div> },
-                    ].map(method => (
+                    ]
+                      .filter(m => showAllMethods || m.id === metodePembayaran)
+                      .map(method => (
                       <label key={method.id} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${metodePembayaran === method.id ? 'border-soft-pink-500 bg-soft-pink-50/50' : 'border-zinc-200 hover:border-soft-pink-300'}`}>
-                        <input 
-                          type="radio" 
-                          name="metodePembayaran" 
-                          value={method.id} 
-                          checked={metodePembayaran === method.id}
-                          onChange={(e) => setMetodePembayaran(e.target.value)}
-                          className="text-soft-pink-600 focus:ring-soft-pink-500 w-4 h-4"
-                        />
+                        {showAllMethods && (
+                          <input 
+                            type="radio" 
+                            name="metodePembayaran" 
+                            value={method.id} 
+                            checked={metodePembayaran === method.id}
+                            onChange={(e) => {
+                              setMetodePembayaran(e.target.value);
+                              setShowAllMethods(false);
+                            }}
+                            className="text-soft-pink-600 focus:ring-soft-pink-500 w-4 h-4"
+                          />
+                        )}
                         {method.icon}
                         <span className="text-sm font-medium text-zinc-700">{method.label}</span>
                       </label>
                     ))}
-                  </div>
-
-                  <div className="flex justify-between items-end border-t border-pink-100 pt-4 mt-4">
-                    <span className="font-bold text-zinc-600">
-                      Total Tagihan
-                    </span>
-                    <span className="text-xl font-black text-soft-pink-600">
-                      {formatRupiah(totalAkhir)}
-                    </span>
                   </div>
                 </div>
               </div>
@@ -738,21 +813,30 @@ export default function HalamanCheckout() {
                   {pesanPembayaran}
                 </p>
               )}
-
-              <button
-                onClick={buatPesanan}
-                disabled={sedangMembayar || itemKeranjang.length === 0}
-                className="w-full bg-soft-pink-600 hover:bg-soft-pink-700 text-white font-bold py-4 rounded-xl transition shadow-md flex items-center justify-center gap-2 mt-6 disabled:bg-zinc-300 disabled:text-zinc-500 disabled:shadow-none"
-              >
-                {sedangMembayar ? (
-                  <Loader2 size={18} className="animate-spin" />
-                ) : (
-                  <CreditCard size={18} />
-                )}
-                {sedangMembayar ? "Membuka Pembayaran..." : "Bayar Sekarang"}
-              </button>
             </aside>
           </div>
+        </div>
+      )}
+
+      {/* STICKY BOTTOM BAR BIKINAN SHOPEE */}
+      {!modalSukses.show && (
+        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-zinc-200 p-4 z-50 flex justify-between items-center shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)] md:px-8">
+          <div>
+            <span className="block text-xs font-bold text-zinc-500 mb-0.5">Total Tagihan</span>
+            <span className="text-xl font-black text-soft-pink-600">{formatRupiah(totalAkhir)}</span>
+          </div>
+          <button
+            onClick={buatPesanan}
+            disabled={sedangMembayar || itemKeranjang.length === 0}
+            className="bg-soft-pink-600 hover:bg-soft-pink-700 text-white font-bold py-3 px-6 md:px-10 rounded-xl transition shadow-md flex items-center justify-center gap-2 disabled:bg-zinc-300 disabled:text-zinc-500 disabled:shadow-none min-w-[140px]"
+          >
+            {sedangMembayar ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <CreditCard size={18} />
+            )}
+            {sedangMembayar ? "Memproses..." : "Bayar Sekarang"}
+          </button>
         </div>
       )}
     </div>

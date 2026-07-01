@@ -55,27 +55,29 @@ export function Navbar() {
 
       <header className="fixed inset-x-0 top-0 z-50 border-b border-white/70 bg-white/70 backdrop-blur-md h-16 flex items-center">
         <nav className="kontainer-halaman flex h-full w-full items-center justify-between relative z-50">
-          <Link
-            href="/"
-            prefetch={true}
-            className="flex items-center group gap-3"
-            onClick={() => setActiveNav("/")}
-          >
-            <Image
-              src="/logo-kkf.png"
-              alt="Logo KKF Label"
-              width={40}
-              height={40}
-              className="object-contain h-10 w-10 flex-shrink-0"
-              priority
-            />
-            <span className="text-xl font-black tracking-tighter text-zinc-900 group-hover:text-soft-pink-600 transition-colors uppercase">
-              KKF LABEL
-            </span>
-          </Link>
+          <div className="flex-1 flex justify-start items-center">
+            <Link
+              href="/"
+              prefetch={true}
+              className="flex items-center group gap-3"
+              onClick={() => setActiveNav("/")}
+            >
+              <Image
+                src="/logo-kkf.png"
+                alt="Logo KKF Label"
+                width={40}
+                height={40}
+                className="object-contain h-10 w-10 flex-shrink-0"
+                priority
+              />
+              <span className="text-xl font-black tracking-tighter text-zinc-900 group-hover:text-soft-pink-600 transition-colors uppercase hidden sm:block">
+                KKF LABEL
+              </span>
+            </Link>
+          </div>
 
           {/* Menu Desktop */}
-          <div className="hidden md:flex items-center gap-7 text-sm font-medium text-zinc-700">
+          <div className="hidden md:flex flex-1 justify-center items-center gap-7 text-sm font-medium text-zinc-700">
             <Link className="transition hover:text-soft-pink-600" href="/" prefetch={true}>
               Katalog
             </Link>
@@ -85,13 +87,12 @@ export function Navbar() {
             >
               Lacak Pesanan
             </Link>
-            {/* 🔥 FIX: Ubah navigasi desktop juga */}
             <Link className="transition hover:text-soft-pink-600" href="/akun">
               Saya
             </Link>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex-1 flex justify-end items-center gap-2">
             <Link
               href="/checkout"
               className="relative flex items-center justify-center h-10 w-10 bg-white border border-pink-200 rounded-full text-soft-pink-500 hover:bg-soft-pink-50 transition-all shadow-sm"

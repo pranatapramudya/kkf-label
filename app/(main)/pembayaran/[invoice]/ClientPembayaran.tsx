@@ -7,10 +7,11 @@ import { Upload, CheckCircle, Copy, AlertTriangle, Loader2, Clock } from "lucide
 
 export default function ClientPembayaran({ order }: { order: any }) {
   const [file, setFile] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedNominal, setCopiedNominal] = useState(false);
   const [timeLeft, setTimeLeft] = useState(3600);
 
   useEffect(() => {
@@ -57,6 +58,12 @@ export default function ClientPembayaran({ order }: { order: any }) {
     }
   };
 
+  const handleCopyNominal = () => {
+    navigator.clipboard.writeText(order.total.toString());
+    setCopiedNominal(true);
+    setTimeout(() => setCopiedNominal(false), 2000);
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
@@ -64,7 +71,7 @@ export default function ClientPembayaran({ order }: { order: any }) {
       return;
     }
 
-    setLoading(true);
+    setIsSubmitting(true);
     setError("");
 
     try {
@@ -87,7 +94,7 @@ export default function ClientPembayaran({ order }: { order: any }) {
     } catch (err: any) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -114,76 +121,61 @@ export default function ClientPembayaran({ order }: { order: any }) {
   }
 
   return (
-    <div className="min-h-screen bg-pink-50/30 py-10 px-4">
+    <div className="min-h-screen bg-pink-50/30 py-6 px-4">
       <div className="max-w-xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-zinc-900 mb-2">Menunggu Pembayaran</h1>
-          <p className="text-zinc-600">Selesaikan pembayaran untuk pesanan <span className="font-bold text-soft-pink-600">{order.kodePesanan}</span></p>
+        <div className="text-center mb-5">
+          <h1 className="text-xl md:text-3xl font-bold text-zinc-900 mb-1.5">Menunggu Pembayaran</h1>
+          <p className="text-sm md:text-base text-zinc-600">Selesaikan pembayaran untuk pesanan <span className="font-bold text-soft-pink-600">{order.kodePesanan}</span></p>
           
           {!success && (
-            <div className="inline-flex items-center justify-center gap-2 mt-4 bg-red-100 text-red-600 px-4 py-2 rounded-full border border-red-200">
+            <div className="inline-flex items-center justify-center gap-2 mt-3 bg-red-100 text-red-600 px-3 py-1.5 rounded-full border border-red-200">
               <Clock size={16} />
-              <span className="text-sm font-bold tracking-wide">Sisa Waktu Pembayaran: {formatWaktu}</span>
+              <span className="text-xs md:text-sm font-bold tracking-wide">Sisa Waktu: {formatWaktu}</span>
             </div>
           )}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-pink-100 p-6 md:p-8 mb-6">
-          <div className="text-center mb-6 pb-6 border-b border-pink-50">
-            <p className="text-sm font-medium text-zinc-500 mb-1">Total Tagihan</p>
-            <p className="text-4xl font-black text-soft-pink-600">{formatRupiah(order.total)}</p>
+        <div className="bg-white rounded-2xl shadow-sm border border-pink-100 p-5 md:p-6 mb-4">
+          <div className="text-center mb-4 pb-4 border-b border-pink-50">
+            <p className="text-sm font-medium text-zinc-500 mb-2">Total Tagihan</p>
+            <div className="flex items-center justify-center gap-3">
+              <p className="text-2xl md:text-3xl font-black text-soft-pink-600">{formatRupiah(order.total)}</p>
+              <button 
+                onClick={handleCopyNominal}
+                className="p-1.5 bg-soft-pink-50 text-soft-pink-600 rounded-lg hover:bg-soft-pink-100 transition flex items-center justify-center"
+                title="Salin Nominal"
+              >
+                {copiedNominal ? <CheckCircle size={18} /> : <Copy size={18} />}
+              </button>
+            </div>
+            {copiedNominal && <p className="text-xs text-emerald-600 font-bold mt-2 animate-in fade-in zoom-in-95">Nominal berhasil disalin!</p>}
           </div>
 
           {rekening ? (
-            <div className="bg-zinc-50 rounded-xl p-5 border border-zinc-200 mb-8">
-              <p className="text-sm font-medium text-zinc-500 mb-3">Transfer ke rekening berikut:</p>
-              <div className="flex justify-between items-center bg-white p-4 rounded-lg border border-zinc-100 shadow-sm">
+            <div className="bg-zinc-50 rounded-xl p-4 border border-zinc-200 mb-5">
+              <p className="text-xs font-medium text-zinc-500 mb-2">Transfer ke rekening berikut:</p>
+              <div className="flex justify-between items-center bg-white p-3 rounded-lg border border-zinc-100 shadow-sm">
                 <div>
-                  <p className="font-bold text-zinc-900">{rekening.bank}</p>
-                  <p className="text-2xl font-mono font-bold tracking-wider text-zinc-800 my-1">{rekening.norek}</p>
-                  <p className="text-sm text-zinc-600">a/n {rekening.nama}</p>
+                  <p className="font-bold text-zinc-900 text-sm">{rekening.bank}</p>
+                  <p className="text-lg md:text-xl font-mono font-bold tracking-wider text-zinc-800 my-0.5">{rekening.norek}</p>
+                  <p className="text-xs text-zinc-600">a/n {rekening.nama}</p>
                 </div>
                 <button 
                   onClick={handleCopy}
-                  className="p-3 bg-soft-pink-50 text-soft-pink-600 rounded-xl hover:bg-soft-pink-100 transition flex flex-col items-center gap-1"
+                  className="p-2.5 bg-soft-pink-50 text-soft-pink-600 rounded-xl hover:bg-soft-pink-100 transition flex flex-col items-center gap-1"
                 >
-                  {copied ? <CheckCircle size={20} /> : <Copy size={20} />}
+                  {copied ? <CheckCircle size={18} /> : <Copy size={18} />}
                   <span className="text-[10px] font-bold">{copied ? "Disalin" : "Salin"}</span>
                 </button>
               </div>
             </div>
           ) : (
-             <div className="bg-red-50 p-4 rounded-xl text-red-600 text-sm font-medium border border-red-100 mb-6">
+             <div className="bg-red-50 p-4 rounded-xl text-red-600 text-sm font-medium border border-red-100 mb-5">
                Metode pembayaran tidak valid untuk transfer manual.
              </div>
           )}
 
-          {success ? (
-            <div className="bg-emerald-50 rounded-2xl p-8 border border-emerald-100 text-center animate-in fade-in zoom-in-95 duration-500">
-              <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5 border-[6px] border-white shadow-sm">
-                <CheckCircle size={40} className="text-emerald-500" />
-              </div>
-              <h2 className="text-2xl font-black text-emerald-700 mb-2">Sukses!</h2>
-              <p className="text-emerald-600 font-medium mb-8">
-                Bukti Pembayaran Berhasil Diunggah! Menunggu verifikasi admin.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link 
-                  href="/"
-                  className="flex-1 max-w-[200px] border-2 border-emerald-200 text-emerald-700 bg-white font-bold py-3 px-4 rounded-xl hover:bg-emerald-50 hover:border-emerald-300 transition text-sm"
-                >
-                  Ke Beranda
-                </Link>
-                <Link 
-                  href="/lacak-pesanan"
-                  className="flex-1 max-w-[200px] bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-emerald-600 shadow-md transition text-sm"
-                >
-                  Lihat Pesanan Saya
-                </Link>
-              </div>
-            </div>
-          ) : (
+          {!success && (
             <div className="space-y-4">
               <h3 className="font-bold text-zinc-900 text-lg">Konfirmasi Pembayaran</h3>
               <p className="text-sm text-zinc-600 mb-4">
@@ -231,17 +223,52 @@ export default function ClientPembayaran({ order }: { order: any }) {
 
                 <button 
                   type="submit"
-                  disabled={!file || loading || timeLeft <= 0}
-                  className="w-full bg-soft-pink-600 hover:bg-soft-pink-700 disabled:bg-zinc-300 disabled:text-zinc-500 text-white font-bold py-4 rounded-xl transition shadow-md flex items-center justify-center gap-2"
+                  disabled={!file || isSubmitting || timeLeft <= 0}
+                  className={`w-full font-bold py-4 rounded-xl transition shadow-md flex items-center justify-center gap-2 ${
+                    isSubmitting
+                      ? "bg-soft-pink-600 text-white opacity-70 cursor-not-allowed"
+                      : !file || timeLeft <= 0
+                        ? "bg-zinc-300 text-zinc-500 cursor-not-allowed shadow-none"
+                        : "bg-soft-pink-600 hover:bg-soft-pink-700 text-white"
+                  }`}
                 >
-                  {loading && <Loader2 size={18} className="animate-spin" />}
-                  {loading ? "Mengunggah Bukti..." : timeLeft <= 0 ? "Waktu Habis" : "Kirim Bukti Pembayaran"}
+                  {isSubmitting && <Loader2 size={18} className="animate-spin" />}
+                  {isSubmitting ? "Mengunggah..." : timeLeft <= 0 ? "Waktu Habis" : "Kirim Bukti Pembayaran"}
                 </button>
               </form>
             </div>
           )}
         </div>
       </div>
+
+      {success && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-sm p-8 text-center shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-5 border-[6px] border-emerald-50 shadow-sm">
+              <CheckCircle size={40} className="text-emerald-500" />
+            </div>
+            <h2 className="text-2xl font-black text-zinc-900 mb-2">Pembayaran Sukses!</h2>
+            <p className="text-zinc-600 text-sm mb-8 leading-relaxed">
+              Bukti transfer Anda telah kami terima dan sedang diverifikasi oleh admin. Terima kasih!
+            </p>
+            
+            <div className="flex flex-col gap-3">
+              <Link 
+                href="/lacak-pesanan"
+                className="w-full bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-emerald-600 shadow-md transition text-sm flex items-center justify-center"
+              >
+                Lihat Pesanan Saya
+              </Link>
+              <Link 
+                href="/"
+                className="w-full border-2 border-zinc-200 text-zinc-600 bg-white font-bold py-3 px-4 rounded-xl hover:bg-zinc-50 transition text-sm flex items-center justify-center"
+              >
+                Kembali ke Beranda
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

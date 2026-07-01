@@ -1,16 +1,13 @@
-# Update PRD: Investigasi & Perbaikan Bug API Upload Bukti (Error 500)
+# Update PRD: Presisi Symmetrical Layout Header (Desktop)
 
-## 1. Gejala dan Analisis Masalah Saat Ini
-- **Kondisi:** Saat pembeli mengunggah bukti transfer manual, server mengembalikan status 500 (Internal Server Error).
-- **Fakta Penting:** Pesanan (Order) tetap masuk dan terlihat di Dashboard Admin dengan status `MENUNGGU_PEMBAYARAN`. 
-- **Kesimpulan:** Alur `checkout` di `/api/payment` berjalan sempurna. Kerusakan murni terisolasi pada _endpoint_ `/api/upload-bukti/route.ts` yang bertugas memperbarui (update) baris pesanan tersebut.
+## 1. Latar Belakang Masalah
+- **Header Tidak Presisi:** Pada tampilan mode *desktop* (PC/Web), menu navigasi utama ("Katalog", "Lacak Pesanan", "Saya") tidak berada di posisi tengah secara akurat (cenderung bergeser ke kanan).
+- Hal ini terjadi karena tata letak *flexbox* tidak membagi ruang secara merata antara Logo (kiri), Navigasi (tengah), dan Ikon Keranjang (kanan).
 
-## 2. Area Audit Utama untuk AI Agent
-Endpoint `/api/upload-bukti/route.ts` harus diaudit pada tiga titik rawan ini:
-1. **Ekstraksi FormData:** Di Next.js App Router, pemrosesan berkas (File) dari `request.formData()` sering menyebabkan _crash_ jika tidak di- _parse_ menjadi `Buffer` atau `ArrayBuffer` sebelum dikirim ke Supabase.
-2. **Koneksi Supabase Storage:** Pastikan pemanggilan `supabase.storage.from('bukti-transfer').upload()` menggunakan variabel lingkungan (_environment variables_) yang valid (`NEXT_PUBLIC_SUPABASE_URL` dan anon/service key).
-3. **Kueri Prisma (Database Update):** Pastikan parameter pencarian (`where`) saat melakukan `prisma.order.update` menggunakan kolom yang tepat. Seringkali *frontend* mengirim `invoice` (contoh: KKF-12345), namun Prisma mencari berdasarkan `id` (integer/UUID), sehingga menyebabkan _crash_ di sisi ORM.
-
-## 3. Ekspektasi Output
-- API harus membungkus seluruh proses dengan blok `try-catch`.
-- API harus memberikan balasan `json` berisi pesan *error* spesifik (tidak hanya kode 500) agar mempermudah _debugging_ lanjutan.
+## 2. Kebutuhan Solusi UX (Requirement)
+- **Symmetrical Flex Layout:**
+  - Gunakan komposisi 3 kolom seimbang pada *header*.
+  - **Kiri (Logo):** Memiliki proporsi ruang `flex-1` dengan posisi konten merapat ke kiri (`justify-start`).
+  - **Tengah (Navigasi):** Memiliki proporsi ruang `flex-1` dengan posisi konten merapat ke tengah (`justify-center`).
+  - **Kanan (Keranjang):** Memiliki proporsi ruang `flex-1` dengan posisi konten merapat ke kanan (`justify-end`).
+  - Pastikan aturan ini hanya berlaku di mode *desktop* (`md:` atau `lg:`), sedangkan mode *mobile* tetap mempertahankan tata letak bawaannya.

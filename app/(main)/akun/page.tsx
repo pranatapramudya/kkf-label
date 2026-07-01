@@ -268,28 +268,30 @@ export default function HalamanAkunSaya() {
         </div>
       )}
 
-      {/* Header Pink Melengkung */}
-      <div className="bg-pink-600 px-6 pt-10 pb-16 rounded-b-[2.5rem] shadow-sm text-white flex justify-between items-start sticky top-0 z-10 gap-2">
-        <div className="flex items-center gap-4 min-w-0 flex-1">
-          <div className="h-16 w-16 shrink-0 bg-white/20 rounded-full flex items-center justify-center border border-white/40 backdrop-blur-sm shadow-inner">
-            <User size={32} className="text-white" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h1 className="font-bold text-lg truncate w-full pr-2">{kontak}</h1>
-            <p className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full w-fit mt-1.5 shadow-sm">
-              Pelanggan KKF
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={logout}
-          className="shrink-0 text-white/80 hover:text-white transition p-2 bg-white/10 rounded-full backdrop-blur-sm"
-        >
-          <LogOut size={18} />
-        </button>
-      </div>
+      {/* Background Gradien Baru */}
+      <div className="absolute top-0 w-full h-72 bg-gradient-to-b from-pink-500/90 to-transparent z-0 pointer-events-none"></div>
 
-      <div className="px-4 -mt-10 max-w-3xl mx-auto relative z-20">
+      {/* Container Konten (PC Friendly) */}
+      <div className="relative z-10 max-w-3xl mx-auto px-4 pt-6">
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex items-center gap-4 min-w-0 flex-1">
+            <div className="h-16 w-16 shrink-0 bg-white/40 rounded-full flex items-center justify-center border border-white/60 backdrop-blur-sm shadow-inner">
+              <User size={32} className="text-rose-950" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="font-semibold text-sm truncate w-full pr-2 text-rose-950">{kontak}</h1>
+              <p className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full w-fit mt-1.5 shadow-sm">
+                Pelanggan KKF
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={logout}
+            className="shrink-0 text-rose-900/80 hover:text-rose-950 transition p-2 bg-white/40 rounded-full backdrop-blur-sm"
+          >
+            <LogOut size={18} />
+          </button>
+        </div>
 
 
         {/* Navigasi Status */}

@@ -68,14 +68,14 @@ export default async function HalamanUtama() {
               potongan bersih, serta pengalaman belanja yang nyaman dari HP.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <a href="#katalog" className="tombol-utama gap-2">
+              <a href="#katalog" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-pink-600 text-white font-semibold px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition-all">
                 Lihat Katalog
                 <ArrowRight size={18} />
               </a>
               {topProducts && topProducts.length > 0 && (
                 <a
                   href="#pilihan-disukai"
-                  className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-zinc-200 bg-white px-8 py-3.5 text-sm font-bold text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-pink-50 text-pink-600 font-semibold px-8 py-3 rounded-xl hover:bg-pink-100 transition-all"
                 >
                   Pilihan Paling Disukai
                 </a>
