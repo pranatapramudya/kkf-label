@@ -78,6 +78,7 @@ export async function POST(permintaan: Request) {
           ongkir: body.ongkir,
           total: body.total,
           statusPesanan: "MENUNGGU_PEMBAYARAN",
+          metodePembayaran: body.metodePembayaran || "MIDTRANS",
           source: affiliateRef ? "AFFILIATE" : "ORGANIC",
           affiliateId: affiliateRef,
           item: {
@@ -115,6 +116,11 @@ export async function POST(permintaan: Request) {
         }
       }
     });
+
+    // Jika metode pembayaran manual, kembalikan kode pesanan langsung tanpa buat token Midtrans
+    if (body.metodePembayaran && body.metodePembayaran !== "MIDTRANS") {
+      return NextResponse.json({ sukses: true, kodePesanan });
+    }
 
     // Menyusun daftar belanjaan buat ditampilin di nota Midtrans
     const itemDetails = [

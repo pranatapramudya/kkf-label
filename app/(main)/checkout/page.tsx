@@ -141,6 +141,7 @@ export default function HalamanCheckout() {
   const [pilihanOngkir, setPilihanOngkir] = useState<PilihanOngkir | null>(
     null,
   );
+  const [metodePembayaran, setMetodePembayaran] = useState("MIDTRANS");
 
   const [pesanOngkir, setPesanOngkir] = useState("");
   const [sedangMemuatWilayah, setSedangMemuatWilayah] = useState(false);
@@ -154,9 +155,11 @@ export default function HalamanCheckout() {
     total: 0,
   });
 
+  const [isRedirecting, setIsRedirecting] = useState(false);
+
   useEffect(() => {
-    if (itemKeranjang.length === 0 && !modalSukses.show) router.push("/");
-  }, [itemKeranjang.length, router, modalSukses.show]);
+    if (itemKeranjang.length === 0 && !modalSukses.show && !isRedirecting) router.push("/");
+  }, [itemKeranjang.length, router, modalSukses.show, isRedirecting]);
 
   const daftarProvinsiAman = useMemo(
     () => (Array.isArray(daftarProvinsi) ? daftarProvinsi : []),
@@ -306,49 +309,72 @@ export default function HalamanCheckout() {
         ongkir: pilihanOngkir.biaya,
         total: totalAkhir,
         items: itemKeranjang,
+        metodePembayaran,
       };
 
-      // 1. Minta tiket/token dulu ke server API kita
-      const resToken = await fetch("/api/payment", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(bodyPesanan),
-      });
+      if (metodePembayaran === "MIDTRANS") {
+        // 1. Minta tiket/token dulu ke server API kita
+        const resToken = await fetch("/api/payment", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(bodyPesanan),
+        });
 
-      const dataToken = await resToken.json();
+        const dataToken = await resToken.json();
 
-      if (!resToken.ok || !dataToken.token) {
-        throw new Error(dataToken.pesan || "Gagal membuka jalur pembayaran.");
+        if (!resToken.ok || !dataToken.token) {
+          throw new Error(dataToken.pesan || "Gagal membuka jalur pembayaran.");
+        }
+
+        setSedangMembayar(false); // Matikan loading biar popup bisa nongol
+
+        // 2. Munculin Popup Midtrans
+        // @ts-ignore
+        window.snap.pay(dataToken.token, {
+          onSuccess: async function (result: any) {
+            // Pesanan sudah tersimpan di database lewat /api/payment sebagai PENDING
+            kosongkanKeranjang();
+            setModalSukses({
+              show: true,
+              invoice: dataToken.kodePesanan,
+              total: totalAkhir,
+            });
+          },
+          onPending: function (result: any) {
+            setPesanPembayaran(
+              "Mohon selesaikan pembayaran Anda terlebih dahulu.",
+            );
+          },
+          onError: function (result: any) {
+            setPesanPembayaran("Proses pembayaran gagal atau ditolak bank.");
+          },
+          onClose: function () {
+            setPesanPembayaran(
+              "Anda menutup jendela pembayaran sebelum menyelesaikannya.",
+            );
+          },
+        });
+      } else {
+        // Alur Transfer Manual
+        const resManual = await fetch("/api/payment", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(bodyPesanan),
+        });
+
+        const dataManual = await resManual.json();
+
+        if (!resManual.ok || !dataManual.kodePesanan) {
+          throw new Error(dataManual.pesan || "Gagal memproses pesanan manual.");
+        }
+
+        setSedangMembayar(false);
+        setIsRedirecting(true);
+        kosongkanKeranjang();
+        
+        // Arahkan ke halaman pending payment khusus manual
+        router.push(`/pembayaran/${dataManual.kodePesanan}`);
       }
-
-      setSedangMembayar(false); // Matikan loading biar popup bisa nongol
-
-      // 2. Munculin Popup Midtrans
-      // @ts-ignore
-      window.snap.pay(dataToken.token, {
-        onSuccess: async function (result: any) {
-          // Pesanan sudah tersimpan di database lewat /api/payment sebagai PENDING
-          kosongkanKeranjang();
-          setModalSukses({
-            show: true,
-            invoice: dataToken.kodePesanan,
-            total: totalAkhir,
-          });
-        },
-        onPending: function (result: any) {
-          setPesanPembayaran(
-            "Mohon selesaikan pembayaran Anda terlebih dahulu.",
-          );
-        },
-        onError: function (result: any) {
-          setPesanPembayaran("Proses pembayaran gagal atau ditolak bank.");
-        },
-        onClose: function () {
-          setPesanPembayaran(
-            "Anda menutup jendela pembayaran sebelum menyelesaikannya.",
-          );
-        },
-      });
     } catch (galat) {
       setPesanPembayaran(
         galat instanceof Error ? galat.message : "Gagal memproses pembayaran.",
@@ -671,7 +697,31 @@ export default function HalamanCheckout() {
                 )}
 
                 <div className="border-t border-pink-100 pt-4 mt-4">
-                  <div className="flex justify-between items-end">
+                  <h3 className="font-bold text-zinc-900 mb-3 text-sm">Metode Pembayaran</h3>
+                  <div className="space-y-2 mb-4">
+                    {[
+                      { id: "MIDTRANS", label: "Otomatis (Virtual Account, QRIS, e-Wallet)", icon: <div className="bg-zinc-800 text-white font-bold text-[10px] w-12 h-7 flex items-center justify-center rounded shrink-0">PAY</div> },
+                      { id: "MANUAL_BCA", label: "Transfer Manual BCA", icon: <div className="bg-[#0066AE] text-white font-black text-[12px] w-12 h-7 flex items-center justify-center rounded shrink-0 tracking-wide italic">BCA</div> },
+                      { id: "MANUAL_BRI", label: "Transfer Manual BRI", icon: <div className="bg-[#00529C] text-white font-black text-[12px] w-12 h-7 flex items-center justify-center rounded shrink-0 tracking-wide">BRI</div> },
+                      { id: "MANUAL_SHOPEEPAY", label: "Transfer Manual ShopeePay", icon: <div className="bg-[#EE4D2D] text-white font-bold text-[8px] w-12 h-7 flex items-center justify-center rounded shrink-0 leading-none text-center">Shopee<br/>Pay</div> },
+                      { id: "MANUAL_GOPAY", label: "Transfer Manual GoPay", icon: <div className="bg-[#00AED6] text-white font-bold text-[10px] w-12 h-7 flex items-center justify-center rounded shrink-0">gopay</div> },
+                    ].map(method => (
+                      <label key={method.id} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${metodePembayaran === method.id ? 'border-soft-pink-500 bg-soft-pink-50/50' : 'border-zinc-200 hover:border-soft-pink-300'}`}>
+                        <input 
+                          type="radio" 
+                          name="metodePembayaran" 
+                          value={method.id} 
+                          checked={metodePembayaran === method.id}
+                          onChange={(e) => setMetodePembayaran(e.target.value)}
+                          className="text-soft-pink-600 focus:ring-soft-pink-500 w-4 h-4"
+                        />
+                        {method.icon}
+                        <span className="text-sm font-medium text-zinc-700">{method.label}</span>
+                      </label>
+                    ))}
+                  </div>
+
+                  <div className="flex justify-between items-end border-t border-pink-100 pt-4 mt-4">
                     <span className="font-bold text-zinc-600">
                       Total Tagihan
                     </span>

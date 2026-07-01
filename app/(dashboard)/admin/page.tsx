@@ -659,6 +659,43 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
     }
   };
 
+  const [sedangVerifikasi, setSedangVerifikasi] = useState(false);
+
+  const verifikasiPembayaran = async (statusPesananBaru: string) => {
+    if (!pesananDiedit) return;
+    setSedangVerifikasi(true);
+    try {
+      const res = await fetch(`/api/admin/pesanan/${pesananDiedit.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formEdit,
+          statusPesanan: statusPesananBaru,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Gagal menyimpan perubahan ke database.");
+
+      if (tampilkanNotifikasi) {
+        tampilkanNotifikasi(
+          statusPesananBaru === "DIPROSES" ? "Berhasil menerima pembayaran!" : "Bukti pembayaran ditolak.",
+          "sukses",
+        );
+      } else {
+        alert(statusPesananBaru === "DIPROSES" ? "Berhasil menerima pembayaran!" : "Bukti pembayaran ditolak.");
+      }
+
+      setPesananDiedit(null);
+      fetchPesanan(currentPage);
+    } catch (err: any) {
+      if (tampilkanNotifikasi)
+        tampilkanNotifikasi("Gagal: " + err.message, "gagal");
+      else alert("Gagal verifikasi pembayaran.");
+    } finally {
+      setSedangVerifikasi(false);
+    }
+  };
+
   const simpanUpdatePesanan = async (e: React.FormEvent) => {
     e.preventDefault();
     setSedangUpdate(true);
@@ -872,7 +909,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
 
       {pesananDiedit && (
         <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 sm:p-8 shadow-2xl animate-in zoom-in-95">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 sm:p-8 shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b border-pink-100 pb-4 mb-5">
               <div>
                 <h3 className="text-lg font-bold text-zinc-900">
@@ -910,85 +947,145 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
               </div>
             )}
 
-            <form onSubmit={simpanUpdatePesanan} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 mb-1.5">
-                  Status Pesanan
-                </label>
-                <select
-                  required
-                  value={formEdit.statusPesanan}
-                  onChange={(e) =>
-                    setFormEdit({ ...formEdit, statusPesanan: e.target.value })
-                  }
-                  className="w-full border border-zinc-300 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm font-medium"
+            {pesananDiedit.buktiTransferUrl && (
+              <div className="mb-5 bg-blue-50 p-4 rounded-xl border border-blue-100 flex flex-col gap-3 animate-in fade-in zoom-in-95">
+                <p className="text-sm text-blue-800 font-medium text-center">
+                  Arsip Bukti Pembayaran Manual
+                </p>
+                <div 
+                  className="relative w-full h-56 bg-zinc-200 rounded-lg overflow-hidden cursor-pointer shadow-inner hover:opacity-90 transition group"
+                  onClick={() => window.open(pesananDiedit.buktiTransferUrl, "_blank")}
                 >
-                  <option value="MENUNGGU_PEMBAYARAN">
-                    Menunggu Pembayaran
-                  </option>
-                  <option value="DIPROSES">Sedang Diproses (Dikemas)</option>
-                  <option value="DIKIRIM">Dikirim (Dalam Perjalanan)</option>
-                  <option value="SELESAI">Selesai (Diterima Pembeli)</option>
-                  <option value="DIBATALKAN">Dibatalkan</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 mb-1.5">
-                  Kurir / Ekspedisi Pilihan Pembeli
-                </label>
-                <input
-                  type="text"
-                  readOnly={true}
-                  value={pesananDiedit?.ekspedisi || "Belum dipilih"}
-                  className="w-full border border-zinc-200 p-3 rounded-xl bg-zinc-100 cursor-not-allowed text-zinc-500 text-sm font-bold uppercase focus:outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 mb-1.5">
-                  Nomor Resi (Opsional)
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Contoh: SPXID12345678"
-                    value={formEdit.nomorResi}
-                    onChange={(e) =>
-                      setFormEdit({ ...formEdit, nomorResi: e.target.value })
-                    }
-                    className="w-full border border-zinc-300 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm font-bold tracking-wide"
+                  <img 
+                    src={pesananDiedit.buktiTransferUrl} 
+                    alt="Bukti Transfer" 
+                    className="object-contain w-full h-full"
                   />
-                  <button
-                    type="button"
-                    onClick={handleBuatResiBiteship}
-                    disabled={sedangBuatResi || !!formEdit.nomorResi}
-                    className="shrink-0 bg-zinc-900 text-white px-4 rounded-xl font-bold text-xs hover:bg-zinc-800 transition disabled:opacity-50 flex items-center gap-2"
-                  >
-                    {sedangBuatResi ? <Loader2 size={14} className="animate-spin" /> : <Package size={14} />}
-                    Buat Resi (Biteship)
-                  </button>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <span className="text-white font-bold text-sm bg-black/50 px-3 py-1.5 rounded-full">Klik untuk perbesar</span>
+                  </div>
                 </div>
               </div>
-              <div className="pt-4 flex gap-3">
+            )}
+
+            {pesananDiedit.statusPesanan === "MENUNGGU_VERIFIKASI" ? (
+              <div className="space-y-4 animate-in fade-in zoom-in-95">
+                {!pesananDiedit.buktiTransferUrl && (
+                  <div className="mb-4 bg-red-50 p-4 rounded-xl border border-red-100 flex flex-col gap-3">
+                    <p className="text-center text-sm text-red-600 font-bold">Bukti transfer tidak ditemukan meskipun status menunggu verifikasi.</p>
+                  </div>
+                )}
+                
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => verifikasiPembayaran("MENUNGGU_PEMBAYARAN")}
+                    disabled={sedangVerifikasi}
+                    className="flex-1 py-3 font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl hover:bg-red-100 transition text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {sedangVerifikasi ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />} Tolak Bukti
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => verifikasiPembayaran("DIPROSES")}
+                    disabled={sedangVerifikasi}
+                    className="flex-1 py-3 font-bold text-white bg-emerald-500 rounded-xl shadow-md hover:bg-emerald-600 transition flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                  >
+                    {sedangVerifikasi ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />} Terima Pembayaran
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={() => setPesananDiedit(null)}
-                  className="flex-1 py-3 font-bold text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition text-sm"
+                  className="w-full mt-2 py-3 font-bold text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition text-sm"
                 >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={sedangUpdate}
-                  className="flex-1 py-3 font-bold text-white bg-soft-pink-600 rounded-xl shadow-md hover:bg-soft-pink-700 transition flex items-center justify-center gap-2 text-sm disabled:bg-zinc-400"
-                >
-                  {sedangUpdate ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    "Simpan Update"
-                  )}
+                  Tutup
                 </button>
               </div>
-            </form>
+            ) : (
+              <form onSubmit={simpanUpdatePesanan} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">
+                    Status Pesanan
+                  </label>
+                  <select
+                    required
+                    value={formEdit.statusPesanan}
+                    onChange={(e) =>
+                      setFormEdit({ ...formEdit, statusPesanan: e.target.value })
+                    }
+                    className="w-full border border-zinc-300 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm font-medium"
+                  >
+                    <option value="MENUNGGU_PEMBAYARAN">
+                      Menunggu Pembayaran
+                    </option>
+                    <option value="MENUNGGU_VERIFIKASI">
+                      Menunggu Verifikasi (Transfer Manual)
+                    </option>
+                    <option value="DIPROSES">Sedang Diproses (Dikemas)</option>
+                    <option value="DIKIRIM">Dikirim (Dalam Perjalanan)</option>
+                    <option value="SELESAI">Selesai (Diterima Pembeli)</option>
+                    <option value="DIBATALKAN">Dibatalkan</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">
+                    Kurir / Ekspedisi Pilihan Pembeli
+                  </label>
+                  <input
+                    type="text"
+                    readOnly={true}
+                    value={pesananDiedit?.ekspedisi || "Belum dipilih"}
+                    className="w-full border border-zinc-200 p-3 rounded-xl bg-zinc-100 cursor-not-allowed text-zinc-500 text-sm font-bold uppercase focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 mb-1.5">
+                    Nomor Resi (Opsional)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Contoh: SPXID12345678"
+                      value={formEdit.nomorResi}
+                      onChange={(e) =>
+                        setFormEdit({ ...formEdit, nomorResi: e.target.value })
+                      }
+                      className="w-full border border-zinc-300 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm font-bold tracking-wide"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleBuatResiBiteship}
+                      disabled={sedangBuatResi || !!formEdit.nomorResi}
+                      className="shrink-0 bg-zinc-900 text-white px-4 rounded-xl font-bold text-xs hover:bg-zinc-800 transition disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {sedangBuatResi ? <Loader2 size={14} className="animate-spin" /> : <Package size={14} />}
+                      Buat Resi (Biteship)
+                    </button>
+                  </div>
+                </div>
+                <div className="pt-4 flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPesananDiedit(null)}
+                    className="flex-1 py-3 font-bold text-zinc-600 bg-zinc-100 rounded-xl hover:bg-zinc-200 transition text-sm"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={sedangUpdate}
+                    className="flex-1 py-3 font-bold text-white bg-soft-pink-600 rounded-xl shadow-md hover:bg-soft-pink-700 transition flex items-center justify-center gap-2 text-sm disabled:bg-zinc-400"
+                  >
+                    {sedangUpdate ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      "Simpan Update"
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

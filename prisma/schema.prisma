@@ -15,6 +15,7 @@ enum PeranUser {
 
 enum StatusPesanan {
   MENUNGGU_PEMBAYARAN
+  MENUNGGU_VERIFIKASI
   DIBAYAR
   DIPROSES
   DIKIRIM
@@ -122,6 +123,8 @@ model Order {
   ongkir             Int
   total              Int
   statusPesanan      StatusPesanan   @default(MENUNGGU_PEMBAYARAN)
+  metodePembayaran   String?         @default("MIDTRANS")
+  buktiTransferUrl   String?
   source             OrderSource     @default(ORGANIC)
   affiliateId        String?
   item               OrderItem[]

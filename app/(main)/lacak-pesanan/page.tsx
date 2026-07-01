@@ -43,7 +43,7 @@ export default function LacakPesananPage() {
         throw new Error(data.pesan || "Gagal melacak pesanan.");
       }
 
-      setHasilDB(data.pesan);
+      setHasilDB(data.pesanan);
       setHasilLacak(data.lacak);
     } catch (galat: any) {
       setErrorPesan(galat.message);
@@ -106,6 +106,26 @@ export default function LacakPesananPage() {
         {/* HASIL PENCARIAN */}
         {hasilDB && (
           <div className="space-y-6 animate-in slide-in-from-bottom-8 duration-500 fade-in">
+            {hasilDB.statusPesanan === "MENUNGGU_PEMBAYARAN" && hasilDB.buktiTransferUrl && (
+              <div className="bg-red-50 p-5 rounded-3xl border border-red-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle size={24} className="text-red-500 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="font-bold text-red-700 text-lg">Pesanan ditolak</h4>
+                    <p className="text-red-600 text-sm mt-1">
+                      Foto transaksi buram atau tidak valid. Silakan upload ulang bukti pembayaran yang benar.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => window.location.href = `/pembayaran/${hasilDB.kodePesanan}`}
+                  className="shrink-0 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 rounded-xl transition shadow-md whitespace-nowrap"
+                >
+                  Upload Ulang
+                </button>
+              </div>
+            )}
+
             {/* KARTU INFO INVOICE */}
             <div className="bg-white p-6 md:p-8 rounded-3xl border border-pink-100 shadow-sm">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-pink-50 pb-5 mb-5">
