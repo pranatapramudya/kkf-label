@@ -245,8 +245,6 @@ export default function HalamanCheckout() {
     if (!provinsiDipilih) return;
     async function ambilKota() {
       setSedangMemuatWilayah(true);
-      setKotaDipilih("");
-      setPilihanOngkir(null);
       try {
         const respons = await fetch(
           `/api/wilayah/kabupaten/${provinsiDipilih}`,
@@ -261,6 +259,14 @@ export default function HalamanCheckout() {
             }))
           : [];
         setDaftarKota(formatAman);
+        
+        setKotaDipilih(prev => {
+          if (prev && formatAman.find((k: any) => k.city_id === prev)) {
+             return prev;
+          }
+          setPilihanOngkir(null);
+          return "";
+        });
       } catch (err) {
         console.error("Gagal memuat kota:", err);
       } finally {

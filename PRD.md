@@ -1,13 +1,12 @@
-# Update PRD: Presisi Symmetrical Layout Header (Desktop)
+# Update PRD: Bug Fix Client-Side Routing (useRouter)
 
 ## 1. Latar Belakang Masalah
-- **Header Tidak Presisi:** Pada tampilan mode *desktop* (PC/Web), menu navigasi utama ("Katalog", "Lacak Pesanan", "Saya") tidak berada di posisi tengah secara akurat (cenderung bergeser ke kanan).
-- Hal ini terjadi karena tata letak *flexbox* tidak membagi ruang secara merata antara Logo (kiri), Navigasi (tengah), dan Ikon Keranjang (kanan).
+- **Next.js Error Overlay:** Muncul *error* "1 Issue" pada saat pengguna menekan tombol "Lihat Pesanan Saya" atau "Kembali ke Beranda" di dalam modal sukses pembayaran.
+- **Penyebab:** Kesalahan implementasi *hook* navigasi di Next.js App Router (kemungkinan besar karena *import path* yang salah atau inisialisasi yang tertinggal).
 
-## 2. Kebutuhan Solusi UX (Requirement)
-- **Symmetrical Flex Layout:**
-  - Gunakan komposisi 3 kolom seimbang pada *header*.
-  - **Kiri (Logo):** Memiliki proporsi ruang `flex-1` dengan posisi konten merapat ke kiri (`justify-start`).
-  - **Tengah (Navigasi):** Memiliki proporsi ruang `flex-1` dengan posisi konten merapat ke tengah (`justify-center`).
-  - **Kanan (Keranjang):** Memiliki proporsi ruang `flex-1` dengan posisi konten merapat ke kanan (`justify-end`).
-  - Pastikan aturan ini hanya berlaku di mode *desktop* (`md:` atau `lg:`), sedangkan mode *mobile* tetap mempertahankan tata letak bawaannya.
+## 2. Kebutuhan Solusi Logika (Requirement)
+- **App Router Navigation:**
+  - Pastikan komponen yang merender tombol tersebut menggunakan direktif `"use client"`.
+  - Impor *hook* secara eksplisit: `import { useRouter } from 'next/navigation'`. (TIDAK BOLEH menggunakan `next/router`).
+  - Inisialisasi *hook* di dalam komponen utama sebelum fungsi *return*: `const router = useRouter();`.
+  - Bungkus pemanggilan di dalam fungsi *handler* yang benar (contoh: `onClick={() => router.push('/saya')}`).

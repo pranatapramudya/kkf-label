@@ -70,7 +70,7 @@ export function Navbar() {
                 className="object-contain h-10 w-10 flex-shrink-0"
                 priority
               />
-              <span className="text-xl font-black tracking-tighter text-zinc-900 group-hover:text-soft-pink-600 transition-colors uppercase hidden sm:block">
+              <span className="text-xl font-black tracking-tighter text-zinc-900 group-hover:text-soft-pink-600 transition-colors uppercase">
                 KKF LABEL
               </span>
             </Link>
@@ -127,13 +127,13 @@ export function Navbar() {
                       }
                       setActiveNav(item.href);
                     }}
-                    className="relative flex flex-col items-center w-16 h-full"
+                    className="relative flex flex-col items-center justify-center gap-1 w-16 h-full"
                   >
                     <div
-                      className={`absolute transition-all duration-300 ease-in-out flex items-center justify-center ${
+                      className={`transition-all duration-300 ease-in-out flex items-center justify-center ${
                         isActive
-                          ? "-top-5 h-14 w-14 bg-soft-pink-600 text-white rounded-full shadow-lg border-4 border-white"
-                          : "top-2 h-8 w-8 text-zinc-400 hover:text-soft-pink-500"
+                          ? "absolute -top-5 h-14 w-14 bg-soft-pink-600 text-white rounded-full shadow-lg border-4 border-white"
+                          : "relative h-8 w-8 text-zinc-400 hover:text-soft-pink-500"
                       }`}
                     >
                       <item.icon size={isActive ? 24 : 22} />
@@ -150,10 +150,10 @@ export function Navbar() {
                       )}
                     </div>
                     <span
-                      className={`absolute transition-all duration-300 font-bold ${
+                      className={`transition-all duration-300 font-bold mt-1 ${
                         isActive
-                          ? "bottom-1 text-[10px] text-soft-pink-600"
-                          : "bottom-1.5 text-[9px] text-zinc-500"
+                          ? "absolute bottom-1 text-[10px] text-soft-pink-600"
+                          : "relative text-[9px] text-zinc-500"
                       }`}
                     >
                       {item.name}

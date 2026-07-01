@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { formatRupiah } from "@/lib/format";
 import { Upload, CheckCircle, Copy, AlertTriangle, Loader2, Clock } from "lucide-react";
 
 export default function ClientPembayaran({ order }: { order: any }) {
+  const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -253,18 +255,18 @@ export default function ClientPembayaran({ order }: { order: any }) {
             </p>
             
             <div className="flex flex-col gap-3">
-              <Link 
-                href="/lacak-pesanan"
+              <button 
+                onClick={() => router.push('/akun')}
                 className="w-full bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl hover:bg-emerald-600 shadow-md transition text-sm flex items-center justify-center"
               >
                 Lihat Pesanan Saya
-              </Link>
-              <Link 
-                href="/"
+              </button>
+              <button 
+                onClick={() => router.push('/')}
                 className="w-full border-2 border-zinc-200 text-zinc-600 bg-white font-bold py-3 px-4 rounded-xl hover:bg-zinc-50 transition text-sm flex items-center justify-center"
               >
                 Kembali ke Beranda
-              </Link>
+              </button>
             </div>
           </div>
         </div>

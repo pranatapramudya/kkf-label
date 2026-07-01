@@ -21,12 +21,9 @@ export async function POST(permintaan: Request) {
     const cookieStore = await cookies();
     const affiliateRef = cookieStore.get("affiliate_ref")?.value || null;
 
-    // Bikin nomor invoice otomatis ala startup
-    const tanggal = new Date();
-    const tahun = tanggal.getFullYear().toString().slice(-2);
-    const bulan = (tanggal.getMonth() + 1).toString().padStart(2, "0");
-    const acak = Math.floor(1000 + Math.random() * 9000);
-    const kodePesanan = `KKF-${tahun}${bulan}${acak}`;
+    // Bikin nomor invoice otomatis ala startup yang terjamin unik
+    const uniqueKodePesanan = 'KKF-' + Date.now().toString() + '-' + Math.floor(Math.random() * 1000).toString();
+    const kodePesanan = uniqueKodePesanan;
 
     // Wajib dibulatkan, Midtrans bakal error kalau ada angka desimal/koma
     const grossAmount = Math.round(body.total);
