@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
-import { admin } from "@/lib/firebase-admin";
+import "@/lib/firebase-admin";
 import { getMessaging } from "firebase-admin/messaging";
 
 const prisma = new PrismaClient();
