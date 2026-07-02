@@ -13,7 +13,7 @@ export async function GET() {
       "https://rajaongkir.komerce.id/api/v1/destination/province",
       {
         method: "GET",
-        headers: { key: apiKey },
+        headers: { Key: apiKey },
         cache: "no-store",
       },
     );
@@ -30,15 +30,12 @@ export async function GET() {
 
     const results = data.data || [];
     
-    // Bungkus ke format RajaOngkir agar frontend tidak patah
-    return NextResponse.json({
-      rajaongkir: {
-        results: results.map((p: any) => ({
-          province_id: String(p.id),
-          province: p.name,
-        }))
-      }
-    });
+    const daftarProvinsi = results.map((p: any) => ({
+      id: String(p.id),
+      nama: p.name,
+    }));
+
+    return NextResponse.json({ data: daftarProvinsi });
   } catch (galat: any) {
     return NextResponse.json(
       { pesan: "Gagal memuat provinsi Komerce", detail: galat.message },

@@ -25,7 +25,7 @@ export async function POST(permintaan: Request) {
       {
         method: "POST",
         headers: {
-          key: apiKey,
+          Key: apiKey,
           "content-type": "application/x-www-form-urlencoded",
         },
         body: parameter.toString(),

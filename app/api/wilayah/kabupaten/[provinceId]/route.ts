@@ -16,7 +16,7 @@ export async function GET(
       `https://rajaongkir.komerce.id/api/v1/destination/city/${provinceId}`,
       {
         method: "GET",
-        headers: { key: apiKey },
+        headers: { Key: apiKey },
         cache: "no-store",
       },
     );
@@ -33,17 +33,13 @@ export async function GET(
 
     const results = data.data || [];
 
-    // Bungkus ke format RajaOngkir agar frontend tidak patah
-    return NextResponse.json({
-      rajaongkir: {
-        results: results.map((c: any) => ({
-          city_id: String(c.id),
-          city_name: c.name,
-          type: c.type || "",
-          postal_code: c.postal_code || "",
-        }))
-      }
-    });
+    const daftarKabupaten = results.map((c: any) => ({
+      id: String(c.id),
+      nama: c.name,
+      kodepos: c.postal_code || "",
+    }));
+
+    return NextResponse.json({ data: daftarKabupaten });
   } catch (galat: any) {
     return NextResponse.json(
       { pesan: "Gagal memuat kabupaten Komerce", detail: galat.message },
