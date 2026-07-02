@@ -1,14 +1,14 @@
-# Update PRD: UI Enhancement - Copy Order ID Button
+# Update PRD: Fix Shipping API (Enforce RajaOngkir Starter)
 
 ## 1. Latar Belakang Masalah
-- Pada halaman "Checkout Success" (Pembayaran Diproses) dan halaman "Saya" (Riwayat Pesanan), pengguna kesulitan menyalin Order ID/Nomor Pesanan untuk keperluan pelacakan.
-- Dibutuhkan tombol *copy* (*clipboard*) berukuran kecil di sebelah teks Order ID untuk meningkatkan UX pelacakan pesanan.
+- Terdapat ketidaksesuaian implementasi: Endpoint saat ini menggunakan Komerce API yang sedang terkena *limit*, padahal proyek ini dikonfigurasi untuk menggunakan RajaOngkir Starter (Free).
+- Dibutuhkan perombakan *route handler* ongkir agar 100% menggunakan API resmi RajaOngkir.
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **Komponen Fungsional:**
-  - Buat utilitas fungsi penyalinan menggunakan `navigator.clipboard.writeText(orderId)`.
-  - Berikan *feedback* visual sementara kepada pengguna setelah tombol ditekan (misal: ikon berubah menjadi tanda centang atau muncul *toast* "Disalin!").
-- **Implementasi UI:**
-  - **Halaman Checkout Success:** Letakkan ikon copy kecil persis di sebelah teks Order ID (misal: KKF-178...).
-  - **Halaman Profile/Pesanan Saya:** Letakkan ikon copy kecil di sebelah Order ID pada daftar kartu riwayat pesanan (seperti yang terlihat pada status "MENUNGGU VERIFIKASI").
-  - Gunakan ikon standar (seperti `Copy` dari `lucide-react` atau library ikon yang digunakan di proyek ini).
+- **Refaktor `app/api/ongkir/route.ts`:**
+  - Hapus seluruh URL endpoint Komerce.
+  - Gunakan endpoint resmi RajaOngkir: `https://api.rajaongkir.com/starter/cost`.
+  - Gunakan Header `key` dengan nilai dari `process.env.RAJAONGKIR_API_KEY`.
+- **Penyesuaian Payload & Response:**
+  - Kirim *body* request sesuai format RajaOngkir: `origin`, `destination`, `weight`, dan `courier` (dukungan kurir gratisan: jne, pos, tiki).
+  - Lakukan *mapping* dari *response* `data.rajaongkir.results` menjadi *array* berformat seragam yang bisa dibaca oleh *frontend* (komponen *checkout* saat ini) agar UI tidak rusak.

@@ -11,54 +11,60 @@ export async function POST(permintaan: Request) {
   try {
     const body = await permintaan.json();
 
-    // Format pengiriman data Komerce V2
     const parameter = new URLSearchParams({
-      origin: process.env.RAJAONGKIR_ORIGIN_ID || "440", // Ambil dari env, default 440 (Sumedang)
+      origin: process.env.RAJAONGKIR_ORIGIN_ID || "440", // 440 = Sumedang
       destination: body.kotaTujuan,
       weight: String(body.berat ?? 1000),
       courier: body.ekspedisi.toLowerCase(),
     });
 
-    // 🚀 TEMBAK KE KOMERCE V2
-    const respons = await fetch(
-      "https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost",
-      {
-        method: "POST",
-        headers: {
-          key: apiKey,
-          "content-type": "application/x-www-form-urlencoded",
-        },
-        body: parameter.toString(),
+    // Tembak ke API Resmi RajaOngkir Starter
+    const respons = await fetch("https://api.rajaongkir.com/starter/cost", {
+      method: "POST",
+      headers: {
+        key: apiKey,
+        "content-type": "application/x-www-form-urlencoded",
       },
-    );
+      body: parameter.toString(),
+    });
 
     const data = await respons.json();
 
-    // Cek kalau Komerce nolak (misal ID kota salah atau limit habis)
-    if (data.meta?.status === false || data.meta?.status === "error") {
+    // Cek error dari RajaOngkir
+    if (data.rajaongkir?.status?.code !== 200) {
       return NextResponse.json(
-        { pesan: data.meta.message || "Gagal dari API Ekspedisi" },
+        { pesan: data.rajaongkir?.status?.description || "Gagal mengambil ongkir dari RajaOngkir" },
         { status: 400 },
       );
     }
 
-    const results = data.data || [];
+    const results = data.rajaongkir.results || [];
+    
+    // Transformasi data agar sesuai dengan format yang diharapkan oleh frontend
+    const daftarBiaya: any[] = [];
 
-    // Mapping hasil biaya Komerce
-    const daftarBiaya = results.map((layanan: any) => ({
-      ekspedisi: body.ekspedisi.toUpperCase(),
-      layanan: layanan.service || layanan.name,
-      namaLayanan: layanan.description || layanan.service || "Reguler",
-      biaya: Number(layanan.cost || layanan.price || 0),
-      estimasi: layanan.etd || layanan.estimation || "-",
-    }));
+    if (results.length > 0 && results[0].costs) {
+      results[0].costs.forEach((layanan: any) => {
+        if (layanan.cost && layanan.cost.length > 0) {
+          const detailBiaya = layanan.cost[0];
+          daftarBiaya.push({
+            ekspedisi: body.ekspedisi.toUpperCase(),
+            layanan: layanan.service,
+            namaLayanan: layanan.description || layanan.service,
+            biaya: Number(detailBiaya.value || 0),
+            estimasi: detailBiaya.etd || "-",
+          });
+        }
+      });
+    }
 
+    // Urutkan biaya dari yang termurah
     daftarBiaya.sort((a: any, b: any) => a.biaya - b.biaya);
 
     return NextResponse.json({ daftarBiaya });
   } catch (galat: any) {
     return NextResponse.json(
-      { pesan: "Gagal menghitung ongkir", detail: galat.message },
+      { pesan: "Terjadi kesalahan saat menghitung ongkir", detail: galat.message },
       { status: 500 },
     );
   }
