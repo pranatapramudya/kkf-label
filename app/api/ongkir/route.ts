@@ -34,10 +34,10 @@ export async function POST(permintaan: Request) {
 
     const data = await respons.json();
 
-    // Cek kalau Komerce nolak (misal ID kota salah)
-    if (data.meta?.status === false) {
+    // Cek kalau Komerce nolak (misal ID kota salah atau limit habis)
+    if (data.meta?.status === false || data.meta?.status === "error") {
       return NextResponse.json(
-        { pesan: data.meta.message || "Gagal dari API Komerce" },
+        { pesan: data.meta.message || "Gagal dari API Ekspedisi" },
         { status: 400 },
       );
     }
