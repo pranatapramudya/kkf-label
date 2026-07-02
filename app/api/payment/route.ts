@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
 import { admin } from "@/lib/firebase-admin";
+import { getMessaging } from "firebase-admin/messaging";
 
 const prisma = new PrismaClient();
 
@@ -129,7 +130,7 @@ export async function POST(permintaan: Request) {
       const adminTokens = await prisma.adminToken.findMany();
       if (adminTokens.length > 0) {
         const tokens = adminTokens.map(t => t.token);
-        await admin.messaging().sendEachForMulticast({
+        await getMessaging().sendEachForMulticast({
           tokens,
           notification: {
             title: "Pesanan Baru KKF Label!",

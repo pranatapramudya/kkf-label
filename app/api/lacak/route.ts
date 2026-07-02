@@ -51,7 +51,18 @@ export async function POST(permintaan: Request) {
         },
       );
 
-      const dataKomerce = await respons.json();
+      const text = await respons.text();
+      let dataKomerce;
+      
+      try {
+        dataKomerce = JSON.parse(text);
+      } catch (e) {
+        console.error("Gagal parse JSON API Kurir:", text.substring(0, 100));
+        return NextResponse.json(
+          { pesan: "Gagal melacak resi dari server kurir." },
+          { status: 502 }
+        );
+      }
 
       if (dataKomerce.meta?.status === true) {
         riwayatPelacakan = dataKomerce.data?.manifest || [];
