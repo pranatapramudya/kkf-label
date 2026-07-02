@@ -1,45 +1,51 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const apiKey = process.env.RAJAONGKIR_API_KEY;
-  if (!apiKey)
-    return NextResponse.json({ pesan: "API Key kosong" }, { status: 500 });
+  // Hardcode 34 Provinsi karena Biteship tidak menyediakan endpoint list provinsi statis
+  const daftarProvinsi = [
+    { id: "Aceh", nama: "Nanggroe Aceh Darussalam (NAD)" },
+    { id: "Sumatera Utara", nama: "Sumatera Utara" },
+    { id: "Sumatera Barat", nama: "Sumatera Barat" },
+    { id: "Riau", nama: "Riau" },
+    { id: "Jambi", nama: "Jambi" },
+    { id: "Sumatera Selatan", nama: "Sumatera Selatan" },
+    { id: "Bengkulu", nama: "Bengkulu" },
+    { id: "Lampung", nama: "Lampung" },
+    { id: "Kepulauan Bangka Belitung", nama: "Kepulauan Bangka Belitung" },
+    { id: "Kepulauan Riau", nama: "Kepulauan Riau" },
+    { id: "DKI Jakarta", nama: "DKI Jakarta" },
+    { id: "Jawa Barat", nama: "Jawa Barat" },
+    { id: "Jawa Tengah", nama: "Jawa Tengah" },
+    { id: "DI Yogyakarta", nama: "DI Yogyakarta" },
+    { id: "Jawa Timur", nama: "Jawa Timur" },
+    { id: "Banten", nama: "Banten" },
+    { id: "Bali", nama: "Bali" },
+    { id: "Nusa Tenggara Barat", nama: "Nusa Tenggara Barat (NTB)" },
+    { id: "Nusa Tenggara Timur", nama: "Nusa Tenggara Timur (NTT)" },
+    { id: "Kalimantan Barat", nama: "Kalimantan Barat" },
+    { id: "Kalimantan Tengah", nama: "Kalimantan Tengah" },
+    { id: "Kalimantan Selatan", nama: "Kalimantan Selatan" },
+    { id: "Kalimantan Timur", nama: "Kalimantan Timur" },
+    { id: "Kalimantan Utara", nama: "Kalimantan Utara" },
+    { id: "Sulawesi Utara", nama: "Sulawesi Utara" },
+    { id: "Sulawesi Tengah", nama: "Sulawesi Tengah" },
+    { id: "Sulawesi Selatan", nama: "Sulawesi Selatan" },
+    { id: "Sulawesi Tenggara", nama: "Sulawesi Tenggara" },
+    { id: "Gorontalo", nama: "Gorontalo" },
+    { id: "Sulawesi Barat", nama: "Sulawesi Barat" },
+    { id: "Maluku", nama: "Maluku" },
+    { id: "Maluku Utara", nama: "Maluku Utara" },
+    { id: "Papua", nama: "Papua" },
+    { id: "Papua Barat", nama: "Papua Barat" }
+  ];
 
-  try {
-    const respons = await fetch(
-      "https://rajaongkir.komerce.id/api/v1/destination/province",
-      {
-        method: "GET",
-        headers: { key: apiKey },
-        cache: "no-store",
-      },
-    );
-
-    const data = await respons.json();
-
-    // Validasi Error dari Komerce
-    if (data.meta?.status === false || data.meta?.status === "error" || data.meta?.code >= 400) {
-      return NextResponse.json(
-        { pesan: data.meta?.message || "Gagal mengambil provinsi dari Komerce" },
-        { status: 400 }
-      );
+  // Kembalikan dengan format Komerce/RajaOngkir agar frontend TIDAK patah
+  return NextResponse.json({
+    rajaongkir: {
+      results: daftarProvinsi.map((p) => ({
+        province_id: p.id, // ID menggunakan nama agar pencarian BiteShip selanjutnya mudah
+        province: p.nama,
+      }))
     }
-
-    const results = data.data || [];
-    
-    // Bungkus ke format RajaOngkir agar frontend tidak patah
-    return NextResponse.json({
-      rajaongkir: {
-        results: results.map((p: any) => ({
-          province_id: String(p.id),
-          province: p.name,
-        }))
-      }
-    });
-  } catch (galat: any) {
-    return NextResponse.json(
-      { pesan: "Gagal memuat provinsi Komerce", detail: galat.message },
-      { status: 500 },
-    );
-  }
+  });
 }

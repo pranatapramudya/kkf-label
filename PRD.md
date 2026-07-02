@@ -1,18 +1,19 @@
-# Update PRD: Fix Region Fetching (Komerce Wrapper for RajaOngkir)
+# Update PRD: Full Migration to BiteShip (Location & Shipping Rates)
 
 ## 1. Latar Belakang Masalah
-- *Dropdown* Provinsi dan Kota mati ("Pencarian tidak ditemukan").
-- Kesalahan diagnosis sebelumnya: Proyek ini secara sah menggunakan API Key dari ekosistem Komerce (yang membungkus RajaOngkir), bukan dari rajaongkir.com langsung. Sisa kuota masih tersedia (30/100).
-- Bug terjadi karena *backend* melakukan *pass-through* (proxy murni) respons Komerce, sementara *frontend* mengharapkan struktur data JSON resmi RajaOngkir (misal mencari properti `data.rajaongkir.results`).
+- API Komerce (RajaOngkir wrapper) telah mencapai limit harian (Error 429: Daily limit exceeded).
+- Efek dari limit ini mematikan dua sistem krusial sekaligus: Dropdown Wilayah (Provinsi & Kota) menjadi kosong, dan Kalkulasi Ongkos Kirim gagal total.
+- Migrasi total ke BiteShip diperlukan segera menggunakan `BITESHIP_API_KEY`.
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **Refaktor Route Handler Wilayah (Provinsi & Kota):**
-  - Pastikan menggunakan endpoint Komerce: 
-    - `https://rajaongkir.komerce.id/api/v1/destination/province`
-    - `https://rajaongkir.komerce.id/api/v1/destination/city/{province_id}`
-  - Gunakan `process.env.RAJAONGKIR_API_KEY` sebagai *header key*.
-  - Hapus opsi `cache: "force-cache"` agar data selalu segar.
-- **Data Mapping (Sangat Krusial):**
-  - Jangan lakukan *proxy murni*. 
-  - Tangkap *response* dari Komerce, ekstrak *array* datanya (biasanya ada di dalam properti `data` atau `data.data`), lalu **petakan ulang (map)** menjadi struktur yang dibaca oleh komponen *dropdown Checkout*.
-  - Pastikan kembalian JSON dari *backend* Next.js ini memiliki format *array of objects* yang sama persis dengan yang dibutuhkan UI *frontend* (mengandung `id`, `name`, dll, atau buatkan mock pembungkus `{ rajaongkir: { results: [...] } }` jika *frontend* memaksa mencari *path* tersebut).
+- **Refaktor Route Handler (Wilayah & Ongkir):**
+  - Rombak total 3 file API ini: 
+    1. API Provinsi (misal `app/api/wilayah/provinsi/route.ts`)
+    2. API Kota/Kabupaten (misal `app/api/wilayah/kabupaten/[provinceId]/route.ts` atau endpoint Area)
+    3. API Ongkos Kirim (`app/api/ongkir/route.ts`)
+  - Ganti seluruh URL *fetch* menjadi *endpoint* resmi BiteShip (`https://api.biteship.com/v1/...`).
+  - Gunakan `process.env.BITESHIP_API_KEY` pada Header otorisasi.
+- **Data Mapping & UI Compatibility (Sangat Krusial):**
+  - *Frontend* Checkout sudah memiliki *state* dan struktur UI yang *fixed*. Perubahan di *backend* ini **tidak boleh merusak antarmuka**.
+  - Tangkap *response* dari BiteShip, lalu **petakan ulang (map)** bentuk JSON-nya di rute API Next.js agar format *array of objects*-nya menyerupai struktur yang diharapkan oleh komponen *frontend* (misalnya mengembalikan format `id` dan `name` untuk wilayah, dan format `courier`, `service`, `cost` untuk ongkir).
+  - Pastikan setiap pesan *error* atau *feedback* UI yang muncul tetap menggunakan bahasa Indonesia.

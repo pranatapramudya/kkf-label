@@ -4,47 +4,57 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ provinceId: string }> },
 ) {
-  const apiKey = process.env.RAJAONGKIR_API_KEY;
+  const apiKey = process.env.BITESHIP_API_KEY;
   const { provinceId } = await params;
   if (!apiKey)
     return NextResponse.json({ pesan: "API Key kosong" }, { status: 500 });
 
   try {
+    // Mencari area berdasarkan nama provinsi yang dikirim dari dropdown pertama
     const respons = await fetch(
-      `https://rajaongkir.komerce.id/api/v1/destination/city/${provinceId}`,
+      `https://api.biteship.com/v1/maps/areas?countries=ID&input=${encodeURIComponent(provinceId)}`,
       {
         method: "GET",
-        headers: { key: apiKey },
+        headers: { Authorization: apiKey },
         cache: "no-store",
       },
     );
 
     const data = await respons.json();
 
-    // Validasi Error dari Komerce
-    if (data.meta?.status === false || data.meta?.status === "error" || data.meta?.code >= 400) {
+    if (!data.success) {
       return NextResponse.json(
-        { pesan: data.meta?.message || "Gagal mengambil kabupaten dari Komerce" },
+        { pesan: data.error || "Gagal mengambil area dari Biteship" },
         { status: 400 }
       );
     }
 
-    const results = data.data || [];
+    const results = data.areas || [];
 
-    // Bungkus ke format RajaOngkir agar frontend tidak patah
+    // Mengambil area unik agar dropdown tidak kepenuhan hasil kodepos ganda
+    const uniqueAreas = [];
+    const map = new Map();
+    for (const item of results) {
+      if (!map.has(item.name)) {
+        map.set(item.name, true);
+        uniqueAreas.push({
+          city_id: item.id, // Ini adalah Area ID BiteShip (yang digunakan di API Ongkir)
+          city_name: item.name, 
+          type: item.administrative_division_level_3_type || "Area",
+          postal_code: item.postal_code || "",
+        });
+      }
+    }
+
+    // Dibungkus ke dalam format RajaOngkir agar frontend dapat memetakan data dengan baik
     return NextResponse.json({
       rajaongkir: {
-        results: results.map((c: any) => ({
-          city_id: String(c.id),
-          city_name: c.name,
-          type: c.type || "",
-          postal_code: c.postal_code || "",
-        }))
+        results: uniqueAreas
       }
     });
   } catch (galat: any) {
     return NextResponse.json(
-      { pesan: "Gagal memuat kabupaten Komerce", detail: galat.message },
+      { pesan: "Gagal memuat kabupaten dari Biteship", detail: galat.message },
       { status: 500 },
     );
   }
