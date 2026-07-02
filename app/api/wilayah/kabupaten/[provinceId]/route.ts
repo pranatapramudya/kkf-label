@@ -10,37 +10,31 @@ export async function GET(
     return NextResponse.json({ pesan: "API Key kosong" }, { status: 500 });
 
   try {
-    // Tembak ke API Resmi RajaOngkir Starter
+    // Tembak murni ke API Resmi RajaOngkir Starter
     const respons = await fetch(
       `https://api.rajaongkir.com/starter/city?province=${provinceId}`,
       {
         method: "GET",
         headers: { key: apiKey },
-        cache: "force-cache",
+        cache: "no-store", // Hindari cache error saat build/runtime
       },
     );
 
     const data = await respons.json();
     
+    // Validasi Limit Harian / Error dari RajaOngkir
     if (data.rajaongkir?.status?.code !== 200) {
        return NextResponse.json(
-        { pesan: data.rajaongkir?.status?.description || "Gagal mengambil kabupaten dari RajaOngkir" },
+        { pesan: data.rajaongkir?.status?.description || "Gagal mengambil kota. Kemungkinan limit harian RajaOngkir habis." },
         { status: 400 }
       );
     }
 
-    const results = data.rajaongkir.results || [];
-
-    const daftarKabupaten = results.map((c: any) => ({
-      id: String(c.city_id),
-      nama: c.type ? `${c.type} ${c.city_name}` : c.city_name,
-      kodepos: c.postal_code || "",
-    }));
-
-    return NextResponse.json(daftarKabupaten);
+    // Kembalikan struktur asli JSON RajaOngkir agar kompatibel dengan frontend (data.rajaongkir.results)
+    return NextResponse.json(data);
   } catch (galat: any) {
     return NextResponse.json(
-      { pesan: "Gagal memuat kabupaten dari RajaOngkir" },
+      { pesan: "Gagal memuat kabupaten dari RajaOngkir", detail: galat.message },
       { status: 500 },
     );
   }
