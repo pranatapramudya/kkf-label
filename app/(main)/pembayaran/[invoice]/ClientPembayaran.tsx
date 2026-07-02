@@ -14,6 +14,7 @@ export default function ClientPembayaran({ order }: { order: any }) {
   const [success, setSuccess] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copiedNominal, setCopiedNominal] = useState(false);
+  const [copiedOrderId, setCopiedOrderId] = useState(false);
   const [timeLeft, setTimeLeft] = useState(3600);
 
   useEffect(() => {
@@ -66,6 +67,12 @@ export default function ClientPembayaran({ order }: { order: any }) {
     setTimeout(() => setCopiedNominal(false), 2000);
   };
 
+  const handleCopyOrderId = () => {
+    navigator.clipboard.writeText(order.kodePesanan);
+    setCopiedOrderId(true);
+    setTimeout(() => setCopiedOrderId(false), 2000);
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
@@ -108,8 +115,17 @@ export default function ClientPembayaran({ order }: { order: any }) {
             <CheckCircle size={40} className="text-emerald-500" />
           </div>
           <h2 className="text-2xl font-bold text-zinc-900 mb-2">Pembayaran Diproses</h2>
-          <p className="text-zinc-600 mb-6">
-            Status pesanan <strong>{order.kodePesanan}</strong> saat ini adalah {order.statusPesanan.replace("_", " ")}. Silakan pantau riwayat pengiriman Anda.
+          <p className="text-zinc-600 mb-6 flex flex-col items-center gap-2">
+            <span>
+              Status pesanan <strong>{order.kodePesanan}</strong> saat ini adalah {order.statusPesanan.replace("_", " ")}. Silakan pantau riwayat pengiriman Anda.
+            </span>
+            <button 
+              onClick={handleCopyOrderId}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-lg transition text-sm font-medium"
+            >
+              {copiedOrderId ? <CheckCircle size={16} className="text-emerald-500" /> : <Copy size={16} />}
+              {copiedOrderId ? "Disalin!" : "Salin Order ID"}
+            </button>
           </p>
           <Link 
             href="/lacak-pesanan"
@@ -127,7 +143,16 @@ export default function ClientPembayaran({ order }: { order: any }) {
       <div className="max-w-xl mx-auto">
         <div className="text-center mb-5">
           <h1 className="text-xl md:text-3xl font-bold text-zinc-900 mb-1.5">Menunggu Pembayaran</h1>
-          <p className="text-sm md:text-base text-zinc-600">Selesaikan pembayaran untuk pesanan <span className="font-bold text-soft-pink-600">{order.kodePesanan}</span></p>
+          <div className="flex items-center justify-center gap-2 mt-1">
+            <p className="text-sm md:text-base text-zinc-600">Selesaikan pembayaran untuk pesanan <span className="font-bold text-soft-pink-600">{order.kodePesanan}</span></p>
+            <button 
+              onClick={handleCopyOrderId}
+              className="p-1.5 bg-zinc-100 hover:bg-zinc-200 text-zinc-500 hover:text-soft-pink-600 rounded-lg transition"
+              title="Salin Order ID"
+            >
+              {copiedOrderId ? <CheckCircle size={16} className="text-emerald-500" /> : <Copy size={16} />}
+            </button>
+          </div>
           
           {!success && (
             <div className="inline-flex items-center justify-center gap-2 mt-3 bg-red-100 text-red-600 px-3 py-1.5 rounded-full border border-red-200">

@@ -18,6 +18,7 @@ import {
   Search,
   MapPin,
   Clock,
+  Copy,
 } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
 
@@ -60,6 +61,16 @@ export default function HalamanAkunSaya() {
   const [modalLacak, setModalLacak] = useState(false);
   const [dataLacak, setDataLacak] = useState<any>(null);
   const [loadingLacak, setLoadingLacak] = useState(false);
+
+  // State untuk Copy Order ID
+  const [copiedOrderId, setCopiedOrderId] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedOrderId(text);
+    showNotif("Order ID disalin!", "sukses");
+    setTimeout(() => setCopiedOrderId(null), 2000);
+  };
 
   useEffect(() => {
     const kontakTersimpan = localStorage.getItem("kkf_user_kontak");
@@ -396,6 +407,13 @@ export default function HalamanAkunSaya() {
                   <span className="text-[10px] font-bold text-zinc-500 flex items-center gap-1.5">
                     <ShoppingBag size={14} className="text-zinc-400" />{" "}
                     {order.kodePesanan}
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); copyToClipboard(order.kodePesanan); }}
+                      className="ml-0.5 p-1 hover:bg-zinc-100 rounded text-zinc-400 hover:text-pink-600 transition"
+                      title="Salin Order ID"
+                    >
+                      {copiedOrderId === order.kodePesanan ? <CheckCircle size={12} className="text-emerald-500" /> : <Copy size={12} />}
+                    </button>
                   </span>
                   <span
                     className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-md tracking-wider ${

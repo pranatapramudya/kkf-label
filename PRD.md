@@ -1,11 +1,14 @@
-# Update PRD: Clean Up Obsolete Firebase Import
+# Update PRD: UI Enhancement - Copy Order ID Button
 
 ## 1. Latar Belakang Masalah
-- Terjadi *build error* di Vercel: `Module '"@/lib/firebase-admin"' has no exported member 'admin'` pada file `app/api/payment/route.ts`.
-- Ini adalah sisa residu dari pembaruan Firebase Admin v12+. Karena `lib/firebase-admin.ts` sudah diubah menjadi modular dan tidak lagi mengekspor `admin`, pemanggilan impor di file lain menjadi *error*.
+- Pada halaman "Checkout Success" (Pembayaran Diproses) dan halaman "Saya" (Riwayat Pesanan), pengguna kesulitan menyalin Order ID/Nomor Pesanan untuk keperluan pelacakan.
+- Dibutuhkan tombol *copy* (*clipboard*) berukuran kecil di sebelah teks Order ID untuk meningkatkan UX pelacakan pesanan.
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **Refaktor `app/api/payment/route.ts`:**
-  - Hapus atau ubah baris `import { admin } from "@/lib/firebase-admin";`.
-  - Karena kita hanya butuh file tersebut dieksekusi untuk inisialisasi (side-effect), ubah menjadi impor tanpa destructuring: `import "@/lib/firebase-admin";`.
-  - Pastikan fungsi pengiriman pesan tetap menggunakan `getMessaging().sendEachForMulticast(...)` yang diimpor langsung dari `firebase-admin/messaging`.
+- **Komponen Fungsional:**
+  - Buat utilitas fungsi penyalinan menggunakan `navigator.clipboard.writeText(orderId)`.
+  - Berikan *feedback* visual sementara kepada pengguna setelah tombol ditekan (misal: ikon berubah menjadi tanda centang atau muncul *toast* "Disalin!").
+- **Implementasi UI:**
+  - **Halaman Checkout Success:** Letakkan ikon copy kecil persis di sebelah teks Order ID (misal: KKF-178...).
+  - **Halaman Profile/Pesanan Saya:** Letakkan ikon copy kecil di sebelah Order ID pada daftar kartu riwayat pesanan (seperti yang terlihat pada status "MENUNGGU VERIFIKASI").
+  - Gunakan ikon standar (seperti `Copy` dari `lucide-react` atau library ikon yang digunakan di proyek ini).
