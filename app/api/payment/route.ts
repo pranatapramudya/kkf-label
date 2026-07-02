@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
+import { admin } from "@/lib/firebase-admin";
 
 const prisma = new PrismaClient();
 
@@ -122,6 +123,26 @@ export async function POST(permintaan: Request) {
         },
       });
     });
+
+    // 5. Kirim Push Notification ke semua Admin Devices via FCM
+    try {
+      const adminTokens = await prisma.adminToken.findMany();
+      if (adminTokens.length > 0) {
+        const tokens = adminTokens.map(t => t.token);
+        await admin.messaging().sendEachForMulticast({
+          tokens,
+          notification: {
+            title: "Pesanan Baru KKF Label!",
+            body: `Ada order masuk senilai Rp ${body.total.toLocaleString("id-ID")}`,
+          },
+          data: {
+            orderId: kodePesanan,
+          }
+        });
+      }
+    } catch (pushErr) {
+      console.error("Gagal mengirim Push Notification via FCM:", pushErr);
+    }
 
     // Jika metode pembayaran manual, kembalikan kode pesanan langsung tanpa buat token Midtrans
     if (body.metodePembayaran && body.metodePembayaran !== "MIDTRANS") {

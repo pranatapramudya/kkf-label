@@ -1,14 +1,13 @@
-# Update PRD: Bug Fix Notifikasi (Audio Fail-safe & Routing Detail)
+# Update PRD: Native Push Notification (Capacitor + Firebase FCM)
 
 ## 1. Latar Belakang Masalah
-- **Audio Error:** Terjadi `NotSupportedError` di konsol karena *file* MP3 tidak ditemukan atau gagal dimuat, yang dapat mengganggu *render* komponen.
-- **Routing Macet:** Tombol "Buka Detail" pada pop-over notifikasi gagal mengarahkan admin ke halaman pesanan. Ini mungkin disebabkan oleh *path* yang tidak valid atau *error handler* yang memblokir eksekusi navigasi.
+- In-App Notification (Web Audio & Polling) tidak berjalan saat aplikasi Android (Capacitor) berada di *background* atau layar perangkat terkunci (OS *battery optimization*).
+- Admin membutuhkan notifikasi *push* asli (Native Push Notification) yang muncul di *system tray* Android kapan pun pesanan baru masuk.
 
-## 2. Kebutuhan Solusi Logika (Requirement)
-- **Audio Fail-safe:**
-  - Tambahkan blok `try-catch` yang kokoh di sekitar pemanggilan `audio.play()`.
-  - Pastikan pemutaran audio tidak memblokir atau merusak proses *render* komponen utama jika file belum ada di folder `public/notif.mp3`.
-- **Koreksi Routing "Buka Detail":**
-  - Pastikan fungsi `onClick` menggunakan `e.preventDefault()`.
-  - Eksekusi *update database* (`isRead: true`) dan *routing* (`router.push`) harus dijalankan secara asinkron dengan benar.
-  - Verifikasi URL tujuan. Berdasarkan sidebar, URL yang benar kemungkinan adalah `/admin/pesanan` atau `/pesanan`. Pastikan URL ini akurat.
+## 2. Kebutuhan Solusi Logika & Infrastruktur (Requirement)
+- **Plugin Capacitor:** Instalasi dan konfigurasi `@capacitor/push-notifications` untuk meminta izin (*permission*) kepada OS Android dan mengambil FCM Device Token.
+- **Database (Prisma):** Tambahkan model/tabel `DeviceToken` atau tambahkan *field* `fcmToken` pada tabel User/Admin untuk menyimpan token perangkat admin.
+- **Backend Trigger (Firebase Admin SDK):** 
+  - Instal `firebase-admin` di Next.js.
+  - Saat API `/api/payment` sukses memproses orderan baru, jalankan fungsi *push* menggunakan `firebase-admin` ke FCM Token milik admin yang tersimpan di database.
+  - *Payload* notifikasi harus berisi judul ("Pesanan Masuk KKF Label") dan body ("Nominal Rp XXX masuk").
