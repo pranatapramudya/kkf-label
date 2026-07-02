@@ -1,19 +1,14 @@
-# Update PRD: Security Patch & Performance Optimization (Pre-Launch)
+# Update PRD: Bug Fix Notifikasi (Audio Fail-safe & Routing Detail)
 
 ## 1. Latar Belakang Masalah
-Berdasarkan hasil audit pre-launch, ditemukan 4 celah (blind spots) krusial pada arsitektur sistem yang harus segera ditambal sebelum aplikasi dirilis ke publik:
-- **Webhook Idempotency:** Risiko pemrosesan ganda pada notifikasi Midtrans yang dapat menyebabkan pengurangan stok berkali-kali untuk satu pesanan.
-- **Backend File Validation:** Validasi ukuran dan jenis file bukti transfer saat ini hanya berada di sisi klien (frontend), sehingga rentan di-bypass menggunakan tools API (seperti Postman).
-- **Race Condition:** Pengurangan stok rentan terhadap *race condition* jika dua pengguna melakukan *checkout* pada milidetik yang sama.
-- **Database Scalability:** Tabel `Order` dan `Product` belum memiliki indeks pencarian, yang berisiko memperlambat performa saat data membesar.
+- **Audio Error:** Terjadi `NotSupportedError` di konsol karena *file* MP3 tidak ditemukan atau gagal dimuat, yang dapat mengganggu *render* komponen.
+- **Routing Macet:** Tombol "Buka Detail" pada pop-over notifikasi gagal mengarahkan admin ke halaman pesanan. Ini mungkin disebabkan oleh *path* yang tidak valid atau *error handler* yang memblokir eksekusi navigasi.
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **Keamanan Webhook (Idempotency):**
-  - Validasi `signature_key` dari Midtrans (gabungan `order_id`, `status_code`, `gross_amount`, dan `ServerKey` yang di-hash menggunakan SHA512).
-  - Pastikan sistem mengecek apakah pesanan sudah berstatus `DIBAYAR` di database sebelum melakukan update status dan pengurangan stok. Jika sudah `DIBAYAR`, abaikan webhook (return 200 OK).
-- **Validasi Backend (Storage):**
-  - Di dalam rute `/api/upload-bukti/route.ts`, tambahkan validasi *server-side*: maksimal ukuran *buffer* 3MB dan tipe MIME yang diizinkan hanya `image/jpeg`, `image/png`, dan `image/webp`. Tolak *request* jika tidak sesuai (return 400 Bad Request).
-- **Atomic Transaction (Prisma):**
-  - Bungkus operasi pembuatan pesanan (`prisma.order.create`) dan pengurangan stok produk (`stokTotal: { decrement: x }`) ke dalam `prisma.$transaction` agar terhindar dari *race condition*.
-- **Database Indexing:**
-  - Tambahkan `@@index([kodePesanan])` dan `@@index([statusPesanan])` pada model `Order` di dalam `schema.prisma`.
+- **Audio Fail-safe:**
+  - Tambahkan blok `try-catch` yang kokoh di sekitar pemanggilan `audio.play()`.
+  - Pastikan pemutaran audio tidak memblokir atau merusak proses *render* komponen utama jika file belum ada di folder `public/notif.mp3`.
+- **Koreksi Routing "Buka Detail":**
+  - Pastikan fungsi `onClick` menggunakan `e.preventDefault()`.
+  - Eksekusi *update database* (`isRead: true`) dan *routing* (`router.push`) harus dijalankan secara asinkron dengan benar.
+  - Verifikasi URL tujuan. Berdasarkan sidebar, URL yang benar kemungkinan adalah `/admin/pesanan` atau `/pesanan`. Pastikan URL ini akurat.

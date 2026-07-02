@@ -112,6 +112,15 @@ export async function POST(permintaan: Request) {
           });
         }
       }
+
+      // 4. Buat Notifikasi untuk Admin
+      await tx.notification.create({
+        data: {
+          title: "Pesanan Baru Masuk",
+          message: `Pesanan baru masuk dengan kode ${kodePesanan} senilai Rp ${body.total.toLocaleString("id-ID")}`,
+          orderId: kodePesanan,
+        },
+      });
     });
 
     // Jika metode pembayaran manual, kembalikan kode pesanan langsung tanpa buat token Midtrans

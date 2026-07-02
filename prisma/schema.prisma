@@ -205,3 +205,12 @@ model Affiliate {
   dibuatPada  DateTime @default(now())
   diubahPada  DateTime @updatedAt
 }
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  orderId   String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
