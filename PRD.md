@@ -1,19 +1,16 @@
-# Update PRD: Full Migration to BiteShip (Location & Shipping Rates)
+# Update PRD: Rollback to Komerce API (Location & Shipping Rates)
 
 ## 1. Latar Belakang Masalah
-- API Komerce (RajaOngkir wrapper) telah mencapai limit harian (Error 429: Daily limit exceeded).
-- Efek dari limit ini mematikan dua sistem krusial sekaligus: Dropdown Wilayah (Provinsi & Kota) menjadi kosong, dan Kalkulasi Ongkos Kirim gagal total.
-- Migrasi total ke BiteShip diperlukan segera menggunakan `BITESHIP_API_KEY`.
+- Eksperimen migrasi ke BiteShip dibatalkan karena menyebabkan *breaking changes* pada *frontend* (Dropdown wilayah tidak berfungsi) dan membutuhkan aktivasi kurir manual di *dashboard*.
+- Sistem harus dikembalikan (rollback) 100% menggunakan ekosistem Komerce (RajaOngkir Wrapper) karena komponen UI klien sudah dioptimalkan untuk struktur data Komerce.
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **Refaktor Route Handler (Wilayah & Ongkir):**
-  - Rombak total 3 file API ini: 
-    1. API Provinsi (misal `app/api/wilayah/provinsi/route.ts`)
-    2. API Kota/Kabupaten (misal `app/api/wilayah/kabupaten/[provinceId]/route.ts` atau endpoint Area)
-    3. API Ongkos Kirim (`app/api/ongkir/route.ts`)
-  - Ganti seluruh URL *fetch* menjadi *endpoint* resmi BiteShip (`https://api.biteship.com/v1/...`).
-  - Gunakan `process.env.BITESHIP_API_KEY` pada Header otorisasi.
-- **Data Mapping & UI Compatibility (Sangat Krusial):**
-  - *Frontend* Checkout sudah memiliki *state* dan struktur UI yang *fixed*. Perubahan di *backend* ini **tidak boleh merusak antarmuka**.
-  - Tangkap *response* dari BiteShip, lalu **petakan ulang (map)** bentuk JSON-nya di rute API Next.js agar format *array of objects*-nya menyerupai struktur yang diharapkan oleh komponen *frontend* (misalnya mengembalikan format `id` dan `name` untuk wilayah, dan format `courier`, `service`, `cost` untuk ongkir).
-  - Pastikan setiap pesan *error* atau *feedback* UI yang muncul tetap menggunakan bahasa Indonesia.
+- **Rollback Route Handler (Wilayah & Ongkir):**
+  - Buka dan kembalikan logika kode pada API Provinsi, API Kota, dan API Ongkir ke versi Komerce.
+  - **Endpoint Provinsi:** `https://rajaongkir.komerce.id/api/v1/destination/province`
+  - **Endpoint Kota:** `https://rajaongkir.komerce.id/api/v1/destination/city/{province_id}`
+  - **Endpoint Ongkir:** Gunakan endpoint kalkulasi domestik Komerce atau kembalikan ke kode sebelumnya yang stabil.
+  - Gunakan kembali `process.env.RAJAONGKIR_API_KEY` untuk autentikasi.
+- **Data Mapping & Bahasa:**
+  - Pastikan *response* JSON dikembalikan persis seperti struktur asli Komerce agar *dropdown* wilayah bisa kembali mencari daerah (misalnya pencarian kota berfungsi normal).
+  - Pastikan semua pesan *error* di- *mapping* ke dalam bahasa Indonesia. Jangan ada pesan *error* berbahasa Inggris yang lolos ke *frontend*.
