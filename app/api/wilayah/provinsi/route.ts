@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const apiKey = process.env.RAJAONGKIR_API_KEY;
   if (!apiKey)
     return NextResponse.json({ pesan: "API Key kosong" }, { status: 500 });
 
   try {
+    // 🚀 TEMBAK KE KOMERCE V2
     const respons = await fetch(
       "https://rajaongkir.komerce.id/api/v1/destination/province",
       {

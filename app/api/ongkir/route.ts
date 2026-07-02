@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(permintaan: Request) {
   const apiKey = process.env.RAJAONGKIR_API_KEY;
   if (!apiKey)
@@ -27,6 +29,7 @@ export async function POST(permintaan: Request) {
           "content-type": "application/x-www-form-urlencoded",
         },
         body: parameter.toString(),
+        cache: "no-store",
       },
     );
 

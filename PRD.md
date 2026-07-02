@@ -1,16 +1,12 @@
-# Update PRD: Rollback to Komerce API (Location & Shipping Rates)
+# Update PRD: Fix Next.js Aggressive Caching on Komerce API
 
 ## 1. Latar Belakang Masalah
-- Eksperimen migrasi ke BiteShip dibatalkan karena menyebabkan *breaking changes* pada *frontend* (Dropdown wilayah tidak berfungsi) dan membutuhkan aktivasi kurir manual di *dashboard*.
-- Sistem harus dikembalikan (rollback) 100% menggunakan ekosistem Komerce (RajaOngkir Wrapper) karena komponen UI klien sudah dioptimalkan untuk struktur data Komerce.
+- Pasca-*rollback* ke Komerce, API mengembalikan respons "Limit habis" padahal kuota di dasbor masih tersisa (30/100).
+- Diagnosis: Next.js melakukan *caching* terhadap respons *error* 429 sebelumnya. Karena kode di-*rollback* ke versi lama, perilaku *caching* bawaan Next.js kembali aktif, sehingga aplikasi tidak benar-benar melakukan *fetch* ke server Komerce melainkan menyajikan *cache error* yang sudah usang.
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **Rollback Route Handler (Wilayah & Ongkir):**
-  - Buka dan kembalikan logika kode pada API Provinsi, API Kota, dan API Ongkir ke versi Komerce.
-  - **Endpoint Provinsi:** `https://rajaongkir.komerce.id/api/v1/destination/province`
-  - **Endpoint Kota:** `https://rajaongkir.komerce.id/api/v1/destination/city/{province_id}`
-  - **Endpoint Ongkir:** Gunakan endpoint kalkulasi domestik Komerce atau kembalikan ke kode sebelumnya yang stabil.
-  - Gunakan kembali `process.env.RAJAONGKIR_API_KEY` untuk autentikasi.
-- **Data Mapping & Bahasa:**
-  - Pastikan *response* JSON dikembalikan persis seperti struktur asli Komerce agar *dropdown* wilayah bisa kembali mencari daerah (misalnya pencarian kota berfungsi normal).
-  - Pastikan semua pesan *error* di- *mapping* ke dalam bahasa Indonesia. Jangan ada pesan *error* berbahasa Inggris yang lolos ke *frontend*.
+- **Matikan Cache Secara Paksa (Bypass Cache):**
+  - Buka file route handler untuk Provinsi, Kota, dan Ongkir.
+  - Tambahkan deklarasi `export const dynamic = 'force-dynamic';` di baris paling atas (setelah import) pada ketiga file tersebut.
+  - Pada setiap fungsi `fetch()`, pastikan menambahkan opsi `{ cache: 'no-store' }`.
+  - Opsional: Tambahkan *query parameter* `?t=${Date.now()}` pada URL *fetch* ke Komerce untuk benar-benar memaksa Next.js melewati *cache*.
