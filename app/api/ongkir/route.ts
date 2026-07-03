@@ -2,6 +2,32 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+let cachedOriginAreaId: string | null = null;
+
+async function getOriginAreaId(apiKey: string) {
+  if (cachedOriginAreaId) return cachedOriginAreaId;
+  try {
+    const res = await fetch("https://api.biteship.com/v1/maps/areas?countries=ID&input=Cimalaka&type=single", {
+      headers: { "Authorization": apiKey }
+    });
+    const data = await res.json();
+    if (data.success && data.areas && data.areas.length > 0) {
+      const cimalaka = data.areas.find((a: any) => 
+        a.administrative_division_level_3_name?.toLowerCase() === "cimalaka" &&
+        a.administrative_division_level_2_name?.toLowerCase() === "sumedang"
+      ) || data.areas[0];
+      
+      if (cimalaka?.id) {
+        cachedOriginAreaId = cimalaka.id;
+        return cachedOriginAreaId;
+      }
+    }
+  } catch (err) {
+    console.error("Gagal memuat origin area id otomatis", err);
+  }
+  return "IDNP9IDNC430IDND5356"; // Fallback darurat
+}
+
 export async function POST(permintaan: Request) {
   const apiKey = process.env.BITESHIP_API_KEY;
   if (!apiKey)
@@ -29,8 +55,10 @@ export async function POST(permintaan: Request) {
       }
     ];
 
+    const originId = await getOriginAreaId(apiKey);
+
     const payload = {
-      origin_area_id: "IDNP9IDNC430IDND5356", // Area ID untuk Cimalaka, Sumedang (KKF Label)
+      origin_area_id: originId,
       destination_area_id: body.areaIdTujuan,
       couriers: body.ekspedisi.toLowerCase(),
       items: body.items && body.items.length > 0 ? body.items : defaultItems
