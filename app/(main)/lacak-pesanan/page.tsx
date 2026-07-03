@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search,
   Package,
@@ -21,36 +21,58 @@ export default function LacakPesananPage() {
   const [hasilDB, setHasilDB] = useState<any>(null);
   const [hasilLacak, setHasilLacak] = useState<any>(null);
 
-  const lacakSekarang = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!kodeInvoice) return;
-
+  const fetchData = async (invoiceStr: string) => {
+    if (!invoiceStr) return;
     setSedangMencari(true);
     setErrorPesan("");
     setHasilDB(null);
     setHasilLacak(null);
 
     try {
-      const respons = await fetch("/api/lacak", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ kodeInvoice }),
-      });
+      // 1. Ambil data pesanan dari DB
+      const resOrder = await fetch(`/api/pesanan/lacak?kode=${invoiceStr}`);
+      const dataOrder = await resOrder.json();
 
-      const data = await respons.json();
-
-      if (!respons.ok) {
-        throw new Error(data.pesan || "Gagal melacak pesanan.");
+      if (!resOrder.ok) {
+        throw new Error(dataOrder.error || dataOrder.pesan || "Gagal melacak pesanan.");
       }
 
-      setHasilDB(data.pesanan);
-      setHasilLacak(data.lacak);
+      setHasilDB(dataOrder.data);
+
+      // 2. Jika ada noResi, lacak resi dari Biteship
+      if (dataOrder.data.nomorResi && dataOrder.data.ekspedisi) {
+        const resTrack = await fetch("/api/tracking", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ waybill: dataOrder.data.nomorResi, courier: dataOrder.data.ekspedisi }),
+        });
+        const trackData = await resTrack.json();
+        if (resTrack.ok && trackData.success) {
+          setHasilLacak(trackData.tracking);
+        }
+      }
     } catch (galat: any) {
       setErrorPesan(galat.message);
     } finally {
       setSedangMencari(false);
     }
   };
+
+  const lacakSekarang = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await fetchData(kodeInvoice);
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const inv = params.get("invoice");
+      if (inv) {
+        setKodeInvoice(inv);
+        fetchData(inv);
+      }
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-pink-50/30 py-10 px-4 md:px-8 font-sans text-zinc-900 pb-32">
@@ -199,17 +221,19 @@ export default function LacakPesananPage() {
                     Resi pengiriman belum tersedia.
                   </p>
                 </div>
-              ) : hasilLacak?.riwayat?.length > 0 ? (
+              ) : hasilLacak?.history?.length > 0 ? (
                 <div className="relative pl-2 md:pl-4">
                   {/* Garis vertikal timeline */}
                   <div className="absolute left-[15px] md:left-[23px] top-2 bottom-2 w-0.5 bg-pink-100"></div>
 
                   <div className="space-y-6 relative">
-                    {hasilLacak.riwayat.map((item: any, index: number) => {
+                    {hasilLacak.history.map((item: any, index: number) => {
                       const isLatest = index === 0; // Data dari API biasanya dibalik, index 0 itu terbaru
-                      const isDelivered =
-                        item.manifest_code === "DELIVERED" ||
-                        hasilLacak.status === "DELIVERED";
+                      const isDelivered = item.status === "delivered";
+                      
+                      const dateObj = new Date(item.updated_at);
+                      const dateStr = dateObj.toLocaleDateString("id-ID");
+                      const timeStr = dateObj.toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' });
 
                       return (
                         <div
@@ -242,18 +266,13 @@ export default function LacakPesananPage() {
                             <p
                               className={`text-sm md:text-base font-bold ${isLatest ? "text-soft-pink-600" : "text-zinc-700"}`}
                             >
-                              {item.manifest_description}
+                              {item.note}
                             </p>
                             <div className="flex items-center gap-2 mt-1 text-xs text-zinc-500 font-medium">
-                              <span>{item.manifest_date}</span>
+                              <span>{dateStr}</span>
                               <span className="w-1 h-1 rounded-full bg-zinc-300"></span>
-                              <span>{item.manifest_time}</span>
+                              <span>{timeStr}</span>
                             </div>
-                            {item.city_name && (
-                              <p className="text-xs text-zinc-500 mt-1 flex items-center gap-1">
-                                <MapPin size={12} /> {item.city_name}
-                              </p>
-                            )}
                           </div>
                         </div>
                       );

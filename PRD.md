@@ -1,16 +1,16 @@
-# Update PRD: Fix Resend Sandbox Limitation & PC Mailto Link
+# Update PRD: Logika Pencarian & Pelacakan Halaman "Lacak Pesanan"
 
 ## 1. Latar Belakang Masalah
-- **Error Email Massal:** Resend menolak *request batch* dengan error `Invalid 'to' field` karena akun masih dalam mode Sandbox (belum ada verifikasi domain). API mencoba mengirim ke email eksternal.
-- **Error Tombol Individual:** Tombol "Email" (warna biru) di dalam tabel tidak berfungsi di PC desktop karena OS tidak memiliki *default email client* untuk menangani protokol `mailto:`.
+- UI Halaman "Lacak Pesanan" sudah tersedia. Pengguna dapat melacak paket dengan memasukkan **Nomor Invoice** (bukan Nomor Resi).
+- Sistem Admin memiliki 2 jalur input resi (Hybrid: Manual dan Otomatis via Biteship). Keduanya harus bermuara pada satu fungsi pelacakan yang sama di sisi klien.
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **Bypass Resend Sandbox (Testing Mode):**
-  - Di dalam file API route pengiriman email (`api/admin/broadcast/route.ts`), modifikasi hasil *mapping* data email dari Prisma.
-  - Selama tahap *development* ini, paksa (override) parameter `to` menjadi email testing resmi (contoh: `prapranata20@gmail.com`) terlepas dari siapa pemilik pesanan tersebut.
-  - (Opsional) Berikan *comment* di kode tersebut agar mudah dikembalikan ke email pelanggan asli (`user.email`) setelah domain production `.com` diverifikasi.
-- **Perbaikan Tombol Email di Tabel (Universal Mail Link):**
-  - Ubah logika tombol "Email" biru pada tabel. Jangan gunakan protokol standar `mailto:email@domain.com`.
-  - Gunakan URL Gmail Web Composer agar bisa dibuka langsung via Browser di PC maupun HP.
-  - Format URL: `https://mail.google.com/mail/?view=cm&fs=1&to={email_pelanggan}`.
-  - Pastikan tombol menggunakan atribut `target="_blank" rel="noopener noreferrer"`.
+- **Logika Halaman Lacak Pesanan (`/lacak` atau sejenisnya):**
+  - Form pencarian menerima input `Nomor Invoice`.
+  - Lakukan *fetch* ke database untuk mengambil detail pesanan berdasarkan `Nomor Invoice` tersebut.
+  - Jika `noResi` belum ada (null/kosong), tampilkan status: "Pesanan sedang diproses oleh admin KKF. Resi pengiriman belum tersedia."
+  - Jika `noResi` sudah ada (berisi string), jalankan *fetch* kedua secara otomatis ke *endpoint* internal `/api/tracking` dengan membawa *payload* `noResi` dan `kode_kurir`.
+  - Tampilkan hasil dari `/api/tracking` ke dalam bentuk *Timeline* visual Status Pengiriman di bawah detail pesanan.
+- **Optimasi UX Tombol "Lacak" di Halaman Pesanan Saya:**
+  - Pastikan tombol "Lacak" (warna pink) pada kartu pesanan yang berstatus "DIKIRIM" berfungsi sebagai *shortcut*.
+  - Saat ditekan, arahkan pengguna ke halaman Lacak Pesanan dengan Nomor Invoice yang sudah terisi otomatis (misal menggunakan URL parameter `?invoice=KKF-XXXXX`), sehingga pengguna tidak perlu melakukan *copy-paste* secara manual.

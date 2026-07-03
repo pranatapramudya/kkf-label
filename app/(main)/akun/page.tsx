@@ -57,10 +57,7 @@ export default function HalamanAkunSaya() {
   const [modalKonfirm, setModalKonfirm] = useState<string | null>(null);
   const [sedangKonfirm, setSedangKonfirm] = useState(false);
 
-  // 🔥 SUNTIKAN BARU: State Modal Lacak Resi
-  const [modalLacak, setModalLacak] = useState(false);
-  const [dataLacak, setDataLacak] = useState<any>(null);
-  const [loadingLacak, setLoadingLacak] = useState(false);
+  // State Lacak dihapus (dipindah ke halaman Lacak Pesanan)
 
   // State untuk Copy Order ID
   const [copiedOrderId, setCopiedOrderId] = useState<string | null>(null);
@@ -177,31 +174,7 @@ export default function HalamanAkunSaya() {
     }
   };
 
-  // 🔥 FUNGSI BARU: Panggil API Lacak
-  const handleLacakPaket = async (kodeInvoice: string) => {
-    setModalLacak(true);
-    setLoadingLacak(true);
-    setDataLacak(null);
-    try {
-      const res = await fetch("/api/lacak", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kodeInvoice }),
-      });
-      const result = await res.json();
-      if (res.ok) {
-        setDataLacak(result);
-      } else {
-        showNotif(result.pesan || "Gagal melacak pesanan", "gagal");
-        setModalLacak(false);
-      }
-    } catch (e) {
-      showNotif("Terjadi kesalahan jaringan", "gagal");
-      setModalLacak(false);
-    } finally {
-      setLoadingLacak(false);
-    }
-  };
+  // Fungsi Lacak Paket dipindah ke halaman Lacak Pesanan
 
   const listBelumBayar = dataPesanan.filter((p) => {
     const s = p.statusPesanan?.toUpperCase() || "";
@@ -492,7 +465,7 @@ export default function HalamanAkunSaya() {
                     order.statusPesanan === "SAMPAI") && (
                     <div className="flex gap-2 w-full justify-end">
                       <button
-                        onClick={() => handleLacakPaket(order.kodePesanan)}
+                        onClick={() => router.push(`/lacak-pesanan?invoice=${order.kodePesanan}`)}
                         className="border border-pink-200 text-pink-600 bg-pink-50 text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-pink-100 transition flex items-center gap-1.5 shadow-sm"
                       >
                         <Search size={14} /> Lacak
@@ -646,118 +619,7 @@ export default function HalamanAkunSaya() {
         </div>
       )}
 
-      {/* 🔥 MODAL LACAK RESI TIMELINE 🔥 */}
-      {modalLacak && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl animate-in zoom-in-95 max-h-[85vh] flex flex-col">
-            <div className="flex justify-between items-center mb-5 border-b border-zinc-100 pb-3 shrink-0">
-              <h3 className="font-black text-zinc-900 flex items-center gap-2">
-                <MapPin size={18} className="text-pink-600" /> Lacak Paket
-              </h3>
-              <button
-                onClick={() => setModalLacak(false)}
-                className="text-zinc-400 hover:text-red-500 bg-zinc-50 rounded-full p-1.5 transition"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto pr-2 pb-2 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-zinc-200 [&::-webkit-scrollbar-thumb]:rounded-full">
-              {loadingLacak ? (
-                <div className="flex flex-col items-center justify-center py-10 gap-3">
-                  <Loader2 size={32} className="animate-spin text-pink-600" />
-                  <p className="text-xs font-bold text-zinc-500">
-                    Mencari posisi paketmu...
-                  </p>
-                </div>
-              ) : dataLacak?.pesanan ? (
-                <div>
-                  {/* Info Resi */}
-                  <div className="bg-zinc-50 p-4 rounded-2xl border border-zinc-100 mb-6 flex justify-between items-center">
-                    <div>
-                      <p className="text-[10px] font-bold text-zinc-500 uppercase mb-0.5">
-                        Nomor Resi
-                      </p>
-                      <p className="text-sm font-black text-zinc-900 uppercase">
-                        {dataLacak.pesanan?.nomorResi || "-"}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-[10px] font-bold text-zinc-500 uppercase mb-0.5">
-                        Kurir
-                      </p>
-                      <p className="text-sm font-black text-pink-600 uppercase">
-                        {dataLacak.pesanan?.ekspedisi || "-"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Timeline Perjalanan */}
-                  <div className="relative pl-3 space-y-6 before:absolute before:inset-0 before:ml-[17px] before:-translate-x-px before:h-full before:w-0.5 before:bg-gradient-to-b before:from-zinc-200 before:via-zinc-200 before:to-transparent">
-                    {dataLacak.lacak?.riwayat &&
-                    dataLacak.lacak.riwayat.length > 0 ? (
-                      dataLacak.lacak.riwayat.map((hist: any, idx: number) => (
-                        <div
-                          key={idx}
-                          className="relative flex items-start gap-4"
-                        >
-                          <div
-                            className={`absolute left-0 w-4 h-4 rounded-full border-[3px] border-white shadow-sm z-10 ${
-                              idx === 0
-                                ? "bg-pink-500 ring-2 ring-pink-100"
-                                : "bg-zinc-300"
-                            }`}
-                          ></div>
-                          <div className="pl-6 w-full -mt-1">
-                            <p
-                              className={`text-xs ${idx === 0 ? "font-bold text-zinc-900" : "font-medium text-zinc-500"}`}
-                            >
-                              {hist.manifest_description}
-                            </p>
-                            <div className="flex items-center gap-1 mt-1.5">
-                              <Clock
-                                size={10}
-                                className={
-                                  idx === 0 ? "text-pink-500" : "text-zinc-400"
-                                }
-                              />
-                              <p
-                                className={`text-[10px] font-semibold ${idx === 0 ? "text-pink-600" : "text-zinc-400"}`}
-                              >
-                                {hist.manifest_date} • {hist.manifest_time}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-6">
-                        <MapPin
-                          size={32}
-                          className="text-zinc-200 mx-auto mb-3"
-                        />
-                        <p className="text-xs font-bold text-zinc-500">
-                          Resi belum terupdate di sistem ekspedisi.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-6">
-                  <AlertTriangle
-                    size={32}
-                    className="text-amber-400 mx-auto mb-3"
-                  />
-                  <p className="text-xs font-bold text-zinc-500">
-                    Gagal memuat pelacakan.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal Lacak Resi dihapus, pindah ke halaman khusus */}
     </div>
   );
 }

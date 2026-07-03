@@ -28,6 +28,8 @@ export async function GET(request: Request) {
         namaPenerima: true,
         total: true,
         dibuatPada: true,
+        nomorResi: true,
+        buktiTransferUrl: true,
       },
     });
 
