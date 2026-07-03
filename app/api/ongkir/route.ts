@@ -13,16 +13,16 @@ export async function POST(permintaan: Request) {
   try {
     const body = await permintaan.json();
 
-    if (!body.kodeposTujuan) {
+    if (!body.areaIdTujuan) {
       return NextResponse.json(
-        { pesan: "Kode pos tujuan tidak ditemukan. Silakan pilih ulang kota tujuan Anda." },
+        { pesan: "Area tujuan tidak ditemukan. Silakan cari dan pilih ulang kecamatan Anda." },
         { status: 400 }
       );
     }
 
     const payload = {
-      origin_postal_code: 45362, // Kode pos default Sumedang (KKF Label)
-      destination_postal_code: Number(body.kodeposTujuan),
+      origin_area_id: "IDNP9IDNC430IDND5356", // Area ID untuk Cimalaka, Sumedang (KKF Label)
+      destination_area_id: body.areaIdTujuan,
       couriers: body.ekspedisi.toLowerCase(),
       items: [
         {

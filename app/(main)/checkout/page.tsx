@@ -130,6 +130,94 @@ const DropdownPencarian = ({
   );
 };
 
+const AutocompleteAreaBiteship = ({ value, onChange }: { value: any, onChange: (area: any) => void }) => {
+  const [buka, setBuka] = useState(false);
+  const [kataKunci, setKataKunci] = useState(value?.name || "");
+  const [hasilPencarian, setHasilPencarian] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const klikLuar = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setBuka(false);
+    };
+    document.addEventListener("mousedown", klikLuar);
+    return () => document.removeEventListener("mousedown", klikLuar);
+  }, []);
+
+  useEffect(() => {
+    if (value) {
+      setKataKunci(value.name);
+    }
+  }, [value]);
+
+  useEffect(() => {
+    if (!kataKunci || kataKunci.length < 3) {
+      setHasilPencarian([]);
+      return;
+    }
+    if (value && kataKunci === value.name) return; // don't search if it's just the selected value
+
+    const delayDebounce = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/wilayah/biteship?input=${encodeURIComponent(kataKunci)}`);
+        const data = await res.json();
+        if (data.areas) {
+          setHasilPencarian(data.areas);
+        }
+      } catch (err) {
+        console.error("Gagal cari area", err);
+      } finally {
+        setLoading(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [kataKunci, value]);
+
+  return (
+    <div ref={ref} className="relative w-full">
+      <div className="flex items-center border border-zinc-200 rounded-xl p-3 bg-white focus-within:border-soft-pink-500 transition">
+        <Search size={16} className="text-zinc-400 shrink-0 mr-2" />
+        <input
+          type="text"
+          placeholder="Cari kecamatan / kodepos (min 3 huruf)..."
+          value={kataKunci}
+          onChange={(e) => {
+            setKataKunci(e.target.value);
+            setBuka(true);
+          }}
+          onFocus={() => setBuka(true)}
+          className="w-full bg-transparent text-sm focus:outline-none text-zinc-900"
+        />
+        {loading && <Loader2 size={16} className="animate-spin text-soft-pink-500 ml-2 shrink-0" />}
+      </div>
+
+      {buka && hasilPencarian.length > 0 && (
+        <div className="absolute z-50 mt-2 w-full rounded-xl border border-pink-100 bg-white shadow-xl animate-in fade-in zoom-in-95 duration-200">
+          <ul className="max-h-60 overflow-y-auto p-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-zinc-200 [&::-webkit-scrollbar-thumb]:rounded-full">
+            {hasilPencarian.map((area: any) => (
+              <li
+                key={area.id}
+                onClick={() => {
+                  onChange(area);
+                  setKataKunci(area.name);
+                  setBuka(false);
+                }}
+                className={`flex cursor-pointer flex-col rounded-lg p-2.5 transition-colors text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900`}
+              >
+                <span className="text-sm font-semibold">{area.name}</span>
+                <span className="text-xs text-zinc-400">{area.administrative_division_level_1_name}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function HalamanCheckout() {
   const router = useRouter();
   const { itemKeranjang, subtotal, ubahJumlah, hapusItem, kosongkanKeranjang } =
@@ -139,10 +227,7 @@ export default function HalamanCheckout() {
   const [emailPenerima, setEmailPenerima] = useState("");
   const [teleponPenerima, setTeleponPenerima] = useState("");
   const [alamatLengkap, setAlamatLengkap] = useState("");
-  const [daftarProvinsi, setDaftarProvinsi] = useState<any[]>([]);
-  const [daftarKota, setDaftarKota] = useState<any[]>([]);
-  const [provinsiDipilih, setProvinsiDipilih] = useState("");
-  const [kotaDipilih, setKotaDipilih] = useState("");
+  const [areaDipilih, setAreaDipilih] = useState<any>(null);
   const [ekspedisiDipilih, setEkspedisiDipilih] = useState("jne");
   const [pilihanOngkir, setPilihanOngkir] = useState<PilihanOngkir | null>(
     null,
@@ -173,8 +258,7 @@ export default function HalamanCheckout() {
         if (data.namaPenerima) setNamaPenerima(data.namaPenerima);
         if (data.teleponPenerima) setTeleponPenerima(data.teleponPenerima);
         if (data.emailPenerima) setEmailPenerima(data.emailPenerima);
-        if (data.provinsiDipilih) setProvinsiDipilih(data.provinsiDipilih);
-        if (data.kotaDipilih) setKotaDipilih(data.kotaDipilih);
+        if (data.areaDipilih) setAreaDipilih(data.areaDipilih);
         if (data.ekspedisiDipilih) setEkspedisiDipilih(data.ekspedisiDipilih);
         if (data.alamatLengkap) setAlamatLengkap(data.alamatLengkap);
         setIsEditingAddress(false);
@@ -190,22 +274,8 @@ export default function HalamanCheckout() {
     if (itemKeranjang.length === 0 && !modalSukses.show && !isRedirecting) router.push("/");
   }, [itemKeranjang.length, router, modalSukses.show, isRedirecting]);
 
-  const daftarProvinsiAman = useMemo(
-    () => (Array.isArray(daftarProvinsi) ? daftarProvinsi : []),
-    [daftarProvinsi],
-  );
-  const daftarKotaAman = useMemo(
-    () => (Array.isArray(daftarKota) ? daftarKota : []),
-    [daftarKota],
-  );
-  const namaProvinsi = useMemo(
-    () => daftarProvinsiAman.find((p: any) => p.province_id === provinsiDipilih)?.province ?? "",
-    [daftarProvinsiAman, provinsiDipilih],
-  );
-  const namaKota = useMemo(
-    () => daftarKotaAman.find((k: any) => k.city_id === kotaDipilih)?.city_name ?? "",
-    [daftarKotaAman, kotaDipilih],
-  );
+  const namaProvinsi = areaDipilih?.administrative_division_level_1_name ?? "";
+  const namaKota = areaDipilih?.administrative_division_level_2_name ?? "";
 
   const subtotalBersih = itemKeranjang.reduce(
     (acc: number, item: any) => acc + Number(item.harga) * Number(item.jumlah),
@@ -223,81 +293,18 @@ export default function HalamanCheckout() {
   const BIAYA_LAYANAN = 1000;
   const totalAkhir = subtotalBersih + (pilihanOngkir?.biaya ?? 0) + BIAYA_LAYANAN;
 
-  useEffect(() => {
-    async function ambilProvinsi() {
-      setSedangMemuatWilayah(true);
-      try {
-        const respons = await fetch("/api/wilayah/provinsi");
-        const data = await respons.json();
-        
-        const parsedData = data.rajaongkir?.results || data.data || (Array.isArray(data) ? data : []);
-        const formatAman = Array.isArray(parsedData)
-          ? parsedData.map((item: any) => ({
-              province_id: String(item.province_id || item.id),
-              province: item.province || item.nama || item.name,
-            }))
-          : [];
-        setDaftarProvinsi(formatAman);
-      } catch (err) {
-        console.error("Gagal memuat provinsi:", err);
-      } finally {
-        setSedangMemuatWilayah(false);
-      }
-    }
-    ambilProvinsi();
-  }, []);
-
-  useEffect(() => {
-    if (!provinsiDipilih) return;
-    async function ambilKota() {
-      setSedangMemuatWilayah(true);
-      try {
-        const respons = await fetch(
-          `/api/wilayah/kabupaten/${provinsiDipilih}`,
-        );
-        const data = await respons.json();
-        const parsedData = data.rajaongkir?.results || data.data || (Array.isArray(data) ? data : []);
-        const formatAman = Array.isArray(parsedData)
-          ? parsedData.map((item: any) => ({
-              city_id: String(item.city_id || item.id),
-              city_name: item.city_name || (item.type ? item.type + " " + item.city_name : "") || item.nama || item.name,
-              kodepos: item.postal_code || item.kodepos,
-            }))
-          : [];
-        setDaftarKota(formatAman);
-        
-        setKotaDipilih(prev => {
-          if (prev && formatAman.find((k: any) => k.city_id === prev)) {
-             return prev;
-          }
-          setPilihanOngkir(null);
-          return "";
-        });
-      } catch (err) {
-        console.error("Gagal memuat kota:", err);
-      } finally {
-        setSedangMemuatWilayah(false);
-      }
-    }
-    ambilKota();
-  }, [provinsiDipilih]);
-
   const hitungOngkir = useCallback(async () => {
-    if (!kotaDipilih || !ekspedisiDipilih || itemKeranjang.length === 0) return;
+    if (!areaDipilih || !ekspedisiDipilih || itemKeranjang.length === 0) return;
     setSedangMenghitung(true);
     setPesanOngkir("");
     setPilihanOngkir(null);
 
     try {
-      const kotaTerpilihData = daftarKotaAman.find((k) => String(k.id) === String(kotaDipilih));
-      const destinationPostalCode = kotaTerpilihData?.kodepos;
-
       const respons = await fetch("/api/ongkir", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          kotaTujuan: kotaDipilih,
-          kodeposTujuan: destinationPostalCode,
+          areaIdTujuan: areaDipilih.id,
           ekspedisi: ekspedisiDipilih,
           berat: 1000,
         }),
@@ -319,7 +326,7 @@ export default function HalamanCheckout() {
     } finally {
       setSedangMenghitung(false);
     }
-  }, [ekspedisiDipilih, itemKeranjang.length, kotaDipilih]);
+  }, [areaDipilih, ekspedisiDipilih, itemKeranjang.length]);
 
   useEffect(() => {
     hitungOngkir();
@@ -330,19 +337,18 @@ export default function HalamanCheckout() {
     setPesanPembayaran("");
     if (!namaPenerima || !emailPenerima || !teleponPenerima || !alamatLengkap)
       return setPesanPembayaran("Lengkapi data penerima terlebih dahulu.");
-    if (!kotaDipilih || !pilihanOngkir)
+    if (!areaDipilih || !pilihanOngkir)
       return setPesanPembayaran(
-        "Pilih kota dan tunggu ongkir selesai dihitung.",
+        "Pilih alamat dan tunggu ongkir selesai dihitung.",
       );
 
     setSedangMembayar(true);
     try {
       const formDataToSave = {
         namaPenerima,
-        teleponPenerima,
         emailPenerima,
-        provinsiDipilih,
-        kotaDipilih,
+        teleponPenerima,
+        areaDipilih,
         ekspedisiDipilih,
         alamatLengkap
       };
@@ -567,35 +573,14 @@ export default function HalamanCheckout() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs text-zinc-500 mb-1">
-                          Provinsi
-                        </label>
-                        <DropdownPencarian
-                          options={daftarProvinsiAman}
-                          value={provinsiDipilih}
-                          onChange={setProvinsiDipilih}
-                          placeholder="Pilih Provinsi..."
-                          valueKey="province_id"
-                          labelKey="province"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs text-zinc-500 mb-1">
-                          Kota/Kabupaten
-                        </label>
-                        <DropdownPencarian
-                          options={daftarKotaAman}
-                          value={kotaDipilih}
-                          onChange={setKotaDipilih}
-                          placeholder="Pilih Kota..."
-                          disabled={!provinsiDipilih || daftarKotaAman.length === 0}
-                          valueKey="city_id"
-                          labelKey="city_name"
-                        />
-                      </div>
+                    <div className="col-span-2">
+                      <label className="block text-xs text-zinc-500 mb-1">
+                        Cari Area (Kecamatan / Kodepos)
+                      </label>
+                      <AutocompleteAreaBiteship
+                        value={areaDipilih}
+                        onChange={setAreaDipilih}
+                      />
                     </div>
 
                     <div>
@@ -610,7 +595,7 @@ export default function HalamanCheckout() {
                         value={ekspedisiDipilih}
                         onChange={setEkspedisiDipilih}
                         placeholder="Pilih Ekspedisi..."
-                        disabled={!kotaDipilih}
+                        disabled={!areaDipilih}
                       />
                     </div>
 
