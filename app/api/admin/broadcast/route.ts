@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
@@ -14,13 +13,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Subjek dan isi pesan harus diisi' }, { status: 400 });
     }
 
-    // Mengambil semua data pengguna/pelanggan dari database
-    const users = await prisma.user.findMany({
-      select: { email: true }
+    // Mengambil data email unik pelanggan dari riwayat pesanan (Order) yang Selesai
+    const pesanan = await prisma.order.findMany({
+      where: {
+        statusPesanan: 'SELESAI',
+        emailPenerima: {
+          contains: '@'
+        }
+      },
+      select: { emailPenerima: true },
+      distinct: ['emailPenerima']
     });
 
-    const validEmails = users
-      .map(u => u.email)
+    const validEmails = pesanan
+      .map(p => p.emailPenerima)
       .filter(email => email && email.includes('@'));
 
     if (validEmails.length === 0) {
