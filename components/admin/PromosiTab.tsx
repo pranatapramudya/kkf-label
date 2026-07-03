@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Loader2, Copy, Send, Megaphone, CheckCircle, Mail } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
+import { Capacitor } from "@capacitor/core";
+import { Browser } from "@capacitor/browser";
 
 export default function PromosiTab() {
   const [daftarPelanggan, setDaftarPelanggan] = useState<any[]>([]);
@@ -46,14 +48,21 @@ export default function PromosiTab() {
     tampilNotif("Berhasil disalin! Siap blast ke aplikasi ketiga.");
   };
 
-  const kirimSatuWA = (nama: string, nomor: string) => {
+  const kirimSatuWA = async (nama: string, nomor: string) => {
     const teksWA = `*${judulPromo}*%0A%0A${isiPesan}%0A%0A*Kode Diskon:* ${kodeDiskon}%0A%0A~ Admin KKF Label`;
     // Format nomor WA dari 08.. ke 628.. jika perlu
     let noWa = nomor;
     if (noWa.startsWith("0")) {
       noWa = "62" + noWa.substring(1);
     }
-    window.open(`https://wa.me/${noWa}?text=${teksWA}`, "_blank");
+    
+    const waUrl = `https://wa.me/${noWa}?text=${teksWA}`;
+    
+    if (Capacitor.isNativePlatform()) {
+      await Browser.open({ url: waUrl });
+    } else {
+      window.open(waUrl, "_blank", "noopener,noreferrer");
+    }
   };
 
   const subjectEmail = encodeURIComponent(judulPromo);

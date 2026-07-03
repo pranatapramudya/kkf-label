@@ -1,16 +1,15 @@
-# Update PRD: Strict Implementation of Komerce API Docs (Location)
+# Update PRD: Fix WhatsApp Deep Link Handling in Capacitor (WebView)
 
 ## 1. Latar Belakang Masalah
-- Dropdown Provinsi dan Kota mati, serta muncul pesan *error* terkait limit/invalid key.
-- Berdasarkan dokumentasi resmi Komerce, terjadi kesalahan pada pengiriman *Header* dan pembacaan struktur *Response JSON* oleh *backend*.
+- Fitur "Promosi WhatsApp" di halaman Admin memunculkan *error* `net::ERR_UNKNOWN_URL_SCHEME` saat tombol ditekan dari dalam aplikasi Android (WebView Capacitor).
+- *Bug* ini terjadi karena Android WebView secara *default* tidak mengenali dan menolak *custom URL scheme* seperti `whatsapp://`.
+- Di versi *desktop browser*, fungsi berjalan normal (diarahkan ke WhatsApp Web).
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **Perbaikan Header Request:**
-  - Endpoint Provinsi: `https://rajaongkir.komerce.id/api/v1/destination/province`
-  - Endpoint Kota: `https://rajaongkir.komerce.id/api/v1/destination/city/{province_id}`
-  - **WAJIB:** Header otorisasi harus ditulis persis seperti dokumentasi: `Key` (huruf K kapital). Contoh: `{ "Key": process.env.RAJAONGKIR_API_KEY }`.
-- **Perbaikan Data Mapping (Krusial):**
-  - Response dari Komerce memiliki struktur `{ "meta": {...}, "data": [...] }`.
-  - Backend Next.js **TIDAK BOLEH** langsung mem-proxy JSON ini ke frontend jika frontend mengharapkan struktur RajaOngkir standar.
-  - Tangkap response dari Komerce, ambil `json.data`, lalu kembalikan (return) ke *frontend* dalam bentuk yang sesuai dengan komponen Dropdown (misalnya *array* murni atau dibungkus ulang dalam format `{ rajaongkir: { results: json.data } }` tergantung *state frontend*).
-  - Tambahkan penanganan error: Jika `meta.code !== 200`, kembalikan *error message* dari `meta.message`.
+- **Refaktor Logika Tombol Promo WA:**
+  - Modifikasi aksi klik (onClick) atau tautan (href) pada tombol Promosi WhatsApp.
+  - Gunakan format URL standar: `https://wa.me/628XXXXXXX?text=PesanPromo`.
+  - **Penting untuk Capacitor:** Agar aplikasi tidak terjebak di dalam WebView, tautan keluar ini harus dipaksa dibuka oleh *browser/handler* bawaan sistem operasi.
+  - Jika menggunakan HTML Anchor, pastikan menggunakan `<a href="..." target="_blank" rel="noopener noreferrer">`.
+  - Jika menggunakan fungsi JavaScript, gunakan `window.open(url, '_blank')`.
+  - Jika proyek sudah menggunakan plugin `@capacitor/browser`, prioritaskan menggunakan fungsi `Browser.open({ url: waUrl })` untuk kompatibilitas *native* yang sempurna.
