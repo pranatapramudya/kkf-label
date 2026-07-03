@@ -1,16 +1,16 @@
-# Update PRD: Fix Broadcast Email Data Fetching Logic
+# Update PRD: Fix Resend Sandbox Limitation & PC Mailto Link
 
 ## 1. Latar Belakang Masalah
-- UI Halaman Promosi sudah berhasil menampilkan daftar pelanggan beserta emailnya di tabel "Pelanggan Setia".
-- Namun, saat fungsi "Kirim Email Massal" dieksekusi, API mengembalikan *error* "Tidak ada data email pelanggan yang valid di database".
-- Hal ini mengindikasikan adanya ketidaksesuaian (*mismatch*) antara Prisma *query* yang digunakan untuk me-render tabel dengan Prisma *query* di dalam API *route* pengiriman email.
+- **Error Email Massal:** Resend menolak *request batch* dengan error `Invalid 'to' field` karena akun masih dalam mode Sandbox (belum ada verifikasi domain). API mencoba mengirim ke email eksternal.
+- **Error Tombol Individual:** Tombol "Email" (warna biru) di dalam tabel tidak berfungsi di PC desktop karena OS tidak memiliki *default email client* untuk menangani protokol `mailto:`.
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **Sinkronisasi Query Database:**
-  - Buka *file* API route untuk pengiriman email broadcast (contoh: `api/admin/broadcast/route.ts` atau fungsi server action terkait).
-  - Periksa darimana data tabel "Pelanggan Setia" diambil (apakah dari model `Pesanan` yang di-*grouping*, atau model `Pelanggan`).
-  - Gunakan logika Prisma yang **SAMA PERSIS** di dalam API pengiriman email untuk mengambil (meng-ekstrak) alamat email tersebut.
-- **Validasi & Filtering:**
-  - Pastikan hasil *query* di-*filter* (saring) untuk membuang baris yang tidak memiliki email (`email !== null` dan `email !== ''`).
-  - Ekstrak datanya menjadi *array of strings* murni, contoh: `const emailList = ['email1@gmail.com', 'email2@gmail.com']`.
-  - Teruskan `emailList` ini ke *payload* `resend.batch.send()`.
+- **Bypass Resend Sandbox (Testing Mode):**
+  - Di dalam file API route pengiriman email (`api/admin/broadcast/route.ts`), modifikasi hasil *mapping* data email dari Prisma.
+  - Selama tahap *development* ini, paksa (override) parameter `to` menjadi email testing resmi (contoh: `prapranata20@gmail.com`) terlepas dari siapa pemilik pesanan tersebut.
+  - (Opsional) Berikan *comment* di kode tersebut agar mudah dikembalikan ke email pelanggan asli (`user.email`) setelah domain production `.com` diverifikasi.
+- **Perbaikan Tombol Email di Tabel (Universal Mail Link):**
+  - Ubah logika tombol "Email" biru pada tabel. Jangan gunakan protokol standar `mailto:email@domain.com`.
+  - Gunakan URL Gmail Web Composer agar bisa dibuka langsung via Browser di PC maupun HP.
+  - Format URL: `https://mail.google.com/mail/?view=cm&fs=1&to={email_pelanggan}`.
+  - Pastikan tombol menggunakan atribut `target="_blank" rel="noopener noreferrer"`.

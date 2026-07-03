@@ -43,7 +43,8 @@ export async function POST(req: Request) {
       // Membentuk array of objects untuk format Resend Batch API
       const batchPayload = chunk.map(email => ({
         from: 'onboarding@resend.dev',
-        to: email,
+        // TODO: Revert to actual user email (`email`) in production when domain is verified.
+        to: 'prapranata20@gmail.com', 
         subject: subject,
         html: content.replace(/\n/g, '<br/>')
       }));
