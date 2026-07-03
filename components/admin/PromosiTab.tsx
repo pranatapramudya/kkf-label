@@ -40,27 +40,12 @@ export default function PromosiTab() {
   };
 
   const kirimEmailMassal = async () => {
-    if (daftarPelanggan.length === 0) {
-      tampilNotif("Tidak ada pelanggan untuk dikirimi email.", "gagal");
-      return;
-    }
-
-    const emails = daftarPelanggan
-      .map(p => p.email)
-      .filter(email => email && email.includes("@"));
-
-    if (emails.length === 0) {
-      tampilNotif("Tidak ada alamat email pelanggan yang valid.", "gagal");
-      return;
-    }
-
     setMengirim(true);
     try {
-      const res = await fetch("/api/admin/promo/email", {
+      const res = await fetch("/api/admin/broadcast", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          emails,
           subject: judulPromo,
           content: isiPesan,
         }),
@@ -72,7 +57,7 @@ export default function PromosiTab() {
         throw new Error(result.error || "Gagal mengirim email massal");
       }
 
-      tampilNotif(`Berhasil mengirim email promo ke ${emails.length} pelanggan!`);
+      tampilNotif(result.message || "Berhasil mengirim broadcast email promo!");
     } catch (error: any) {
       tampilNotif(error.message, "gagal");
     } finally {
