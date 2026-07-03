@@ -1053,6 +1053,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                       }
                       className="w-full border border-zinc-300 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm font-bold tracking-wide"
                     />
+                    {/*
                     <button
                       type="button"
                       onClick={handleBuatResiBiteship}
@@ -1062,6 +1063,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                       {sedangBuatResi ? <Loader2 size={14} className="animate-spin" /> : <Package size={14} />}
                       Buat Resi (Biteship)
                     </button>
+                    */}
                   </div>
                 </div>
                 <div className="pt-4 flex gap-3">

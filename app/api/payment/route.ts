@@ -62,10 +62,38 @@ export async function POST(permintaan: Request) {
         }
       }
 
+      // 1.5. Upsert Pengguna untuk menyimpan FCM Token (Guest Checkout)
+      let penggunaId = null;
+      if (body.email) {
+        const user = await tx.user.upsert({
+          where: { email: body.email },
+          update: { 
+            nama: body.nama,
+            telepon: body.telepon,
+            alamat: body.alamatLengkap,
+            kota: body.kota,
+            provinsi: body.provinsi,
+            ...(body.fcmToken ? { fcmToken: body.fcmToken } : {})
+          },
+          create: {
+            nama: body.nama,
+            email: body.email,
+            kataSandi: Math.random().toString(36).slice(-8), // random dummy pass
+            telepon: body.telepon,
+            alamat: body.alamatLengkap,
+            kota: body.kota,
+            provinsi: body.provinsi,
+            fcmToken: body.fcmToken || null,
+          }
+        });
+        penggunaId = user.id;
+      }
+
       // 2. Buat Order
       await tx.order.create({
         data: {
           kodePesanan: kodePesanan,
+          penggunaId: penggunaId,
           namaPenerima: body.nama,
           emailPenerima: body.email,
           teleponPenerima: body.telepon,

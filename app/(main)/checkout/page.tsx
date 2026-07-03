@@ -372,6 +372,7 @@ export default function HalamanCheckout() {
         total: totalAkhir,
         items: itemKeranjang,
         metodePembayaran,
+        fcmToken: localStorage.getItem("fcm_token") || undefined,
       };
 
       if (metodePembayaran === "MIDTRANS") {

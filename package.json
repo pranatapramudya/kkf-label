@@ -23,6 +23,7 @@
     "axios": "^1.18.0",
     "capacitor-plugin-safe-area": "^5.0.0",
     "embla-carousel-react": "^8.6.0",
+    "firebase": "^12.15.0",
     "firebase-admin": "^14.1.0",
     "lucide-react": "^0.468.0",
     "next": "^15.0.3",

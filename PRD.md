@@ -1,16 +1,24 @@
-# Update PRD: Migrasi Total API Ongkir dari Komerce ke BiteShip
+# Update PRD: Fitur Notifikasi "Abandoned Cart" (Keranjang Tertinggal) via Firebase
 
-## 1. Latar Belakang Masalah
-- API Komerce/RajaOngkir menerapkan limitasi ketat pada mode Sandbox dan mewajibkan dokumen legal (SLA/CA) untuk masuk ke mode Live, sehingga kurir seperti SiCepat, Ninja, dll selalu merespons "Not Found".
-- Untuk efisiensi dan kebersihan arsitektur, seluruh sistem logistik (Cek Ongkir & Pelacakan) akan disatukan menggunakan **BiteShip API**.
+## 1. Latar Belakang
+- Banyak pembeli yang memasukkan barang ke keranjang namun lupa atau menunda proses checkout.
+- Sistem sudah memiliki konfigurasi Firebase Admin SDK yang sebelumnya digunakan untuk notifikasi pesanan masuk ke admin.
+- Dibutuhkan fitur otomatisasi *marketing* yang mengingatkan pelanggan melalui *Push Notification* di perangkat mereka jika keranjang dibiarkan lebih dari 24 jam.
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **Refaktor API Cek Ongkir (Backend):**
-  - Buka route API yang bertugas mengecek ongkir (misal: `app/api/ongkir/route.ts`).
-  - Hapus seluruh logika, URL, dan *headers* yang mengarah ke Komerce/RajaOngkir.
-  - Ganti menggunakan *endpoint* BiteShip: `POST https://api.biteship.com/v1/rates/couriers`.
-  - Gunakan `process.env.BITESHIP_API_KEY` pada *header* Authorization.
-  - Sesuaikan struktur *payload* (body) yang dikirim agar sesuai dengan standar BiteShip (menggunakan data asal, tujuan, berat barang, dan `couriers` yang dipilih).
-- **Penyesuaian Response ke Frontend:**
-  - *Mapping* hasil *response* JSON dari BiteShip sedemikian rupa agar struktur datanya (harga, nama layanan) tetap kompatibel dengan komponen *Checkout* di *frontend* tanpa harus merombak total UI yang sudah ada.
-  - Pastikan daftar kurir di *dropdown* *frontend* (`value` seperti `sicepat`, `jne`, `jnt`, dll) dikirim dengan benar ke API BiteShip ini.
+- **Database (Prisma):**
+  - Tambahkan kolom `fcmToken` (tipe String, opsional/nullable) pada tabel `User` atau entitas pelanggan. Kolom ini berfungsi menyimpan token notifikasi dari perangkat pelanggan.
+- **Frontend (Klien):**
+  - Buat mekanisme untuk meminta izin notifikasi (*Notification Permission*) kepada pengguna yang sedang *login* atau berinteraksi di toko.
+  - Ambil FCM Token menggunakan Firebase Client SDK, lalu kirimkan token tersebut ke *backend* untuk disimpan di *database* (di-bind dengan data user).
+- **Backend (Cron Job / API Route):**
+  - Buat endpoint baru khusus cron job di `app/api/cron/abandoned-cart/route.ts`.
+  - Endpoint ini bertugas menarik data dari tabel `Cart` (Keranjang) yang memenuhi kriteria:
+    1. Memiliki item di dalamnya.
+    2. Status keranjang belum di-*checkout*.
+    3. `updatedAt` (terakhir diubah) sudah lebih dari 24 jam yang lalu.
+    4. Pengguna/User pemilik keranjang memiliki `fcmToken` yang tidak *null*.
+  - *Looping* data tersebut dan kirimkan notifikasi massal melalui Firebase Admin SDK.
+- **Konfigurasi Vercel:**
+  - Siapkan file `vercel.json` di *root directory* untuk menjadwalkan *trigger* endpoint cron job ini (misal: berjalan setiap hari jam 12.00 siang).
+  - Teks notifikasi wajib menggunakan bahasa Indonesia yang persuasif.

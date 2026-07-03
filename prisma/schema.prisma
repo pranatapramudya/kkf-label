@@ -52,6 +52,7 @@ model User {
   kota         String?
   provinsi     String?
   kodePos      String?
+  fcmToken     String?
   pesanan      Order[]
   ulasan       Review[]
   affiliate    Affiliate?
