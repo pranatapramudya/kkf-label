@@ -25,9 +25,15 @@ import { formatRupiah } from "@/lib/format";
 import type { PilihanOngkir, Wilayah } from "@/types/produk";
 
 const daftarEkspedisi = [
-  { kode: "jne", nama: "JNE" },
-  { kode: "jnt", nama: "J&T" },
-  { kode: "sicepat", nama: "SiCepat" },
+  { value: "jne", label: "JNE" },
+  { value: "jnt", label: "J&T" },
+  { value: "sicepat", label: "SiCepat" },
+  { value: "ide", label: "ID Express" },
+  { value: "ninja", label: "Ninja" },
+  { value: "anteraja", label: "AnterAja" },
+  { value: "pos", label: "Pos Indonesia" },
+  { value: "lion", label: "Lion Parcel" },
+  { value: "sapx", label: "SAPX" },
 ];
 
 const DropdownPencarian = ({
@@ -345,7 +351,7 @@ export default function HalamanCheckout() {
         alamatLengkap: alamatLengkap,
         provinsi: namaProvinsi,
         kota: namaKota,
-        ekspedisi: `${daftarEkspedisi.find((item) => item.kode === ekspedisiDipilih)?.nama} - ${pilihanOngkir.layanan}`,
+        ekspedisi: `${daftarEkspedisi.find((item) => item.value === ekspedisiDipilih)?.label} - ${pilihanOngkir.layanan}`,
         subtotal: subtotalBersih,
         ongkir: pilihanOngkir.biaya,
         total: totalAkhir,
@@ -594,8 +600,8 @@ export default function HalamanCheckout() {
                       </label>
                       <DropdownPencarian
                         options={daftarEkspedisi.map((e) => ({
-                          id: e.kode,
-                          name: e.nama,
+                          id: e.value,
+                          name: e.label,
                         }))}
                         value={ekspedisiDipilih}
                         onChange={setEkspedisiDipilih}
