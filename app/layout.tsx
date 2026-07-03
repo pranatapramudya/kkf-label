@@ -4,6 +4,7 @@ import { PenyediaKeranjang } from "@/context/CartContext";
 import { ClerkProvider } from "@clerk/nextjs";
 import SafeAreaProvider from "@/components/SafeAreaProvider";
 import { Analytics } from "@vercel/analytics/next";
+import CapacitorInit from "@/components/CapacitorInit";
 
 export const metadata: Metadata = {
   title: "kkf-label | Fashion Wanita Minimalis",
@@ -28,6 +29,7 @@ export default function RootLayout({
     <ClerkProvider afterSignOutUrl="/sign-in">
       <html lang="id" suppressHydrationWarning>
         <body className="font-sans antialiased bg-zinc-900" suppressHydrationWarning>
+          <CapacitorInit />
           <div className="bg-white min-h-screen pt-[var(--safe-area-inset-top,env(safe-area-inset-top))] pb-[env(safe-area-inset-bottom)]">
             <PenyediaKeranjang>
               <SafeAreaProvider>
