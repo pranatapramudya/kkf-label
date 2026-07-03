@@ -3,59 +3,69 @@ import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 export async function POST(permintaan: Request) {
-  const apiKey = process.env.RAJAONGKIR_API_KEY;
+  const apiKey = process.env.BITESHIP_API_KEY;
   if (!apiKey)
     return NextResponse.json(
-      { pesan: "API Key kosong di .env" },
+      { pesan: "API Key BiteShip kosong di .env" },
       { status: 500 },
     );
 
   try {
     const body = await permintaan.json();
 
-    const parameter = new URLSearchParams({
-      origin: process.env.RAJAONGKIR_ORIGIN_ID || "440", // Ambil dari env, default 440 (Sumedang)
-      destination: body.kotaTujuan,
-      weight: String(body.berat ?? 1000),
-      courier: body.ekspedisi.toLowerCase(),
-    });
+    if (!body.kodeposTujuan) {
+      return NextResponse.json(
+        { pesan: "Kode pos tujuan tidak ditemukan. Silakan pilih ulang kota tujuan Anda." },
+        { status: 400 }
+      );
+    }
+
+    const payload = {
+      origin_postal_code: 45362, // Kode pos default Sumedang (KKF Label)
+      destination_postal_code: Number(body.kodeposTujuan),
+      couriers: body.ekspedisi.toLowerCase(),
+      items: [
+        {
+          name: "Produk KKF",
+          description: "Pesanan Pakaian KKF Label",
+          value: 100000,
+          length: 10,
+          width: 10,
+          height: 10,
+          weight: body.berat ?? 1000,
+          quantity: 1
+        }
+      ]
+    };
 
     const respons = await fetch(
-      "https://rajaongkir.komerce.id/api/v1/calculate/domestic-cost",
+      "https://api.biteship.com/v1/rates/couriers",
       {
         method: "POST",
         headers: {
-          Key: apiKey,
-          "content-type": "application/x-www-form-urlencoded",
+          "Authorization": apiKey,
+          "content-type": "application/json",
         },
-        body: parameter.toString(),
+        body: JSON.stringify(payload),
         cache: "no-store",
       },
     );
 
     const data = await respons.json();
 
-    if (data.meta?.status === false || data.meta?.status === "error" || data.meta?.code >= 400) {
-      let errorMsg = data.meta?.message || "Gagal dari API Komerce";
-      const lowerMsg = errorMsg.toLowerCase();
-      if (lowerMsg.includes("limit")) {
-        errorMsg = "Limit harian akses logistik telah habis.";
-      } else if (lowerMsg.includes("courier")) {
-        errorMsg = "Kurir tidak tersedia untuk rute atau berat ini.";
-      } else if (lowerMsg.includes("destination") || lowerMsg.includes("origin")) {
-        errorMsg = "Titik pengiriman atau kota tujuan tidak valid.";
-      }
+    if (!respons.ok || !data.success) {
+      const errorMsg = data.error || data.message || "Gagal mengambil tarif pengiriman dari BiteShip";
       return NextResponse.json({ pesan: errorMsg }, { status: 400 });
     }
 
-    const results = data.data || [];
+    const results = data.pricing || [];
 
     const daftarBiaya = results.map((layanan: any) => ({
-      ekspedisi: body.ekspedisi.toUpperCase(),
-      layanan: layanan.service || layanan.name,
-      namaLayanan: layanan.description || layanan.service || "Reguler",
-      biaya: Number(layanan.cost || layanan.price || 0),
-      estimasi: layanan.etd || layanan.estimation || "-",
+      ekspedisi: layanan.courier_name || body.ekspedisi.toUpperCase(),
+      layanan: layanan.courier_service_code || layanan.courier_service_name,
+      namaLayanan: layanan.courier_service_name || "Reguler",
+      biaya: Number(layanan.price || 0),
+      estimasi: layanan.duration || "-",
     }));
 
     daftarBiaya.sort((a: any, b: any) => a.biaya - b.biaya);

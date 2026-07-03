@@ -289,11 +289,15 @@ export default function HalamanCheckout() {
     setPilihanOngkir(null);
 
     try {
+      const kotaTerpilihData = daftarKotaAman.find((k) => String(k.id) === String(kotaDipilih));
+      const destinationPostalCode = kotaTerpilihData?.kodepos;
+
       const respons = await fetch("/api/ongkir", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
           kotaTujuan: kotaDipilih,
+          kodeposTujuan: destinationPostalCode,
           ekspedisi: ekspedisiDipilih,
           berat: 1000,
         }),
