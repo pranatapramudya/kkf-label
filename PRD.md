@@ -1,24 +1,16 @@
-# Update PRD: Fitur Notifikasi "Abandoned Cart" (Keranjang Tertinggal) via Firebase
+# Update PRD: Peningkatan UI/UX Dasbor Admin (Pesanan)
 
 ## 1. Latar Belakang
-- Banyak pembeli yang memasukkan barang ke keranjang namun lupa atau menunda proses checkout.
-- Sistem sudah memiliki konfigurasi Firebase Admin SDK yang sebelumnya digunakan untuk notifikasi pesanan masuk ke admin.
-- Dibutuhkan fitur otomatisasi *marketing* yang mengingatkan pelanggan melalui *Push Notification* di perangkat mereka jika keranjang dibiarkan lebih dari 24 jam.
+- Tampilan antarmuka untuk manajemen pesanan di Dasbor Admin terasa kaku, terutama pada elemen form seperti dropdown status pesanan.
+- Seiring bertambahnya transaksi, Admin kesulitan melacak pesanan spesifik karena tidak adanya fitur pencarian.
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **Database (Prisma):**
-  - Tambahkan kolom `fcmToken` (tipe String, opsional/nullable) pada tabel `User` atau entitas pelanggan. Kolom ini berfungsi menyimpan token notifikasi dari perangkat pelanggan.
-- **Frontend (Klien):**
-  - Buat mekanisme untuk meminta izin notifikasi (*Notification Permission*) kepada pengguna yang sedang *login* atau berinteraksi di toko.
-  - Ambil FCM Token menggunakan Firebase Client SDK, lalu kirimkan token tersebut ke *backend* untuk disimpan di *database* (di-bind dengan data user).
-- **Backend (Cron Job / API Route):**
-  - Buat endpoint baru khusus cron job di `app/api/cron/abandoned-cart/route.ts`.
-  - Endpoint ini bertugas menarik data dari tabel `Cart` (Keranjang) yang memenuhi kriteria:
-    1. Memiliki item di dalamnya.
-    2. Status keranjang belum di-*checkout*.
-    3. `updatedAt` (terakhir diubah) sudah lebih dari 24 jam yang lalu.
-    4. Pengguna/User pemilik keranjang memiliki `fcmToken` yang tidak *null*.
-  - *Looping* data tersebut dan kirimkan notifikasi massal melalui Firebase Admin SDK.
-- **Konfigurasi Vercel:**
-  - Siapkan file `vercel.json` di *root directory* untuk menjadwalkan *trigger* endpoint cron job ini (misal: berjalan setiap hari jam 12.00 siang).
-  - Teks notifikasi wajib menggunakan bahasa Indonesia yang persuasif.
+- **Modernisasi Dropdown Status:**
+  - Ganti elemen `<select>` HTML bawaan pada form "Status Pesanan" (di dalam modal Proses Pesanan) dengan komponen dropdown modern.
+  - Jika menggunakan library UI (seperti Shadcn UI, Headless UI, atau Radix UI), manfaatkan komponen `Select` mereka agar tampilan lebih elegan, *mobile-friendly*, dan konsisten di semua *browser*.
+- **Fitur Pencarian Pesanan (Live Search):**
+  - Tambahkan sebuah *Search Bar* (Input text) di halaman utama `Pesanan` (di sebelah komponen filter bulan/tahun).
+  - Implementasikan logika pencarian *real-time* atau *debounced search* pada *frontend* (atau via parameter URL ke *backend* jika *server-side pagination*).
+  - Pencarian harus mencakup pencocokan teks terhadap:
+    1. **No Invoice** (misal: "KKF-178...").
+    2. **Nama Pelanggan** (misal: "Pranata...").

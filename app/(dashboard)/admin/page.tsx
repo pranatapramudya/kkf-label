@@ -46,6 +46,7 @@ import {
   MessageSquare,
   Mail,
   Phone,
+  Search,
 } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
 import { maskName } from "@/lib/masking";
@@ -526,6 +527,16 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
   const [bulanExport, setBulanExport] = useState("semua");
   const [tahunExport, setTahunExport] = useState(tahunSekarang.toString());
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
   const opsiBulan = [
     { value: "semua", label: "Semua Bulan" },
     ...[
@@ -571,7 +582,13 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
   }, []);
 
   // Data tampil diambil langsung dari daftarPesanan karena API sudah mem-paginate
-  const dataTampil = daftarPesanan;
+  const dataTampil = daftarPesanan.filter((p) => {
+    if (!debouncedSearch) return true;
+    const lowerQ = debouncedSearch.toLowerCase();
+    const matchInvoice = p.kodePesanan?.toLowerCase().includes(lowerQ);
+    const matchNama = p.namaPenerima?.toLowerCase().includes(lowerQ);
+    return matchInvoice || matchNama;
+  });
 
   const exportCSV = () => {
     let dataDifilter = daftarPesanan.filter((p) => {
@@ -759,6 +776,16 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
         <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-6">
           <h3 className="font-bold text-zinc-900 text-lg">Rekapan Transaksi</h3>
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-fit">
+            <div className="relative w-full sm:w-64 shrink-0">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+              <input
+                type="text"
+                placeholder="Cari Invoice / Nama..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 bg-white border border-zinc-200 text-sm font-medium text-zinc-700 rounded-xl hover:border-soft-pink-300 focus:outline-none focus:border-soft-pink-500 transition shadow-sm placeholder:font-normal"
+              />
+            </div>
             <DropdownMewah
               value={bulanExport}
               options={opsiBulan}
@@ -1008,25 +1035,19 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                   <label className="block text-xs font-bold text-zinc-700 mb-1.5">
                     Status Pesanan
                   </label>
-                  <select
-                    required
+                  <DropdownMewah
                     value={formEdit.statusPesanan}
-                    onChange={(e) =>
-                      setFormEdit({ ...formEdit, statusPesanan: e.target.value })
-                    }
-                    className="w-full border border-zinc-300 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm font-medium"
-                  >
-                    <option value="MENUNGGU_PEMBAYARAN">
-                      Menunggu Pembayaran
-                    </option>
-                    <option value="MENUNGGU_VERIFIKASI">
-                      Menunggu Verifikasi (Transfer Manual)
-                    </option>
-                    <option value="DIPROSES">Sedang Diproses (Dikemas)</option>
-                    <option value="DIKIRIM">Dikirim (Dalam Perjalanan)</option>
-                    <option value="SELESAI">Selesai (Diterima Pembeli)</option>
-                    <option value="DIBATALKAN">Dibatalkan</option>
-                  </select>
+                    onChange={(val: string) => setFormEdit({ ...formEdit, statusPesanan: val })}
+                    options={[
+                      { value: "MENUNGGU_PEMBAYARAN", label: "Menunggu Pembayaran" },
+                      { value: "MENUNGGU_VERIFIKASI", label: "Menunggu Verifikasi (Transfer Manual)" },
+                      { value: "DIPROSES", label: "Sedang Diproses (Dikemas)" },
+                      { value: "DIKIRIM", label: "Dikirim (Dalam Perjalanan)" },
+                      { value: "SELESAI", label: "Selesai (Diterima Pembeli)" },
+                      { value: "DIBATALKAN", label: "Dibatalkan" },
+                    ]}
+                    placeholder="Pilih Status..."
+                  />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-zinc-700 mb-1.5">
