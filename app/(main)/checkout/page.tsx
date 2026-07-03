@@ -306,7 +306,12 @@ export default function HalamanCheckout() {
         body: JSON.stringify({
           areaIdTujuan: areaDipilih.id,
           ekspedisi: ekspedisiDipilih,
-          berat: 1000,
+          items: itemKeranjang.map((item: any) => ({
+            name: item.nama || "Produk KKF Label",
+            value: Number(item.harga) || 100000,
+            quantity: Number(item.jumlah) || 1,
+            weight: 250
+          }))
         }),
       });
       const dataOngkir = (await respons.json()) as {

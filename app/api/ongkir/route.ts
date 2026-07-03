@@ -20,22 +20,20 @@ export async function POST(permintaan: Request) {
       );
     }
 
+    const defaultItems = [
+      {
+        name: "Produk KKF Label",
+        value: 150000,
+        quantity: 1,
+        weight: 250
+      }
+    ];
+
     const payload = {
       origin_area_id: "IDNP9IDNC430IDND5356", // Area ID untuk Cimalaka, Sumedang (KKF Label)
       destination_area_id: body.areaIdTujuan,
       couriers: body.ekspedisi.toLowerCase(),
-      items: [
-        {
-          name: "Produk KKF",
-          description: "Pesanan Pakaian KKF Label",
-          value: 100000,
-          length: 10,
-          width: 10,
-          height: 10,
-          weight: body.berat ?? 1000,
-          quantity: 1
-        }
-      ]
+      items: body.items && body.items.length > 0 ? body.items : defaultItems
     };
 
     const respons = await fetch(
