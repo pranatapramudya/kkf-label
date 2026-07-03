@@ -122,11 +122,11 @@ export default function AdminNotification() {
     }
     setIsOpen(false);
     // Halaman list pesanan ada di /admin?tab=pesanan sesuai struktur yang digunakan sebelumnya
-    router.push(`/admin?tab=pesanan&q=${notif.orderId}`);
+    router.push(`/admin?tab=pesanan&search=${notif.orderId}`);
   };
 
   return (
-    <div className="fixed top-4 right-4 z-[9999]" ref={dropdownRef}>
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2.5 bg-white rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-zinc-100 hover:bg-zinc-50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.16)] transition-all duration-300 ease-in-out"

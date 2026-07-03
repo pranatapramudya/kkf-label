@@ -49,6 +49,9 @@ import {
   Search,
 } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
+import { useSearchParams } from "next/navigation";
+import AdminNotification from "@/components/AdminNotification";
+import { Suspense } from "react";
 import { maskName } from "@/lib/masking";
 import TabelProduk from "./produk/TabelProduk";
 import PromosiTab from "@/components/admin/PromosiTab";
@@ -527,8 +530,10 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
   const [bulanExport, setBulanExport] = useState("semua");
   const [tahunExport, setTahunExport] = useState(tahunSekarang.toString());
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get("search") || "";
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -1262,7 +1267,17 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
 // ==========================================
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export default function HalamanAdmin() {
+export default function HalamanAdminWrapper() {
+  return (
+    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center font-bold text-zinc-500">Memuat Dasbor...</div>}>
+      <HalamanAdmin />
+    </Suspense>
+  );
+}
+
+function HalamanAdmin() {
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab") || "analitik";
   const { signOut } = useClerk();
 
   const { data: pendingData } = useSWR("/api/admin/pesanan/pending", fetcher, {
@@ -1275,7 +1290,7 @@ export default function HalamanAdmin() {
   });
   const unrepliedCount = unreadData?.count || 0;
 
-  const [tabAktif, setTabAktif] = useState("analitik");
+  const [tabAktif, setTabAktif] = useState(initialTab);
   const [analitikTabAktif, setAnalitikTabAktif] = useState("ringkasan");
   const [isDropdownAnalitikOpen, setIsDropdownAnalitikOpen] = useState(false);
   const [terakhirDiperbarui, setTerakhirDiperbarui] = useState("");
@@ -1526,11 +1541,11 @@ export default function HalamanAdmin() {
             </div>
           </header>
 
-        <div className="shrink-0 px-4 md:px-8 py-4 md:pt-8 pb-0 flex flex-col sm:flex-row justify-between sm:items-end gap-2">
+        <div className="sticky top-0 z-50 bg-white shrink-0 px-4 md:px-8 py-4 md:py-6 border-b border-pink-100 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
           <h2 className="text-2xl font-bold text-zinc-900 tracking-tight capitalize">
             {tabAktif.replace("-", " ")}
           </h2>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <button
               onClick={() => setBukaKalkulator(true)}
               className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 sm:px-3 py-1.5 rounded-full shadow-sm hover:bg-emerald-100 transition"
@@ -1551,9 +1566,10 @@ export default function HalamanAdmin() {
               />{" "}
               Diperbarui: {terakhirDiperbarui}
             </button>
-            <div className="hidden md:flex items-center justify-center bg-white p-1.5 rounded-full border border-pink-100 shadow-sm hover:shadow-md transition-all shrink-0 w-12 h-12 cursor-pointer">
+            <AdminNotification />
+            <div className="hidden md:flex items-center justify-center bg-white p-1 rounded-full border border-pink-100 shadow-sm hover:shadow-md transition-all shrink-0 w-10 h-10 cursor-pointer">
               <UserButton
-                appearance={{ elements: { userButtonAvatarBox: "w-9 h-9" } }}
+                appearance={{ elements: { userButtonAvatarBox: "w-8 h-8" } }}
               />
             </div>
           </div>

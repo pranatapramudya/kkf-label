@@ -1,4 +1,3 @@
-import AdminNotification from "@/components/AdminNotification";
 import PushNotificationSetup from "@/components/PushNotificationSetup";
 
 export default function DashboardLayout({
@@ -9,7 +8,6 @@ export default function DashboardLayout({
   return (
     <>
       <PushNotificationSetup />
-      <AdminNotification />
       {children}
     </>
   );
