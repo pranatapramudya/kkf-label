@@ -1,23 +1,21 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Copy, Send, Megaphone, CheckCircle, Mail } from "lucide-react";
+import { Loader2, Send, Megaphone, CheckCircle, Mail, AlertCircle } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
-import { Capacitor } from "@capacitor/core";
-import { Browser } from "@capacitor/browser";
 
 export default function PromosiTab() {
   const [daftarPelanggan, setDaftarPelanggan] = useState<any[]>([]);
   const [memuatData, setMemuatData] = useState(true);
+  const [mengirim, setMengirim] = useState(false);
 
   // Form Promo
   const [judulPromo, setJudulPromo] = useState("PROMO SPESIAL KKF LABEL 🎉");
-  const [kodeDiskon, setKodeDiskon] = useState("KKF10K");
   const [isiPesan, setIsiPesan] = useState(
-    "Halo kak! Terima kasih sudah pernah berbelanja di KKF Label. Khusus buat kakak, ada voucher diskon spesial nih! Buruan pakai kodenya sebelum kehabisan ya. 💕"
+    "Halo kak! Terima kasih sudah berbelanja di KKF Label.\n\nKhusus buat kakak, ada voucher diskon spesial nih: KKF10K\n\nBuruan pakai kodenya sebelum kehabisan ya. 💕"
   );
 
-  const [notifikasi, setNotifikasi] = useState({ tampil: false, pesan: "" });
+  const [notifikasi, setNotifikasi] = useState({ tampil: false, pesan: "", tipe: "sukses" });
 
   useEffect(() => {
     const fetchPelanggan = async () => {
@@ -36,37 +34,54 @@ export default function PromosiTab() {
     fetchPelanggan();
   }, []);
 
-  const tampilNotif = (pesan: string) => {
-    setNotifikasi({ tampil: true, pesan });
-    setTimeout(() => setNotifikasi({ tampil: false, pesan: "" }), 3000);
+  const tampilNotif = (pesan: string, tipe = "sukses") => {
+    setNotifikasi({ tampil: true, pesan, tipe });
+    setTimeout(() => setNotifikasi({ tampil: false, pesan: "", tipe: "sukses" }), 4000);
   };
 
-  const copySemuaNomor = () => {
-    if (daftarPelanggan.length === 0) return;
-    const semuaNomor = daftarPelanggan.map((p) => p.telepon).join("\n");
-    navigator.clipboard.writeText(semuaNomor);
-    tampilNotif("Berhasil disalin! Siap blast ke aplikasi ketiga.");
-  };
-
-  const kirimSatuWA = async (nama: string, nomor: string) => {
-    const teksWA = `*${judulPromo}*%0A%0A${isiPesan}%0A%0A*Kode Diskon:* ${kodeDiskon}%0A%0A~ Admin KKF Label`;
-    // Format nomor WA dari 08.. ke 628.. jika perlu
-    let noWa = nomor;
-    if (noWa.startsWith("0")) {
-      noWa = "62" + noWa.substring(1);
+  const kirimEmailMassal = async () => {
+    if (daftarPelanggan.length === 0) {
+      tampilNotif("Tidak ada pelanggan untuk dikirimi email.", "gagal");
+      return;
     }
-    
-    const waUrl = `https://wa.me/${noWa}?text=${teksWA}`;
-    
-    if (Capacitor.isNativePlatform()) {
-      await Browser.open({ url: waUrl });
-    } else {
-      window.open(waUrl, "_blank", "noopener,noreferrer");
+
+    const emails = daftarPelanggan
+      .map(p => p.email)
+      .filter(email => email && email.includes("@"));
+
+    if (emails.length === 0) {
+      tampilNotif("Tidak ada alamat email pelanggan yang valid.", "gagal");
+      return;
+    }
+
+    setMengirim(true);
+    try {
+      const res = await fetch("/api/admin/promo/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emails,
+          subject: judulPromo,
+          content: isiPesan,
+        }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.error || "Gagal mengirim email massal");
+      }
+
+      tampilNotif(`Berhasil mengirim email promo ke ${emails.length} pelanggan!`);
+    } catch (error: any) {
+      tampilNotif(error.message, "gagal");
+    } finally {
+      setMengirim(false);
     }
   };
 
   const subjectEmail = encodeURIComponent(judulPromo);
-  const bodyEmail = encodeURIComponent(`${isiPesan}\n\nKode Diskon: ${kodeDiskon}\n\n~ Admin KKF Label`);
+  const bodyEmail = encodeURIComponent(isiPesan);
 
   return (
     <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300 w-full">
@@ -78,13 +93,13 @@ export default function PromosiTab() {
               <span className="grid h-10 w-10 place-items-center rounded-xl bg-soft-pink-50 text-soft-pink-600 shadow-sm">
                 <Megaphone size={20} />
               </span>
-              <h3 className="font-bold text-zinc-900 text-lg">Buat Promo</h3>
+              <h3 className="font-bold text-zinc-900 text-lg">Buat Promo Email</h3>
             </div>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-zinc-600 mb-1.5">
-                  Judul Promo
+                  Subjek Email
                 </label>
                 <input
                   type="text"
@@ -96,38 +111,42 @@ export default function PromosiTab() {
               </div>
               <div>
                 <label className="block text-xs font-bold text-zinc-600 mb-1.5">
-                  Kode Diskon
-                </label>
-                <input
-                  type="text"
-                  value={kodeDiskon}
-                  onChange={(e) => setKodeDiskon(e.target.value)}
-                  className="w-full border border-zinc-300 p-2.5 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm font-bold text-soft-pink-600 uppercase"
-                  placeholder="Contoh: KKFDICSONT"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-zinc-600 mb-1.5">
-                  Isi Pesan Pendek
+                  Isi Email Promo
                 </label>
                 <textarea
-                  rows={4}
+                  rows={6}
                   value={isiPesan}
                   onChange={(e) => setIsiPesan(e.target.value)}
                   className="w-full border border-zinc-300 p-3 rounded-xl focus:outline-none focus:border-soft-pink-500 text-sm"
-                  placeholder="Ketik pesan manismu di sini..."
+                  placeholder="Ketik isi email promo di sini..."
                 />
               </div>
 
               <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl mt-4">
-                <p className="text-[10px] font-bold text-zinc-500 mb-2 uppercase tracking-wider">Preview Pesan WA</p>
+                <p className="text-[10px] font-bold text-zinc-500 mb-2 uppercase tracking-wider">Preview Pesan Email</p>
                 <div className="text-sm text-zinc-800 whitespace-pre-wrap">
-                  <span className="font-bold">{judulPromo}</span>{"\n\n"}
+                  <span className="font-bold">Subjek: {judulPromo}</span>{"\n\n"}
                   {isiPesan}
-                  {"\n\n"}<span className="font-bold">Kode Diskon:</span> {kodeDiskon}
-                  {"\n\n"}~ Admin KKF Label
                 </div>
               </div>
+
+              <button
+                onClick={kirimEmailMassal}
+                disabled={mengirim}
+                className="w-full flex items-center justify-center gap-2 bg-soft-pink-600 hover:bg-soft-pink-700 disabled:bg-soft-pink-300 text-white px-4 py-3 rounded-xl text-sm font-bold transition shadow-sm mt-4"
+              >
+                {mengirim ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Mengirim...
+                  </>
+                ) : (
+                  <>
+                    <Send size={18} />
+                    Kirim Email Massal
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -140,12 +159,6 @@ export default function PromosiTab() {
                 <h3 className="font-bold text-zinc-900 text-lg">Pelanggan Setia</h3>
                 <p className="text-xs text-zinc-500 mt-1">Total {daftarPelanggan.length} pelanggan yang pernah order.</p>
               </div>
-              <button
-                onClick={copySemuaNomor}
-                className="flex items-center justify-center gap-2 bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2.5 rounded-xl text-sm font-bold transition shadow-sm"
-              >
-                <Copy size={16} /> Copy Semua Nomor
-              </button>
             </div>
 
             {memuatData ? (
@@ -177,7 +190,7 @@ export default function PromosiTab() {
                               <td className="py-3 px-2 font-bold text-zinc-800">{p.nama}</td>
                               <td className="py-3 px-2 text-zinc-600">
                                 <div>{p.telepon}</div>
-                                <div className="text-xs text-zinc-400">{p.email}</div>
+                                <div className="text-xs text-zinc-400">{p.email || "-"}</div>
                               </td>
                               <td className="py-3 px-2 text-zinc-500 text-xs">
                                 {new Date(p.pesananTerakhir).toLocaleDateString("id-ID")}
@@ -187,18 +200,14 @@ export default function PromosiTab() {
                               </td>
                               <td className="py-3 px-2 text-right">
                                 <div className="flex items-center justify-end gap-2">
-                                  <button
-                                    onClick={() => kirimSatuWA(p.nama, p.telepon)}
-                                    className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-1.5 rounded-lg transition shadow-sm"
-                                  >
-                                    <Send size={14} /> WA
-                                  </button>
-                                  <a
-                                    href={`mailto:${p.email}?subject=${subjectEmail}&body=${bodyEmail}`}
-                                    className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 px-3 py-1.5 rounded-lg transition shadow-sm"
-                                  >
-                                    <Mail size={14} /> Email
-                                  </a>
+                                  {p.email && (
+                                    <a
+                                      href={`mailto:${p.email}?subject=${subjectEmail}&body=${bodyEmail}`}
+                                      className="inline-flex items-center gap-1.5 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 px-3 py-1.5 rounded-lg transition shadow-sm"
+                                    >
+                                      <Mail size={14} /> Email
+                                    </a>
+                                  )}
                                 </div>
                               </td>
                             </tr>
@@ -223,18 +232,14 @@ export default function PromosiTab() {
                             {p.email && <p>📧 {p.email}</p>}
                           </div>
                           <div className="flex gap-2">
-                            <button
-                              onClick={() => kirimSatuWA(p.nama, p.telepon)}
-                              className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-bold text-white bg-emerald-500 hover:bg-emerald-600 px-3 py-2 rounded-lg transition shadow-sm"
-                            >
-                              <Send size={14} /> WA
-                            </button>
-                            <a
-                              href={`mailto:${p.email}?subject=${subjectEmail}&body=${bodyEmail}`}
-                              className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-lg transition shadow-sm"
-                            >
-                              <Mail size={14} /> Email
-                            </a>
+                            {p.email && (
+                              <a
+                                href={`mailto:${p.email}?subject=${subjectEmail}&body=${bodyEmail}`}
+                                className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs font-bold text-white bg-blue-500 hover:bg-blue-600 px-3 py-2 rounded-lg transition shadow-sm"
+                              >
+                                <Mail size={14} /> Email
+                              </a>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -248,11 +253,12 @@ export default function PromosiTab() {
       </div>
 
       {notifikasi.tampil && (
-        <div className="fixed bottom-5 right-5 z-[99999] bg-zinc-900 text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300">
-          <CheckCircle size={18} className="text-emerald-400" />
+        <div className={`fixed bottom-5 right-5 z-[99999] text-white px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300 ${notifikasi.tipe === "sukses" ? "bg-zinc-900" : "bg-red-500"}`}>
+          {notifikasi.tipe === "sukses" ? <CheckCircle size={18} className="text-emerald-400" /> : <AlertCircle size={18} />}
           <p className="text-xs font-bold tracking-wide">{notifikasi.pesan}</p>
         </div>
       )}
     </div>
   );
 }
+

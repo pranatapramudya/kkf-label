@@ -1,15 +1,19 @@
-# Update PRD: Fix WhatsApp Deep Link Handling in Capacitor (WebView)
+# Update PRD: Migration to Resend for Professional Email Promotions
 
 ## 1. Latar Belakang Masalah
-- Fitur "Promosi WhatsApp" di halaman Admin memunculkan *error* `net::ERR_UNKNOWN_URL_SCHEME` saat tombol ditekan dari dalam aplikasi Android (WebView Capacitor).
-- *Bug* ini terjadi karena Android WebView secara *default* tidak mengenali dan menolak *custom URL scheme* seperti `whatsapp://`.
-- Di versi *desktop browser*, fungsi berjalan normal (diarahkan ke WhatsApp Web).
+- Fitur promosi via WhatsApp dihentikan karena dinilai kurang profesional untuk *blast* massal dan memiliki risiko *banned* dari Meta.
+- Proyek ini akan menggunakan **Resend** sebagai layanan pengiriman email promosi resmi karena terintegrasi sangat baik dengan ekosistem Next.js.
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **Refaktor Logika Tombol Promo WA:**
-  - Modifikasi aksi klik (onClick) atau tautan (href) pada tombol Promosi WhatsApp.
-  - Gunakan format URL standar: `https://wa.me/628XXXXXXX?text=PesanPromo`.
-  - **Penting untuk Capacitor:** Agar aplikasi tidak terjebak di dalam WebView, tautan keluar ini harus dipaksa dibuka oleh *browser/handler* bawaan sistem operasi.
-  - Jika menggunakan HTML Anchor, pastikan menggunakan `<a href="..." target="_blank" rel="noopener noreferrer">`.
-  - Jika menggunakan fungsi JavaScript, gunakan `window.open(url, '_blank')`.
-  - Jika proyek sudah menggunakan plugin `@capacitor/browser`, prioritaskan menggunakan fungsi `Browser.open({ url: waUrl })` untuk kompatibilitas *native* yang sempurna.
+- **Integrasi Resend SDK:**
+  - Lakukan instalasi dependensi Resend: `npm install resend`.
+  - Gunakan `process.env.RESEND_API_KEY` untuk inisialisasi *client* Resend di *backend*.
+- **Pembuatan API Route Email Promo:**
+  - Buat *endpoint* baru (misal `app/api/admin/promo/email/route.ts`).
+  - *Endpoint* ini harus menerima *payload* berupa daftar email tujuan (atau ID *user*), subjek promo, dan isi/konten promo.
+  - Gunakan `resend.emails.send({...})` untuk mengirim email.
+- **Refaktor Halaman Admin Promosi:**
+  - Hapus tombol/logika pengiriman via WhatsApp.
+  - Ubah UI menjadi *form* pengiriman Email Promo. Admin harus bisa memasukkan Subjek Email dan Pesan Promo.
+  - Saat tombol "Kirim Promo Email" diklik, *frontend* akan menembak *endpoint* API Resend yang baru dibuat.
+  - Tambahkan indikator *loading* (Toaster/Notifikasi UI) agar Admin tahu email sedang diproses dan berhasil dikirim.
