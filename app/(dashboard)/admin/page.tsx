@@ -536,6 +536,11 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
   const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
 
   useEffect(() => {
+    const s = searchParams.get("search") || "";
+    setSearchTerm(s);
+  }, [searchParams]);
+
+  useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchTerm);
     }, 300);
@@ -1280,6 +1285,11 @@ function HalamanAdmin() {
   const initialTab = searchParams.get("tab") || "analitik";
   const { signOut } = useClerk();
 
+  useEffect(() => {
+    const t = searchParams.get("tab");
+    if (t) setTabAktif(t);
+  }, [searchParams]);
+
   const { data: pendingData } = useSWR("/api/admin/pesanan/pending", fetcher, {
     refreshInterval: 10000,
   });
@@ -1530,47 +1540,38 @@ function HalamanAdmin() {
 
         {/* MAIN CONTENT AREA */}
         <div className="flex-1 flex flex-col min-w-0 bg-white relative">
-          <header className="md:hidden shrink-0 bg-white border-b border-pink-100 p-4 flex items-center justify-between sticky top-0 z-30 shadow-sm">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-zinc-900">KKF-LABEL-ADMIN</span>
-            </div>
-            <div className="bg-white p-1 rounded-full border border-pink-100 shadow-sm flex items-center justify-center shrink-0 w-10 h-10">
-              <UserButton
-                appearance={{ elements: { userButtonAvatarBox: "w-8 h-8" } }}
-              />
-            </div>
-          </header>
-
-        <div className="sticky top-0 z-50 bg-white shrink-0 px-4 md:px-8 py-4 md:py-6 border-b border-pink-100 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-          <h2 className="text-2xl font-bold text-zinc-900 tracking-tight capitalize">
+        <div className="sticky top-0 z-50 bg-white shrink-0 px-4 md:px-8 py-3 md:py-6 border-b border-pink-100 shadow-sm flex items-center justify-between gap-2 md:gap-4">
+          <h2 className="text-lg md:text-2xl font-bold text-zinc-900 tracking-tight capitalize truncate">
             {tabAktif.replace("-", " ")}
           </h2>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4 shrink-0">
             <button
               onClick={() => setBukaKalkulator(true)}
-              className="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2.5 sm:px-3 py-1.5 rounded-full shadow-sm hover:bg-emerald-100 transition"
+              className="flex items-center gap-1.5 text-[10px] md:text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 md:px-3 py-1.5 rounded-full shadow-sm hover:bg-emerald-100 transition"
+              title="Kalkulator Profit"
             >
               <CircleDollarSign size={14} />
-              <span className="hidden sm:inline">Kalkulator Profit</span>
-              <span className="sm:hidden">Profit</span>
+              <span className="hidden lg:inline">Kalkulator Profit</span>
             </button>
             <button
               onClick={tarikDataTerbaru}
-              className="flex items-center gap-2 text-xs font-medium text-zinc-500 bg-white border border-zinc-200 px-3 py-1.5 rounded-full shadow-sm w-fit hover:bg-zinc-50 transition"
+              className="flex items-center gap-1.5 text-[10px] md:text-xs font-medium text-zinc-500 bg-white border border-zinc-200 px-2 md:px-3 py-1.5 rounded-full shadow-sm hover:bg-zinc-50 transition"
+              title={`Diperbarui: ${terakhirDiperbarui}`}
             >
               <RefreshCw
                 size={12}
-                className={
-                  sedangRefresh ? "animate-spin text-soft-pink-500" : ""
-                }
-              />{" "}
-              Diperbarui: {terakhirDiperbarui}
-            </button>
-            <AdminNotification />
-            <div className="hidden md:flex items-center justify-center bg-white p-1 rounded-full border border-pink-100 shadow-sm hover:shadow-md transition-all shrink-0 w-10 h-10 cursor-pointer">
-              <UserButton
-                appearance={{ elements: { userButtonAvatarBox: "w-8 h-8" } }}
+                className={sedangRefresh ? "animate-spin text-soft-pink-500" : ""}
               />
+              <span className="hidden lg:inline">Diperbarui: {terakhirDiperbarui}</span>
+            </button>
+            
+            <div className="flex items-center gap-2 md:gap-4 ml-1 md:ml-2 pl-2 md:pl-4 border-l border-pink-100">
+              <AdminNotification />
+              <div className="flex items-center justify-center bg-white p-1 rounded-full border border-pink-100 shadow-sm hover:shadow-md transition-all shrink-0 w-8 h-8 md:w-10 md:h-10 cursor-pointer">
+                <UserButton
+                  appearance={{ elements: { userButtonAvatarBox: "w-7 h-7 md:w-8 md:h-8" } }}
+                />
+              </div>
             </div>
           </div>
         </div>

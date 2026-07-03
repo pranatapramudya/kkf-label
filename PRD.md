@@ -1,15 +1,13 @@
-# Update PRD: Perbaikan UI/UX Komponen Notifikasi & Navigasi Detail Pesanan
+# Update PRD: Optimasi Reaktivitas Pencarian & Responsivitas Mobile Header
 
 ## 1. Latar Belakang
-- Penempatan elemen ikon lonceng notifikasi (Notification Bell) di Header/TopBar tidak presisi dan posisinya tergeser/menumpuk dengan foto profil di berbagai halaman.
-- Elemen notifikasi tidak terkunci posisinya (ikut ter-scroll ke bawah saat pengguna menggulir halaman), sehingga mengganggu *User Experience* (UX) baik di web PC maupun mobile.
-- Tombol "Buka Detail" di dalam *dropdown* notifikasi belum memiliki fungsi navigasi yang tepat. Saat diklik, admin hanya diarahkan ke halaman utama pesanan tanpa otomatis memfilter pesanan yang dimaksud.
+- Fitur navigasi "Buka Detail" dari notifikasi mengalami *delay* (tidak reaktif) di mana admin harus me-*refresh* halaman secara manual agar tabel tersaring.
+- Tata letak (*layout*) *Header/TopBar* pada perangkat *mobile* berantakan. Ikon Notifikasi (Bell) terpisah dari Ikon Profil, menyebabkan UI terlihat tidak rapi.
 
 ## 2. Kebutuhan Solusi Logika (Requirement)
-- **Perbaikan CSS Positioning Header & Notifikasi:**
-  - Pastikan komponen pembungkus *Header/TopBar* menggunakan *layout Flexbox* (`flex`, `items-center`, `justify-end` atau `justify-between`) agar elemen-elemen di dalamnya (Tombol Kalkulator, Waktu Diperbarui, Lonceng Notif, Foto Profil) berjajar rapi dan memiliki jarak (`gap`) yang konsisten.
-  - Terapkan CSS `position: sticky` dengan `top: 0` dan `z-index` yang tinggi pada komponen *Header/TopBar* secara keseluruhan, BUKAN hanya pada ikon loncengnya. Ini memastikan seluruh *bar* menu atas tetap diam di posisinya saat halaman di-scroll.
-- **Navigasi Cerdas "Buka Detail" (Deep Linking):**
-  - Ubah perilaku tombol "Buka Detail" pada notifikasi pesanan.
-  - Saat diklik, arahkan pengguna ke rute `/admin/pesanan?search=[nomor_invoice_pesanan]`.
-  - Pastikan komponen pencarian (*Search Bar*) yang telah dibuat di halaman Pesanan dapat membaca parameter URL `?search=` ini saat pertama kali di-*render* (menggunakan `useSearchParams` di Next.js), sehingga tabel pesanan otomatis terfilter dan hanya menampilkan pesanan dari notifikasi tersebut.
+- **Reaktivitas URL & Search Bar (State Sync):**
+  - Komponen pencarian (Search Bar) di halaman Pesanan harus tersinkronisasi langsung dengan URL *Query Parameters*.
+  - Gunakan `useEffect` yang mendengarkan perubahan nilai `searchParams.get('search')` untuk memperbarui *state* lokal (input *value*), sehingga saat tombol "Buka Detail" diklik, UI otomatis merender ulang (*re-render*) tabel tanpa perlu *reload* halaman manual.
+- **Perbaikan Layout Header Mobile (Tailwind CSS):**
+  - Restrukturisasi pembungkus elemen di *TopBar*. Kelompokkan Ikon Notifikasi dan Foto Profil ke dalam satu kontainer div khusus (`flex items-center gap-2` atau `gap-4`).
+  - Untuk elemen "Kalkulator Profit" dan "Diperbarui", buat agar tampil responsif (misalnya, teks disembunyikan di layar kecil `hidden sm:block`, atau biarkan *wrap* ke baris bawah dengan rapi tanpa merusak posisi grup Lonceng & Profil di kanan atas).
