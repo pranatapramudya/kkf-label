@@ -404,15 +404,17 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
             <div className="flex gap-3">
               <button
                 onClick={() => handleSubmitDesktop("keranjang")}
-                className="flex-1 bg-soft-pink-50 border border-soft-pink-200 text-soft-pink-600 font-bold py-3.5 rounded-xl hover:bg-soft-pink-100 transition flex items-center justify-center gap-2"
+                disabled={maxStok <= 0}
+                className={`flex-1 font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 ${maxStok <= 0 ? 'bg-zinc-200 text-zinc-500 border border-zinc-200 cursor-not-allowed' : 'bg-soft-pink-50 border border-soft-pink-200 text-soft-pink-600 hover:bg-soft-pink-100'}`}
               >
-                <ShoppingBag size={18} /> Tambah Keranjang
+                <ShoppingBag size={18} /> {maxStok <= 0 ? "Stok Habis" : "Tambah Keranjang"}
               </button>
               <button
                 onClick={() => handleSubmitDesktop("beli")}
-                className="flex-1 bg-soft-pink-600 text-white font-bold py-3.5 rounded-xl hover:bg-soft-pink-700 transition shadow-md"
+                disabled={maxStok <= 0}
+                className={`flex-1 font-bold py-3.5 rounded-xl transition shadow-md ${maxStok <= 0 ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed shadow-none' : 'bg-soft-pink-600 text-white hover:bg-soft-pink-700'}`}
               >
-                Beli Sekarang
+                {maxStok <= 0 ? "Stok Habis" : "Beli Sekarang"}
               </button>
             </div>
           </div>
@@ -487,24 +489,25 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
       </div>
 
       <div className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-zinc-200 p-3 px-4 flex items-center gap-3 z-[90] pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.1)]">
-
         <button
           onClick={() => {
             setTipeAksi("keranjang");
             setShowModal(true);
           }}
-          className="flex-1 bg-soft-pink-50 text-soft-pink-600 font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-sm border border-soft-pink-200 active:scale-95 transition-transform"
+          disabled={maxStok <= 0}
+          className={`flex-1 font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-sm border transition-transform ${maxStok <= 0 ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed border-zinc-200' : 'bg-soft-pink-50 text-soft-pink-600 border-soft-pink-200 active:scale-95'}`}
         >
-          <ShoppingBag size={18} /> Keranjang
+          <ShoppingBag size={18} /> {maxStok <= 0 ? "Stok Habis" : "Keranjang"}
         </button>
         <button
           onClick={() => {
             setTipeAksi("beli");
             setShowModal(true);
           }}
-          className="flex-1 bg-soft-pink-600 text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-transform"
+          disabled={maxStok <= 0}
+          className={`flex-1 font-bold py-3 rounded-xl shadow-md transition-transform ${maxStok <= 0 ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed shadow-none' : 'bg-soft-pink-600 text-white active:scale-95'}`}
         >
-          Beli Sekarang
+          {maxStok <= 0 ? "Stok Habis" : "Beli Sekarang"}
         </button>
       </div>
 
@@ -606,10 +609,13 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
             <div className="p-4 border-t border-pink-50 pb-[env(safe-area-inset-bottom)]">
               <button
                 onClick={handleSubmitModal}
-                className="w-full bg-soft-pink-600 text-white font-bold py-3.5 rounded-xl shadow-md active:bg-soft-pink-700 transition"
+                disabled={maxStok <= 0}
+                className={`w-full font-bold py-3.5 rounded-xl shadow-md transition ${maxStok <= 0 ? 'bg-zinc-200 text-zinc-500 cursor-not-allowed shadow-none' : 'bg-soft-pink-600 text-white active:bg-soft-pink-700'}`}
               >
-                {tipeAksi === "keranjang"
-                  ? "Masukkan Keranjang"
+                {maxStok <= 0 
+                  ? "Stok Habis" 
+                  : tipeAksi === "keranjang" 
+                  ? "Masukkan Keranjang" 
                   : "Beli Sekarang"}
               </button>
             </div>
