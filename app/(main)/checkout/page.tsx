@@ -28,12 +28,10 @@ const daftarEkspedisi = [
   { value: "jne", label: "JNE" },
   { value: "jnt", label: "J&T" },
   { value: "sicepat", label: "SiCepat" },
-  { value: "ide", label: "ID Express" },
   { value: "ninja", label: "Ninja" },
   { value: "anteraja", label: "AnterAja" },
   { value: "pos", label: "Pos Indonesia" },
   { value: "lion", label: "Lion Parcel" },
-  { value: "sapx", label: "SAPX" },
 ];
 
 const DropdownPencarian = ({
@@ -90,7 +88,7 @@ const DropdownPencarian = ({
             <Search size={16} className="text-soft-pink-400 shrink-0" />
             <input
               type="text"
-              placeholder="Cari wilayah..."
+              placeholder="Cari ekspedisi..."
               value={kataKunci}
               onChange={(e) => setKataKunci(e.target.value)}
               className="w-full bg-transparent text-sm focus:outline-none text-zinc-900 placeholder:text-zinc-400"

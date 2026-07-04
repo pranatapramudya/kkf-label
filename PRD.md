@@ -1,12 +1,20 @@
-# Update PRD: Konfigurasi Native Status Bar (Capacitor)
+# Product Requirements Document (PRD) - Update Fitur Ekspedisi
 
-## 1. Latar Belakang
-- Aplikasi KKF Label telah di-build menjadi APK menggunakan Capacitor.
-- Pada perangkat Android/iOS, teks pada Status Bar (jam, sinyal, baterai) berwarna putih, sehingga tidak terlihat karena menyatu dengan background TopBar aplikasi yang juga berwarna putih (Light Mode).
+## 1. Konteks
+Saat ini aplikasi sudah berada di tahap *production*. Terdapat ketidaksesuaian teks pada antarmuka pencarian ekspedisi dan ada beberapa opsi kurir yang harus dihilangkan dari pilihan pelanggan.
 
-## 2. Kebutuhan Solusi Logika (Requirement)
-- **Konfigurasi Plugin Capacitor Status Bar:**
-  - Integrasikan `@capacitor/status-bar` ke dalam proyek.
-  - Ubah gaya (*style*) Status Bar secara global melalui file `capacitor.config.ts` (atau `.json`) agar menggunakan tema `LIGHT` (yang berarti *background* terang, sehingga teks/ikon status bar otomatis menjadi gelap/hitam).
-  - Tetapkan `backgroundColor` status bar menjadi `#ffffff` (putih) agar serasi dengan *header* aplikasi.
-  - Opsi tambahan: Lakukan pengaturan *safe-area* atau padding di `globals.css` (menggunakan `env(safe-area-inset-top)`) jika status bar menutupi konten web.
+## 2. Detail Tugas (Tasks)
+
+**Task A: Update Teks Placeholder (UI)**
+- **Masalah:** Pada komponen *dropdown/search* pilihan ekspedisi, *placeholder* input pencariannya masih tertulis "Cari wilayah...".
+- **Ekspektasi:** Ubah teks *placeholder* tersebut agar bahasa Indonesianya lebih relevan, yaitu menjadi "Cari ekspedisi...".
+- **Petunjuk:** Cari komponen UI yang merender *dropdown* ekspedisi ini (kemungkinan menggunakan komponen Select/Combobox/Input).
+
+**Task B: Hapus Opsi Kurir (Logic/Data)**
+- **Masalah:** Pada daftar ekspedisi, terdapat kurir "sapx" dan "idexpress" yang saat ini tidak didukung oleh operasional toko.
+- **Ekspektasi:** Hapus, *comment*, atau *filter out* objek data `sapx` dan `idexpress` dari *array* atau pemanggilan API/sumber data ekspedisi, sehingga tidak muncul lagi di pilihan pelanggan.
+
+## 3. Aturan Pengembangan (Strict Rules)
+1. **NO PRODUCTION PUSH:** Dilarang keras melakukan `git add`, `git commit`, atau `git push`. Proyek ini sudah *live*, semua perubahan murni hanya modifikasi kode file di *local environment*.
+2. **LOCAL TESTING ONLY:** Fokus berikan perbaikan kodenya saja agar *developer* bisa mengujinya terlebih dahulu di `localhost:3000`.
+3. **BAHASA:** Pastikan semua teks UI tetap menggunakan bahasa Indonesia.
