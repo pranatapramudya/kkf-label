@@ -230,7 +230,7 @@ export default function HalamanCheckout() {
   const [pilihanOngkir, setPilihanOngkir] = useState<PilihanOngkir | null>(
     null,
   );
-  const [metodePembayaran, setMetodePembayaran] = useState("MIDTRANS");
+  const [metodePembayaran, setMetodePembayaran] = useState("MANUAL_BCA");
 
   const [pesanOngkir, setPesanOngkir] = useState("");
   const [sedangMemuatWilayah, setSedangMemuatWilayah] = useState(false);
@@ -789,25 +789,35 @@ export default function HalamanCheckout() {
                       { id: "MANUAL_GOPAY", label: "Transfer Manual GoPay", icon: <div className="bg-[#00AED6] text-white font-bold text-[10px] w-12 h-7 flex items-center justify-center rounded shrink-0">gopay</div> },
                     ]
                       .filter(m => showAllMethods || m.id === metodePembayaran)
-                      .map(method => (
-                      <label key={method.id} className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${metodePembayaran === method.id ? 'border-soft-pink-500 bg-soft-pink-50/50' : 'border-zinc-200 hover:border-soft-pink-300'}`}>
-                        {showAllMethods && (
-                          <input 
-                            type="radio" 
-                            name="metodePembayaran" 
-                            value={method.id} 
-                            checked={metodePembayaran === method.id}
-                            onChange={(e) => {
-                              setMetodePembayaran(e.target.value);
-                              setShowAllMethods(false);
-                            }}
-                            className="text-soft-pink-600 focus:ring-soft-pink-500 w-4 h-4"
-                          />
-                        )}
-                        {method.icon}
-                        <span className="text-sm font-medium text-zinc-700">{method.label}</span>
-                      </label>
-                    ))}
+                      .map(method => {
+                        const isMidtrans = method.id === "MIDTRANS";
+                        return (
+                          <label key={method.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${isMidtrans ? 'bg-zinc-100 cursor-not-allowed opacity-60 border-zinc-200' : (metodePembayaran === method.id ? 'border-soft-pink-500 bg-soft-pink-50/50 cursor-pointer' : 'border-zinc-200 hover:border-soft-pink-300 cursor-pointer')}`}>
+                            {showAllMethods && (
+                              <input 
+                                type="radio" 
+                                name="metodePembayaran" 
+                                value={method.id} 
+                                checked={metodePembayaran === method.id}
+                                disabled={isMidtrans}
+                                onChange={(e) => {
+                                  if (isMidtrans) return;
+                                  setMetodePembayaran(e.target.value);
+                                  setShowAllMethods(false);
+                                }}
+                                className="text-soft-pink-600 focus:ring-soft-pink-500 w-4 h-4 disabled:opacity-50"
+                              />
+                            )}
+                            {method.icon}
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium text-zinc-700">{method.label}</span>
+                              {isMidtrans && (
+                                <span className="text-[10px] text-zinc-500 font-medium italic mt-0.5">Fitur ini sedang dalam tahap pengembangan</span>
+                              )}
+                            </div>
+                          </label>
+                        )
+                      })}
                   </div>
                 </div>
               </div>

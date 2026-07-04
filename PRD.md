@@ -1,20 +1,23 @@
-# Product Requirements Document (PRD) - Update Fitur Ekspedisi
+# Product Requirements Document (PRD) - Penonaktifan Sementara Metode Pembayaran Midtrans
 
 ## 1. Konteks
-Saat ini aplikasi sudah berada di tahap *production*. Terdapat ketidaksesuaian teks pada antarmuka pencarian ekspedisi dan ada beberapa opsi kurir yang harus dihilangkan dari pilihan pelanggan.
+Saat ini, fitur pembayaran otomatis menggunakan Midtrans sudah selesai dikembangkan, namun masih menunggu persetujuan (approval) metode pembayaran dari pihak Midtrans. Untuk mencegah pelanggan menggunakan fitur yang belum aktif ini, opsi pembayaran Midtrans di halaman Checkout harus dinonaktifkan sementara (disabled) tanpa menghapus kode integrasi yang sudah ada.
 
 ## 2. Detail Tugas (Tasks)
 
-**Task A: Update Teks Placeholder (UI)**
-- **Masalah:** Pada komponen *dropdown/search* pilihan ekspedisi, *placeholder* input pencariannya masih tertulis "Cari wilayah...".
-- **Ekspektasi:** Ubah teks *placeholder* tersebut agar bahasa Indonesianya lebih relevan, yaitu menjadi "Cari ekspedisi...".
-- **Petunjuk:** Cari komponen UI yang merender *dropdown* ekspedisi ini (kemungkinan menggunakan komponen Select/Combobox/Input).
+**Task A: Modifikasi UI Pembayaran (Frontend/Checkout)**
+- Buka file komponen yang menampilkan daftar metode pembayaran di halaman Checkout (kemungkinan di `app/(main)/checkout/page.tsx` atau komponen terkait).
+- Cari opsi/tombol yang mewakili pembayaran otomatis (Midtrans).
+- Terapkan gaya visual non-aktif (disabled state):
+  - Buat elemen tersebut menjadi abu-abu (grayscale/opacity diturunkan).
+  - Ubah kursor menjadi `cursor-not-allowed`.
+  - Nonaktifkan fungsi klik (`pointer-events-none` atau cegah perubahan *state* `onClick`).
+- **Tambahkan teks/badge peringatan:** Sisipkan teks kecil berwarna merah atau abu-abu bertuliskan *"Fitur ini sedang dalam tahap pengembangan"* tepat di bawah atau di dalam opsi Midtrans tersebut.
 
-**Task B: Hapus Opsi Kurir (Logic/Data)**
-- **Masalah:** Pada daftar ekspedisi, terdapat kurir "sapx" dan "idexpress" yang saat ini tidak didukung oleh operasional toko.
-- **Ekspektasi:** Hapus, *comment*, atau *filter out* objek data `sapx` dan `idexpress` dari *array* atau pemanggilan API/sumber data ekspedisi, sehingga tidak muncul lagi di pilihan pelanggan.
+**Task B: Pertahankan Kode Eksisting**
+- DILARANG menghapus fungsi, *state*, atau integrasi API Midtrans yang sudah ada di dalam file tersebut. Cukup modifikasi pada level antarmuka (UI) saja.
 
 ## 3. Aturan Pengembangan (Strict Rules)
-1. **NO PRODUCTION PUSH:** Dilarang keras melakukan `git add`, `git commit`, atau `git push`. Proyek ini sudah *live*, semua perubahan murni hanya modifikasi kode file di *local environment*.
-2. **LOCAL TESTING ONLY:** Fokus berikan perbaikan kodenya saja agar *developer* bisa mengujinya terlebih dahulu di `localhost:3000`.
-3. **BAHASA:** Pastikan semua teks UI tetap menggunakan bahasa Indonesia.
+1. Dilarang melakukan eksekusi perintah terminal seperti `git push`.
+2. Semua *copywriting* dan *comment* kode harus menggunakan bahasa Indonesia.
+3. Modifikasi kode langsung pada file yang bersangkutan di environment lokal.

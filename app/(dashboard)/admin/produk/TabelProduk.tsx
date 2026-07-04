@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { hapusProduk } from "./actions";
+import { hapusProduk, pulihkanProduk } from "./actions";
 import {
   Loader2,
   Trash2,
   AlertTriangle,
   CheckCircle,
   Edit2,
+  RotateCcw,
 } from "lucide-react";
 
 export default function TabelProduk({ dataProduk }: { dataProduk: any[] }) {
@@ -38,6 +39,23 @@ export default function TabelProduk({ dataProduk }: { dataProduk: any[] }) {
     tipe: "sukses",
   });
   const [sedangMenghapus, setSedangMenghapus] = useState(false);
+  const [sedangMemulihkan, setSedangMemulihkan] = useState<string | null>(null);
+
+  const eksekusiPulihkan = async (id: string) => {
+    setSedangMemulihkan(id);
+    const respon = await pulihkanProduk(id);
+    setSedangMemulihkan(null);
+
+    if (respon.sukses) {
+      setNotifikasi({ terbuka: true, pesan: respon.pesan, tipe: "sukses" });
+    } else {
+      setNotifikasi({ terbuka: true, pesan: respon.pesan, tipe: "gagal" });
+    }
+
+    setTimeout(() => {
+      setNotifikasi((prev) => ({ ...prev, terbuka: false }));
+    }, 3000);
+  };
 
   const picuHapus = (id: string, nama: string) => {
     setModalHapus({ terbuka: true, id, nama });
@@ -74,8 +92,14 @@ export default function TabelProduk({ dataProduk }: { dataProduk: any[] }) {
           produkTampil.map((item) => (
             <div
               key={item.id}
-              className="bg-white border border-pink-100 rounded-2xl p-5 shadow-sm flex flex-col gap-5 relative"
+              className={`bg-white border border-pink-100 rounded-2xl p-5 shadow-sm flex flex-col gap-5 relative ${item.isArchived ? "opacity-60 grayscale-[50%]" : ""}`}
             >
+              {/* Pita Arsip (Kiri Atas) */}
+              {item.isArchived && (
+                <div className="absolute top-0 left-0 bg-zinc-600 text-white text-[10px] font-bold px-3 py-1 rounded-tl-xl rounded-br-xl shadow-sm z-10">
+                  DIARSIPKAN
+                </div>
+              )}
               {/* Pita Diskon (Lebih Rapi di Pojok) */}
               {item.diskonPersen > 0 && (
                 <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl rounded-tr-xl shadow-sm">
@@ -124,18 +148,31 @@ export default function TabelProduk({ dataProduk }: { dataProduk: any[] }) {
 
               {/* Tombol Aksi Mobile */}
               <div className="flex gap-3">
-                <Link
-                  href={`/admin/produk/edit/${item.id}`}
-                  className="flex-1 flex justify-center items-center gap-2 py-2.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl text-xs font-bold transition-all border border-amber-100"
-                >
-                  <Edit2 size={16} /> Edit
-                </Link>
-                <button
-                  onClick={() => picuHapus(item.id, item.nama)}
-                  className="flex-1 flex justify-center items-center gap-2 py-2.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl text-xs font-bold transition-all border border-red-100"
-                >
-                  <Trash2 size={16} /> Hapus
-                </button>
+                {item.isArchived ? (
+                  <button
+                    onClick={() => eksekusiPulihkan(item.id)}
+                    disabled={sedangMemulihkan === item.id}
+                    className="flex-1 flex justify-center items-center gap-2 py-2.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-xl text-xs font-bold transition-all border border-emerald-100"
+                  >
+                    {sedangMemulihkan === item.id ? <Loader2 size={16} className="animate-spin" /> : <RotateCcw size={16} />}
+                    {sedangMemulihkan === item.id ? "Memulihkan..." : "Pulihkan"}
+                  </button>
+                ) : (
+                  <>
+                    <Link
+                      href={`/admin/produk/edit/${item.id}`}
+                      className="flex-1 flex justify-center items-center gap-2 py-2.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl text-xs font-bold transition-all border border-amber-100"
+                    >
+                      <Edit2 size={16} /> Edit
+                    </Link>
+                    <button
+                      onClick={() => picuHapus(item.id, item.nama)}
+                      className="flex-1 flex justify-center items-center gap-2 py-2.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl text-xs font-bold transition-all border border-red-100"
+                    >
+                      <Trash2 size={16} /> Hapus
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           ))
@@ -172,11 +209,17 @@ export default function TabelProduk({ dataProduk }: { dataProduk: any[] }) {
               produkTampil.map((item) => (
                 <tr
                   key={item.id}
-                  className="hover:bg-pink-50/20 transition-colors"
+                  className={`transition-colors ${item.isArchived ? "bg-zinc-50/50 opacity-60" : "hover:bg-pink-50/20"}`}
                 >
-                  <td className="p-4">
-                    <div className="font-semibold text-zinc-900">
+                  <td className="p-4 relative">
+                    {item.isArchived && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-3/4 bg-zinc-400 rounded-r-md"></span>
+                    )}
+                    <div className="font-semibold text-zinc-900 flex items-center gap-2">
                       {item.nama}
+                      {item.isArchived && (
+                        <span className="bg-zinc-200 text-zinc-600 text-[9px] px-1.5 py-0.5 rounded font-bold tracking-wider">ARSIP</span>
+                      )}
                     </div>
                     <div className="text-xs text-zinc-400 truncate max-w-[180px]">
                       {item.deskripsi || "Tanpa deskripsi"}
@@ -209,18 +252,30 @@ export default function TabelProduk({ dataProduk }: { dataProduk: any[] }) {
                     </span>
                   </td>
                   <td className="p-4 text-right flex justify-end gap-2">
-                    <Link
-                      href={`/admin/produk/edit/${item.id}`}
-                      className="px-3 py-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl text-xs font-bold transition-all border border-amber-100"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => picuHapus(item.id, item.nama)}
-                      className="px-3 py-1.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl text-xs font-bold transition-all border border-red-100"
-                    >
-                      Hapus
-                    </button>
+                    {item.isArchived ? (
+                      <button
+                        onClick={() => eksekusiPulihkan(item.id)}
+                        disabled={sedangMemulihkan === item.id}
+                        className="px-3 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-xl text-xs font-bold transition-all border border-emerald-100 flex items-center gap-1"
+                      >
+                        {sedangMemulihkan === item.id ? <Loader2 size={14} className="animate-spin" /> : <RotateCcw size={14} />} Pulihkan
+                      </button>
+                    ) : (
+                      <>
+                        <Link
+                          href={`/admin/produk/edit/${item.id}`}
+                          className="px-3 py-1.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded-xl text-xs font-bold transition-all border border-amber-100"
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          onClick={() => picuHapus(item.id, item.nama)}
+                          className="px-3 py-1.5 bg-red-50 text-red-500 hover:bg-red-100 rounded-xl text-xs font-bold transition-all border border-red-100"
+                        >
+                          Hapus
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))

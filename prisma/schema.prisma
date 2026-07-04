@@ -91,7 +91,8 @@ model Product {
   ulasan         Review[]
   dibuatPada     DateTime         @default(now())
   diubahPada     DateTime         @updatedAt
-  videoUrl  String?
+  videoUrl       String?
+  isArchived     Boolean          @default(false)
 }
 
 model ProductVariant {

@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
 
 export default async function HalamanUtama() {
   const produkReal = await prisma.product.findMany({
-    where: { aktif: true },
+    where: { aktif: true, isArchived: false },
     select: {
       id: true,
       nama: true,
@@ -26,7 +26,7 @@ export default async function HalamanUtama() {
   });
 
   const semuaProdukLengkap = await prisma.product.findMany({
-    where: { aktif: true },
+    where: { aktif: true, isArchived: false },
     select: {
       id: true,
       nama: true,
