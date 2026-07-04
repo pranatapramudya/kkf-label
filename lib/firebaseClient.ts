@@ -10,8 +10,6 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "dummy"
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-
 export const requestForToken = async () => {
   try {
     const supported = await isSupported();
@@ -20,6 +18,7 @@ export const requestForToken = async () => {
       return null;
     }
 
+    const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
     const messaging = getMessaging(app);
     const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY; 
 
@@ -32,7 +31,7 @@ export const requestForToken = async () => {
       return null;
     }
   } catch (error) {
-    console.error('Error saat mengambil token', error);
+    console.warn('Error saat mengambil token', error);
     return null;
   }
 };

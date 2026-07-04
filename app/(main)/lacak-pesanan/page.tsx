@@ -75,7 +75,7 @@ export default function LacakPesananPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-pink-50/30 py-10 px-4 md:px-8 font-sans text-zinc-900 pb-32">
+    <div className="min-h-screen bg-pink-50/30 py-10 px-4 md:px-8 font-sans text-zinc-900 pb-32 overflow-x-hidden w-full">
       <div className="max-w-3xl mx-auto">
         {/* HEADER & FORM PENCARIAN */}
         <div className="text-center mb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -90,33 +90,35 @@ export default function LacakPesananPage() {
           </p>
         </div>
 
-        <form
-          onSubmit={lacakSekarang}
-          className="bg-white p-2 pl-4 md:pl-6 rounded-full shadow-md border border-pink-100 flex items-center gap-3 animate-in fade-in zoom-in-95 duration-500 delay-100 mb-8 focus-within:ring-2 ring-soft-pink-200 transition-all"
-        >
-          <Receipt size={20} className="text-zinc-400 shrink-0" />
-          <input
-            type="text"
-            required
-            value={kodeInvoice}
-            onChange={(e) => setKodeInvoice(e.target.value)}
-            placeholder="CONTOH: KKF-24061901"
-            className="flex-1 bg-transparent py-3 md:py-4 outline-none text-zinc-900 font-bold placeholder:font-normal placeholder:text-zinc-400 uppercase"
-          />
-          <button
-            type="submit"
-            disabled={sedangMencari || !kodeInvoice}
-            className="bg-soft-pink-600 hover:bg-soft-pink-700 text-white font-bold py-3 md:py-4 px-6 md:px-8 rounded-full transition shadow-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 shrink-0"
+        <div className="w-full max-w-md mx-auto px-4 sm:px-6 mb-8">
+          <form
+            onSubmit={lacakSekarang}
+            className="w-full bg-white p-2 pl-4 md:pl-6 rounded-full shadow-md border border-pink-100 flex items-center gap-3 animate-in fade-in zoom-in-95 duration-500 delay-100 focus-within:ring-2 ring-soft-pink-200 transition-all"
           >
-            {sedangMencari ? (
-              <Loader2 size={18} className="animate-spin" />
-            ) : null}
-            <span className="hidden md:inline">
-              {sedangMencari ? "Mencari..." : "Lacak Paket"}
-            </span>
-            <span className="md:hidden">{sedangMencari ? "..." : "Lacak"}</span>
-          </button>
-        </form>
+            <Receipt size={20} className="text-zinc-400 flex-shrink-0" />
+            <input
+              type="text"
+              required
+              value={kodeInvoice}
+              onChange={(e) => setKodeInvoice(e.target.value)}
+              placeholder="CONTOH: KKF-24061901"
+              className="flex-1 bg-transparent py-3 md:py-4 outline-none text-base md:text-sm text-zinc-900 font-bold placeholder:font-normal placeholder:text-zinc-400 uppercase w-full min-w-0"
+            />
+            <button
+              type="submit"
+              disabled={sedangMencari || !kodeInvoice}
+              className="bg-soft-pink-600 hover:bg-soft-pink-700 text-white font-bold py-3 md:py-4 px-6 md:px-8 rounded-full transition shadow-sm disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2 flex-shrink-0"
+            >
+              {sedangMencari ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : null}
+              <span className="hidden md:inline">
+                {sedangMencari ? "Mencari..." : "Lacak Paket"}
+              </span>
+              <span className="md:hidden">{sedangMencari ? "..." : "Lacak"}</span>
+            </button>
+          </form>
+        </div>
 
         {errorPesan && (
           <div className="bg-red-50 text-red-600 p-4 rounded-2xl border border-red-100 flex items-center gap-3 font-medium animate-in fade-in duration-300 shadow-sm">

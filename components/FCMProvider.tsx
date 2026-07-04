@@ -15,7 +15,7 @@ export function FCMProvider() {
             localStorage.setItem("fcm_token", token);
           }
         } catch (error) {
-          console.error("FCM Provider Error:", error);
+          console.warn("FCM Provider Error:", error);
         }
       }
     }
