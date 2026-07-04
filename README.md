@@ -25,6 +25,7 @@ KKF Label adalah platform e-commerce full-stack modern yang dibangun untuk menan
 - **Pelacakan Pesanan:** Pelanggan dapat mengecek status pesanan dan melakukan *tracking* posisi perjalanan paket.
 - **Ulasan (Review):** Pelanggan (baik pengguna terdaftar maupun *guest*) dapat memberikan ulasan dan rating produk.
 - **Technical SEO Ready:** Penerapan *Dynamic Metadata* untuk setiap produk, *Semantic HTML*, serta *auto-generation* Sitemap (`sitemap.xml`) dan `robots.txt` secara dinamis dari database.
+- **Open Graph (OG) & Social Media Share Ready:** Mengintegrasikan metadata Open Graph untuk memunculkan *link preview* (gambar, judul, deskripsi) yang sempurna saat dibagikan ke WhatsApp dan media sosial lainnya. Tombol "Bagikan" dioptimasi agar selalu menyalin *Clean URL*.
 
 ### 🛡️ Admin Dashboard
 - **Manajemen Produk (CRUD):** Kontrol penuh untuk tambah, edit, dan pengarsipan produk.
