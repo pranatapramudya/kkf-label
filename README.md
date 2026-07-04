@@ -13,6 +13,7 @@ KKF Label adalah platform e-commerce full-stack modern yang dibangun untuk menan
 - **Integrasi Pihak Ketiga:**
   - **Payment Gateway:** Midtrans (saat ini dinonaktifkan sementara/tahap pengembangan)
   - **Pengiriman (Ongkir & Resi):** Biteship API. namun untuk API nembak no resi masih di off kan dari fitur admin menu pada tombol proses
+  - **Pemantauan Performa:** Vercel Speed Insights (@vercel/speed-insights)
 - **Mobile Wrapper:** Capacitor (Android & iOS)
 
 ## 📦 Fitur Utama

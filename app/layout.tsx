@@ -4,6 +4,7 @@ import { PenyediaKeranjang } from "@/context/CartContext";
 import { ClerkProvider } from "@clerk/nextjs";
 import SafeAreaProvider from "@/components/SafeAreaProvider";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import CapacitorInit from "@/components/CapacitorInit";
 
 export const metadata: Metadata = {
@@ -39,6 +40,7 @@ export default function RootLayout({
             </PenyediaKeranjang>
           </div>
           <Analytics />
+          <SpeedInsights />
         </body>
       </html>
     </ClerkProvider>

@@ -15,6 +15,7 @@ Untuk memastikan pelanggan tidak membeli barang kosong, sistem menerapkan strate
    - Sistem memulai blok **Prisma `$transaction`**.
    - API secara langsung (*real-time*) me-query sisa stok dari database sebelum memproses pesanan. Jika stok kosong/minus, API melempar pesan *Error* (penolakan) dan keranjang batal dieksekusi.
    - Jika stok valid, pembuatan riwayat `Order` dan pemotongan stok dilakukan secara atomik (*Atomic Operation*).
+3. **Atomic Stock Return (Pembatalan Pesanan):** Jika Admin memperbarui status pesanan menjadi "Dibatalkan", backend akan memeriksa status sebelumnya. Jika sebelumnya bukan "Dibatalkan", maka akan diluncurkan **Prisma `$transaction`** untuk menambah (*increment*) kembali `stok` varian dan `stokTotal` produk sesuai jumlah pembelian, memastikan tidak ada inventaris yang hilang (*leaking stock*).
 
 ## 3. Sistem "Hybrid Delete" (Manajemen Arsip Aman)
 Penghapusan data di Admin Dashboard pada menu Produk menerapkan logika *Hybrid Delete* untuk melindungi riwayat pesanan (Constraint Data):
@@ -39,3 +40,4 @@ Untuk memaksimalkan *Search Engine Optimization* (SEO), platform ini secara penu
 - **`robots.txt` & Proteksi Path:** File `robots.ts` menginstruksikan perayap untuk bebas mengindeks *Storefront* (`Allow: /`) dengan petunjuk URL `sitemap.xml`, namun di sisi lain menegakkan blokade mutlak (`Disallow`) terhadap rute rahasia seperti panel `/admin` dan jalur belakang `/api`.
 - **Semantic HTML & Image Attributes:** Komponen halaman produk dijamin hanya memiliki satu induk *heading* (`<h1>`) untuk nama produk, dan setiap tag `<Image>` dimuati dengan parameter `alt` yang dinamis sesuai nama aslinya, meningkatkan skor *accessibility* dan SEO Gambar.
 - **Sinkronisasi Canonical URL & Open Graph:** Penggunaan `metadataBase` secara global di dalam `layout.tsx` yang dikombinasikan dengan variabel `NEXT_PUBLIC_BASE_URL` memastikan semua metadata (termasuk `og:image` dan `url` Open Graph) selalu merujuk kuat (*Canonical*) ke domain utama produksi, sehingga menutup celah kebocoran penyebaran tautan berdomain bawaan `.vercel.app`.
+- **Pemantauan Performa Nyata (Core Web Vitals):** Integrasi komponen `<SpeedInsights />` dari Vercel ke dalam *Root Layout* (`layout.tsx`) memungkinkan aplikasi untuk terus memancarkan matriks performa (LCP, FID, CLS) ke *dashboard* analitik Vercel. Hal ini vital untuk mengevaluasi dampak SEO berbasis kecepatan pemuatan halaman bagi pengguna secara *real-time*.

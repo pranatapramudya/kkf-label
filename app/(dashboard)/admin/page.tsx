@@ -573,7 +573,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
   const fetchPesanan = async (page = 1) => {
     setSedangMemuat(true);
     try {
-      const res = await fetch(`/api/admin/pesanan?page=${page}`);
+      const res = await fetch(`/api/admin/pesanan?page=${page}&month=${bulanExport}&year=${tahunExport}`);
       if (res.ok) {
         const json = await res.json();
         setDaftarPesanan(json.data);
@@ -589,7 +589,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
 
   useEffect(() => {
     fetchPesanan(1);
-  }, []);
+  }, [bulanExport, tahunExport]);
 
   // Data tampil diambil langsung dari daftarPesanan karena API sudah mem-paginate
   const dataTampil = daftarPesanan.filter((p) => {
