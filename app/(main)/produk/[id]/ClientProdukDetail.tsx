@@ -259,7 +259,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                       ) : (
                         <Image
                           src={item.url}
-                          alt={`Thumb ${idx}`}
+                          alt={`Thumbnail ${produk.nama} ${idx + 1}`}
                           fill
                           sizes="(max-width: 768px) 20vw, 10vw"
                           className="object-cover bg-white border border-pink-50 rounded-lg"
@@ -525,7 +525,7 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                   fill
                   sizes="112px"
                   className="object-cover"
-                  alt="Varian"
+                  alt={`Varian ${produk.nama}`}
                 />
               </div>
 

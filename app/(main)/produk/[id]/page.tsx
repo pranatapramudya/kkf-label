@@ -2,7 +2,38 @@ import { notFound } from "next/navigation";
 import { PrismaClient } from "@prisma/client";
 import ClientProdukDetail from "./ClientProdukDetail";
 
+import { Metadata } from "next";
+
 const prisma = new PrismaClient();
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+
+  const produkDb = await prisma.product.findFirst({
+    where: {
+      OR: [{ id: id }, { slug: id }],
+    },
+    select: {
+      nama: true,
+      deskripsi: true,
+    },
+  });
+
+  if (!produkDb) {
+    return {
+      title: "Produk Tidak Ditemukan | KKF Label",
+    };
+  }
+
+  return {
+    title: `${produkDb.nama} | KKF Label`,
+    description: produkDb.deskripsi.substring(0, 160),
+  };
+}
 
 export default async function HalamanDetailProduk({
   params,

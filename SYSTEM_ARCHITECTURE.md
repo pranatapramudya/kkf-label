@@ -1,92 +1,40 @@
-# Arsitektur Sistem KKF Label
+# Arsitektur Sistem & Alur Kerja (KKF Label)
 
-Dokumen ini memaparkan gambaran umum mengenai arsitektur sistem dari proyek **KKF Label**, dengan fokus pada antarmuka (*Frontend*), logika pemrosesan (*Backend*), manajemen data (*Database*), serta integrasi dengan layanan eksternal.
+Dokumen ini memuat analisis arsitektur teknis dan korelasi antar fungsi *full-stack* pada platform KKF Label. Sistem ini memanfaatkan arsitektur **Next.js App Router** untuk memisahkan logika Klien (`use client`) dan logika aman di Server (*Server Components* / API Routes).
 
-## Diagram Alur Arsitektur Sistem
+## 1. Skema Relasi Database (Prisma & PostgreSQL)
+Fondasi data diatur secara terpusat pada file `prisma/schema.prisma`. Beberapa relasi krusial yang menopang logika bisnis:
+- **`Product` dan `ProductVariant` (One-to-Many):** Desain ini memungkinkan satu produk memiliki berbagai ukuran atau warna. Masing-masing varian memiliki pencatatan stok sendiri (`stok`), sementara produk memiliki `stokTotal`.
+- **`Order` dan `OrderItem` (One-to-Many):** `Order` menangani data meta-transaksi (alamat, kurir, subtotal), sedangkan `OrderItem` berfungsi sebagai *snapshot* harga dan keterangan varian pada saat transaksi terjadi, melindunginya dari fluktuasi harga produk di masa mendatang.
+- **Relasi Fleksibel pada `Review`:** Ulasan produk direlasikan ke `User`, namun dengan kolom *nullable* agar pembeli tamu (*Guest*) tetap dapat memberikan ulasan menggunakan *Foreign Key* ke `Order`.
 
-Berikut adalah diagram yang memetakan aliran data dan interaksi antar komponen dalam sistem menggunakan sintaks Mermaid.js:
+## 2. Alur Transaksi & Validasi Stok (Pencegahan Overselling)
+Untuk memastikan pelanggan tidak membeli barang kosong, sistem menerapkan strategi validasi dua lapis (Dual-Layer Validation):
+1. **Frontend (UI Guard):** Komponen halaman produk (`ClientProdukDetail.tsx`) secara reaktif membaca data `stokTotal` maupun stok varian. Jika stok menyentuh angka `<= 0`, semua tombol aksi (keranjang/beli) otomatis berubah warna menjadi abu-abu (*disabled*) dengan label "Stok Habis".
+2. **Backend (Pre-Flight Prisma Transaction):** Mengingat manipulasi *localStorage* keranjang sangat rawan dimodifikasi klien, *endpoint* akhir di `/api/pesanan/route.ts` memikul tanggung jawab mutlak. 
+   - Sistem memulai blok **Prisma `$transaction`**.
+   - API secara langsung (*real-time*) me-query sisa stok dari database sebelum memproses pesanan. Jika stok kosong/minus, API melempar pesan *Error* (penolakan) dan keranjang batal dieksekusi.
+   - Jika stok valid, pembuatan riwayat `Order` dan pemotongan stok dilakukan secara atomik (*Atomic Operation*).
 
-```mermaid
-graph TD
-    %% Definisi Gaya
-    classDef frontend fill:#3b82f6,stroke:#2563eb,stroke-width:2px,color:#fff,rx:10px,ry:10px;
-    classDef backend fill:#10b981,stroke:#059669,stroke-width:2px,color:#fff,rx:10px,ry:10px;
-    classDef database fill:#f59e0b,stroke:#d97706,stroke-width:2px,color:#fff,rx:10px,ry:10px;
-    classDef external fill:#8b5cf6,stroke:#7c3aed,stroke-width:2px,color:#fff,rx:10px,ry:10px;
+## 3. Sistem "Hybrid Delete" (Manajemen Arsip Aman)
+Penghapusan data di Admin Dashboard pada menu Produk menerapkan logika *Hybrid Delete* untuk melindungi riwayat pesanan (Constraint Data):
+- **Hard Delete (Penghapusan Total):** Ketika produk belum pernah memiliki relasi transaksi apa pun di dalam tabel `OrderItem`, maka data produk akan dihapus secara permanen dari database. Dalam proses ini, sistem backend turut memanggil *Supabase JS SDK* untuk memusnahkan (*purge*) berkas gambar dari peladen (storage bucket), demi efisiensi *resource*.
+- **Soft Delete (Pengarsipan):** Ketika produk yang akan dihapus sudah memiliki relasi riwayat pesanan, menghapusnya secara permanen akan memicu *Database Integrity Error*. Oleh karena itu, *backend* akan secara elegan mengubah *flag* `isArchived` menjadi `true`.
+- **Dampak Soft Delete:** Produk yang diarsipkan tidak akan tampil di *Storefront* pelanggan. Di dalam antarmuka panel Admin, produk akan dirender redup (*grayscale*), dilucuti tombol editnya, dan dilengkapi tombol pemulihan ("Pulihkan") untuk mengubah statusnya kembali menjadi `isArchived: false`.
 
-    %% Komponen Frontend
-    subgraph Frontend ["Frontend (Next.js UI)"]
-        AdminUI["Dasbor Admin<br>(Manajemen Pesanan, Promosi, dsb.)"]:::frontend
-        CustomerUI["Etalase Pelanggan<br>(Katalog, Keranjang, Checkout)"]:::frontend
-    end
+## 4. Audit Keamanan Variabel Lingkungan (.env)
+Aplikasi memastikan tidak ada kredensial sensitif yang rontok ke sisi *Client Browser*:
+- Label **`NEXT_PUBLIC_`**: Diberlakukan secara eksklusif hanya untuk nilai konfigurasi yang wajar (publik), seperti `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` dan parameter ID Web Firebase untuk *Service Worker*.
+- **Secret Backend (Tanpa Awalan):** Kunci absolut layaknya `DATABASE_URL`, API Key Resend, rahasia Server Midtrans, rahasia autentikasi Clerk, dll, dibiarkan *default*. Dengan begitu, hanya *Node.js Backend* dan *Server Actions* yang diizinkan membacanya.
 
-    %% Komponen Backend
-    subgraph Backend ["Backend (Next.js API & Server Actions)"]
-        API_Admin["API Internal Admin<br>(/api/admin/*)"]:::backend
-        API_Store["API Toko & Pelanggan<br>(/api/*)"]:::backend
-        Webhooks["Webhook Endpoints<br>(/api/webhook/*)"]:::backend
-    end
+## 5. Manajemen Error Sinkron (Firebase Cloud Messaging)
+Modul *Push Notification* (FCM) menggunakan `firebaseClient.ts`. Guna menjaga kelancaran pengembangan *Localhost* dari error *Abort* / *Messaging* yang memicu munculnya *Error Overlay* besar di layar Next.js:
+- Semua inisialisasi diikat dalam blok pelindung `try...catch`.
+- Lemparan *Exception* pada blok `catch` dicegah dan di-downgrade tingkat fatalitasnya dengan metode `console.warn` (alih-alih `console.error`). Cara ini mengizinkan UI tampil prima sembari tetap menjaga *traceability* error di *DevTools Console*.
 
-    %% Komponen Database
-    subgraph DatabaseLayer ["Data Layer"]
-        Prisma["Prisma ORM<br>(Query Builder)"]:::database
-        Supabase[("PostgreSQL Database<br>(Supabase)")]:::database
-    end
-
-    %% Komponen Layanan Pihak Ketiga
-    subgraph ThirdParty ["Layanan Pihak Ketiga (Integrasi)"]
-        Midtrans["Midtrans<br>(Payment Gateway)"]:::external
-        Komerce["Komerce<br>(Cek Ongkos Kirim)"]:::external
-        BiteShip["BiteShip<br>(Sistem Lacak Resi)"]:::external
-        Resend["Resend<br>(Mass Email Broadcast)"]:::external
-    end
-
-    %% Alur Interaksi Frontend ke Backend
-    AdminUI -->|"HTTP Request/Action"| API_Admin
-    CustomerUI -->|"HTTP Request/Action"| API_Store
-
-    %% Alur Interaksi Backend ke Database
-    API_Admin <-->|"Validasi & Operasi CRUD"| Prisma
-    API_Store <-->|"Validasi & Operasi CRUD"| Prisma
-    Webhooks -->|"Update Data Transaksi"| Prisma
-    Prisma <-->|"Eksekusi Query SQL"| Supabase
-
-    %% Alur Interaksi Backend ke Pihak Ketiga
-    API_Store -->|"Request/Validasi Ongkir"| Komerce
-    API_Store -->|"Inisiasi Transaksi (Snap)"| Midtrans
-    API_Admin -->|"Kirim Blast Promosi"| Resend
-    API_Admin -->|"Pelacakan Status Kiriman"| BiteShip
-    API_Store -->|"Pelacakan Status Kiriman"| BiteShip
-
-    %% Alur Interaksi Pihak Ketiga ke Backend
-    Midtrans -.->|"Notifikasi Status Pembayaran"| Webhooks
-```
-
-## Penjelasan Modul Sistem
-
-Sistem KKF Label dibangun dengan arsitektur berbasis komponen modern menggunakan Next.js (App Router), yang secara efektif menyatukan lapisan UI dan logika _server-side_ di dalam satu wadah proyek (monorepo).
-
-### 1. Frontend (Next.js UI)
-Berperan sebagai antarmuka pengguna yang berinteraksi langsung dengan pelanggan maupun administrator.
-- **Etalase Pelanggan (*Customer UI*)**: Menyajikan katalog produk, sistem keranjang (*cart*), ulasan, dan halaman *checkout* kepada pembeli. Dioptimalkan untuk kecepatan pemuatan halaman dan pengalaman pengguna (*User Experience*).
-- **Dasbor Admin (*Admin UI*)**: Pusat kendali yang terproteksi oleh autentikasi, digunakan oleh pemilik toko atau admin untuk mengelola stok, melihat pesanan masuk, mengonfirmasi pembayaran, hingga mengirimkan promosi (*email broadcast*). 
-
-### 2. Backend (Next.js API & Server Actions)
-Lapisan logika bisnis yang menangani autentikasi, validasi *payload*, aturan bisnis, dan komunikasi dengan *database* serta pihak luar.
-- **API Internal Admin & API Toko**: *Endpoint* yang didesain secara khusus untuk melayani permintaan dari UI (seperti pembuatan pesanan, penambahan produk, pengiriman email promosi).
-- **Webhook Endpoints**: Rute API pasif yang bertugas 'mendengarkan' permintaan masuk dari layanan eksternal. Secara khusus, *webhook* digunakan untuk menangkap notifikasi *real-time* dari Midtrans ketika pembayaran pelanggan berhasil atau dibatalkan.
-
-### 3. Data Layer (Prisma ORM & Supabase)
-Lapisan ini mengelola skema penyimpanan data transaksi secara konsisten.
-- **PostgreSQL Database (Supabase)**: Layanan *database* *cloud* utama yang menyimpan seluruh entitas sistem (seperti Pengguna, Pesanan, Produk, dan Afiliasi).
-- **Prisma ORM**: *Object-Relational Mapping* (ORM) yang memfasilitasi komunikasi antara lapisan Backend dan Database. Prisma menyediakan keamanan tipe (*type safety*) dan mempermudah manipulasi data melalui operasi CRUD (Create, Read, Update, Delete) yang terstruktur tanpa perlu menulis *query* SQL secara manual.
-
-### 4. Layanan Pihak Ketiga (Integrasi)
-Sistem KKF Label mendelegasikan beberapa fitur esensial kepada layanan eksternal (*third-party services*) untuk menjamin skalabilitas dan keandalan sistem:
-- **Midtrans**: Menangani ekosistem pembayaran digital (transfer bank, *e-wallet*, kartu kredit) agar toko dapat menerima dana secara aman dan otomatisasi verifikasi pembayaran via *webhook*.
-- **Komerce**: Mengalkulasi biaya ongkos kirim secara dinamis berdasarkan kurir, bobot barang, dan titik alamat pengiriman pelanggan.
-- **BiteShip**: Melacak status resi paket pengiriman (*tracking*) agar pelanggan maupun admin mengetahui letak terkini paket.
-- **Resend**: Bertugas mengirimkan surel promosi secara massal (*broadcast*) kepada para pelanggan dari Dasbor Admin, menggunakan *Batch API* untuk penanganan email berkapasitas besar.
-
----
-*Dokumen ini dibuat secara otomatis dan mewakili potret terkini dari arsitektur platform E-Commerce KKF Label.*
+## 6. Arsitektur SEO & Web Vitals
+Untuk memaksimalkan *Search Engine Optimization* (SEO), platform ini secara penuh menggunakan fitur internal Next.js 15:
+- **Dynamic Metadata (`generateMetadata`):** Saat *Crawler Bot* mengakses halaman detail produk, *Server Component* akan mengeksekusi *query* ke database Prisma. Nama produk dan deskripsinya secara otomatis disuntikkan ke dalam meta tag `<title>` dan `<meta name="description">` pada tahap *Server-Side Rendering* (SSR). Ini menjamin akurasi hasil pencarian Google.
+- **Sitemap Dinamis (`sitemap.ts`):** Menggantikan sitemap XML statis, file `sitemap.ts` beroperasi layaknya API untuk men-generate URL secara dinamis. Parameter *query* difilter murni untuk produk berstatus aktif (`aktif: true`) dan belum terarsip (`isArchived: false`), sehingga Google tidak akan merayapi tautan mati/produk yang sudah dihapus secara *Soft Delete*.
+- **`robots.txt` & Proteksi Path:** File `robots.ts` menginstruksikan perayap untuk bebas mengindeks *Storefront* (`Allow: /`) dengan petunjuk URL `sitemap.xml`, namun di sisi lain menegakkan blokade mutlak (`Disallow`) terhadap rute rahasia seperti panel `/admin` dan jalur belakang `/api`.
+- **Semantic HTML & Image Attributes:** Komponen halaman produk dijamin hanya memiliki satu induk *heading* (`<h1>`) untuk nama produk, dan setiap tag `<Image>` dimuati dengan parameter `alt` yang dinamis sesuai nama aslinya, meningkatkan skor *accessibility* dan SEO Gambar.
