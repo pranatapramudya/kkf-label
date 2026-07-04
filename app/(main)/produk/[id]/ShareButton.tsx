@@ -13,13 +13,9 @@ export default function ShareButton({ produkId }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
   const handleShare = () => {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
-    const affiliateId = user?.id;
-
-    const url = affiliateId
-      ? `${baseUrl}/produk/${produkId}?ref=${affiliateId}`
-      : `${baseUrl}/produk/${produkId}`;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+    // URL bersih tanpa query parameters (?ref=) agar canonical dan Open Graph optimal saat dibagikan ke sosmed/WA
+    const url = `${baseUrl}/produk/${produkId}`;
 
     navigator.clipboard
       .writeText(url)

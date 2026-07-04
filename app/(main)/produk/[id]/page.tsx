@@ -20,6 +20,8 @@ export async function generateMetadata({
     select: {
       nama: true,
       deskripsi: true,
+      slug: true,
+      fotoUtama: true,
     },
   });
 
@@ -29,9 +31,19 @@ export async function generateMetadata({
     };
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
   return {
     title: `${produkDb.nama} | KKF Label`,
     description: produkDb.deskripsi.substring(0, 160),
+    openGraph: {
+      title: produkDb.nama,
+      description: produkDb.deskripsi.substring(0, 160),
+      url: `${baseUrl}/produk/${produkDb.slug}`,
+      siteName: "KKF Label",
+      images: [produkDb.fotoUtama],
+      type: "website",
+    },
   };
 }
 

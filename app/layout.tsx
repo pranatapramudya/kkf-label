@@ -7,6 +7,7 @@ import { Analytics } from "@vercel/analytics/next";
 import CapacitorInit from "@/components/CapacitorInit";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"),
   title: "kkf-label | Fashion Wanita Minimalis",
   description:
     "Butik fashion wanita modern dengan nuansa soft pink dan minimalist white.",
