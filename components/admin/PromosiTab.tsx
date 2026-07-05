@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { Loader2, Send, Megaphone, CheckCircle, Mail, AlertCircle } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
 
 export default function PromosiTab() {
-  const [daftarPelanggan, setDaftarPelanggan] = useState<any[]>([]);
-  const [memuatData, setMemuatData] = useState(true);
+  const fetcher = (url: string) => fetch(url).then((res) => res.json());
+  const { data: daftarPelanggan = [], isLoading: memuatData, mutate: fetchPelanggan } = useSWR("/api/admin/promosi", fetcher, { keepPreviousData: true, refreshInterval: 15000 });
   const [mengirim, setMengirim] = useState(false);
 
   // Form Promo
@@ -17,22 +18,7 @@ export default function PromosiTab() {
 
   const [notifikasi, setNotifikasi] = useState({ tampil: false, pesan: "", tipe: "sukses" });
 
-  useEffect(() => {
-    const fetchPelanggan = async () => {
-      try {
-        const res = await fetch("/api/admin/promosi");
-        if (res.ok) {
-          const data = await res.json();
-          setDaftarPelanggan(data);
-        }
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setMemuatData(false);
-      }
-    };
-    fetchPelanggan();
-  }, []);
+
 
   const tampilNotif = (pesan: string, tipe = "sukses") => {
     setNotifikasi({ tampil: true, pesan, tipe });

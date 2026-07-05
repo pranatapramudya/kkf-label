@@ -3,22 +3,31 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    // Cari semua pesanan yang statusnya SELESAI
-    const pesananSelesai = await prisma.order.findMany({
-      where: {
-        statusPesanan: "SELESAI",
-      },
-      select: {
-        namaPenerima: true,
-        teleponPenerima: true,
-        emailPenerima: true,
-        dibuatPada: true,
-        total: true,
-      },
-      orderBy: {
-        dibuatPada: "desc",
-      },
-    });
+    const [pesananSelesaiRaw, totalPesanan] = await Promise.all([
+      prisma.order.findMany({
+        where: {
+          statusPesanan: "SELESAI",
+        },
+        select: {
+          namaPenerima: true,
+          teleponPenerima: true,
+          emailPenerima: true,
+          dibuatPada: true,
+          total: true,
+        },
+        orderBy: {
+          dibuatPada: "desc",
+        },
+        take: 500,
+      }).catch(() => []),
+      prisma.order.count({
+        where: {
+          statusPesanan: "SELESAI",
+        }
+      }).catch(() => 0)
+    ]);
+    
+    const pesananSelesai = pesananSelesaiRaw as any[];
 
     // Ambil pelanggan unik berdasarkan nomor telepon
     const pelangganMap = new Map();

@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import useSWR from "swr";
 import { Loader2, Star, MessageSquareReply, X } from "lucide-react";
 
 export default function UlasanTable() {
-  const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const fetcher = (url: string) => fetch(url).then((res) => res.json());
+  const { data: responseData, isLoading: loading, mutate: fetchUlasan } = useSWR("/api/admin/ulasan", fetcher, { refreshInterval: 10000, keepPreviousData: true });
+  const data = responseData?.data || [];
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -18,22 +20,7 @@ export default function UlasanTable() {
   const [replyText, setReplyText] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchUlasan = () => {
-    fetch("/api/admin/ulasan")
-      .then((res) => res.json())
-      .then((resData) => {
-        setData(resData);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
-  };
 
-  useEffect(() => {
-    fetchUlasan();
-  }, []);
 
   const handleBalas = async () => {
     if (!replyText.trim() || !selectedReview) return;

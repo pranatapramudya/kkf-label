@@ -3,17 +3,25 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   try {
-    const ulasan = await prisma.review.findMany({
-      orderBy: { dibuatPada: "desc" },
-      include: {
-        produk: {
-          select: { nama: true },
+    const [ulasanRaw, totalUlasan] = await Promise.all([
+      prisma.review.findMany({
+        orderBy: { dibuatPada: "desc" },
+        take: 20,
+        select: {
+          id: true,
+          produkId: true,
+          rating: true,
+          comment: true,
+          dibuatPada: true,
+          adminReply: true,
+          namaGuest: true,
+          produk: { select: { nama: true } },
+          pengguna: { select: { nama: true, email: true } },
         },
-        pengguna: {
-          select: { nama: true, email: true },
-        },
-      },
-    });
+      }).catch(() => []),
+      prisma.review.count().catch(() => 0),
+    ]);
+    const ulasan = ulasanRaw as any[];
 
     const dataTampil = ulasan.map((u) => ({
       id: u.id,
@@ -27,7 +35,7 @@ export async function GET() {
       namaReviewer: u.namaGuest || u.pengguna?.nama || "Anonim",
     }));
 
-    return NextResponse.json(dataTampil);
+    return NextResponse.json({ data: dataTampil, total: totalUlasan });
   } catch (error: any) {
     console.error("🔥 Error Fetch Ulasan:", error.message);
     return NextResponse.json(

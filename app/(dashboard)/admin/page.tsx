@@ -1525,6 +1525,8 @@ function HalamanAdmin() {
                   if (menu.id === "produk") preload("/api/admin/produk", fetcher);
                   if (menu.id === "analitik") preload(`/api/admin/analitik?filter=${filterWaktu}&bulan=${filterBulan}&tahun=${filterTahun}`, fetcher);
                   if (menu.id === "pesanan") preload(`/api/admin/pesanan?page=1&month=semua&year=${tahunSekarang}`, fetcher);
+                  if (menu.id === "ulasan") preload("/api/admin/ulasan", fetcher);
+                  if (menu.id === "promosi") preload("/api/admin/promosi", fetcher);
                 }}
                 onClick={() => {
                   setTabAktif(menu.id);
