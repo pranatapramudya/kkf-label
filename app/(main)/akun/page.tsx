@@ -21,6 +21,7 @@ import {
   Copy,
 } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
+import ColorBadge from "@/components/ColorBadge";
 
 export default function HalamanAkunSaya() {
   const router = useRouter();
@@ -414,9 +415,9 @@ export default function HalamanAkunSaya() {
                       <h3 className="text-xs font-bold text-zinc-900 line-clamp-2 leading-snug">
                         {itm.namaProduk}
                       </h3>
-                      <p className="text-[10px] font-medium text-zinc-500 mt-1">
-                        Varian: {itm.ukuran} - {itm.warna}
-                      </p>
+                      <div className="text-[10px] font-medium text-zinc-500 mt-1 flex items-center gap-1">
+                        <span>Varian: {itm.ukuran} -</span> <ColorBadge text={itm.warna || ''} />
+                      </div>
                       <div className="flex justify-between items-center mt-2.5">
                         <span className="text-[11px] font-bold text-zinc-600">
                           x{itm.jumlah}

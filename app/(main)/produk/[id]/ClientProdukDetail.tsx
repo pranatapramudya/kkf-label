@@ -337,9 +337,16 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                 Pilih Varian
               </span>
               <div className="flex items-center gap-1 text-sm text-zinc-500">
-                <span>
+                <span className="flex items-center gap-1.5">
                   {varianAktif
-                    ? `${varianAktif.ukuran}, ${varianAktif.warna}`
+                    ? <>
+                        {varianAktif.ukuran}
+                        {varianAktif.warna?.startsWith('#') || varianAktif.warna?.startsWith('rgb') ? (
+                          <span className="w-3.5 h-3.5 rounded-full shadow-sm border border-black/10 inline-block" style={{ backgroundColor: varianAktif.warna }} />
+                        ) : (
+                          `, ${varianAktif.warna}`
+                        )}
+                      </>
                     : "Pilih Varian"}
                 </span>
                 <ChevronRight size={18} />
@@ -364,8 +371,13 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                           : "border-zinc-200 text-zinc-600 hover:border-soft-pink-300 hover:bg-zinc-50"
                       }`}
                     >
-                      <span className="w-full truncate">
-                        {v.ukuran} &middot; {v.warna}
+                      <span className="w-full truncate flex items-center gap-1.5">
+                        {v.ukuran} 
+                        {v.warna?.startsWith('#') || v.warna?.startsWith('rgb') ? (
+                          <span className="w-3.5 h-3.5 rounded-full inline-block shadow-sm border border-black/10" style={{ backgroundColor: v.warna }} title={v.warna} />
+                        ) : (
+                          <span>&middot; {v.warna}</span>
+                        )}
                       </span>
                       <span
                         className={`text-[10px] mt-1 ${varianAktif?.id === v.id ? "font-bold" : "font-normal opacity-70"}`}
@@ -569,13 +581,18 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                       <button
                         key={v.id}
                         onClick={() => handlePilihVarian(v, idx)}
-                        className={`px-4 py-2.5 text-sm rounded-xl border transition-all ${
+                        className={`px-4 py-2.5 text-sm rounded-xl border transition-all flex items-center gap-1.5 ${
                           varianAktif?.id === v.id
                             ? "border-soft-pink-500 bg-soft-pink-50 text-soft-pink-700 font-bold shadow-sm"
                             : "border-zinc-200 text-zinc-600 hover:bg-zinc-50"
                         }`}
                       >
-                        {v.ukuran} - {v.warna}
+                        {v.ukuran}
+                        {v.warna?.startsWith('#') || v.warna?.startsWith('rgb') ? (
+                          <span className="w-3.5 h-3.5 rounded-full inline-block shadow-sm border border-black/10" style={{ backgroundColor: v.warna }} title={v.warna} />
+                        ) : (
+                          <span>- {v.warna}</span>
+                        )}
                       </button>
                     ))}
                   </div>

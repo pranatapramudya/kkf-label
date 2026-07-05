@@ -61,6 +61,7 @@ import RfmTable from "@/components/admin/RfmTable";
 import RingkasanAnalitik from "@/components/admin/RingkasanAnalitik";
 
 import UlasanTable from "@/components/admin/UlasanTable";
+import ColorBadge from "@/components/ColorBadge";
 
 // ==========================================
 // 🔥 KOMPONEN DROPDOWN MEWAH
@@ -95,6 +96,7 @@ function DropdownMewah({
   return (
     <div className={`relative ${widthClass} shrink-0`} ref={ref}>
       <button
+        type="button"
         onClick={() => setBuka(!buka)}
         className="w-full flex items-center justify-between bg-white border border-zinc-200 text-sm font-bold text-zinc-700 px-4 py-2.5 rounded-xl hover:border-soft-pink-300 focus:outline-none transition shadow-sm"
       >
@@ -408,18 +410,29 @@ function FormTambahProduk({
                 </div>
                 <div className="flex-1">
                   <label className="block text-xs font-bold text-zinc-600 mb-1">
-                    Warna
+                    Warna (RGB/Hex)
                   </label>
-                  <input
-                    type="text"
-                    required
-                    value={item.warna}
-                    onChange={(e) =>
-                      updateVarian(index, "warna", e.target.value)
-                    }
-                    className="w-full border border-zinc-300 p-2.5 rounded-lg focus:outline-none focus:border-soft-pink-500 text-sm"
-                    placeholder="Soft Pink"
-                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      required
+                      value={item.warna?.startsWith('#') ? item.warna : '#000000'}
+                      onChange={(e) =>
+                        updateVarian(index, "warna", e.target.value)
+                      }
+                      className="h-10 w-10 shrink-0 cursor-pointer rounded-lg border border-zinc-300 p-0.5"
+                    />
+                    <input
+                      type="text"
+                      required
+                      value={item.warna}
+                      onChange={(e) =>
+                        updateVarian(index, "warna", e.target.value)
+                      }
+                      className="w-full border border-zinc-300 p-2.5 rounded-lg focus:outline-none focus:border-soft-pink-500 text-sm"
+                      placeholder="#FFC0CB"
+                    />
+                  </div>
                 </div>
                 <div className="w-24">
                   <label className="block text-xs font-bold text-zinc-600 mb-1">
@@ -1227,10 +1240,15 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                     {selectedInvoice.item?.map((itm: any, i: number) => (
                       <div key={i} className="flex gap-1 mb-1">
                         <span className="shrink-0">{itm.jumlah}x</span>
-                        <span className="uppercase truncate">
-                          {itm.namaProduk} ({itm.ukuran || "-"},{" "}
-                          {itm.warna || "-"})
-                        </span>
+                        <div className="uppercase truncate flex items-center gap-1">
+                          <span>{itm.namaProduk} {itm.ukuran ? `(${itm.ukuran})` : ""}</span>
+                          {itm.warna && (
+                            <>
+                              <span>-</span>
+                              <ColorBadge text={itm.warna} />
+                            </>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>

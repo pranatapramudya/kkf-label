@@ -57,12 +57,21 @@ export async function POST(permintaan: Request) {
 
     const originId = await getOriginAreaId(apiKey);
 
-    const payload = {
+    const payload: any = {
       origin_area_id: originId,
       destination_area_id: body.areaIdTujuan,
       couriers: body.ekspedisi.toLowerCase(),
       items: body.items && body.items.length > 0 ? body.items : defaultItems
     };
+
+    // FIX: Kurir Instant Gojek sering membutuhkan koordinat pasti agar tidak error "No courier available"
+    if (payload.couriers === 'gojek') {
+      // Hardcode default origin/dest koordinat untuk sementara jika belum dinamis
+      payload.origin_latitude = -6.8398;
+      payload.origin_longitude = 107.9405;
+      payload.destination_latitude = -6.8188;
+      payload.destination_longitude = 107.9472;
+    }
 
     const respons = await fetch(
       "https://api.biteship.com/v1/rates/couriers",
@@ -80,19 +89,42 @@ export async function POST(permintaan: Request) {
     const data = await respons.json();
 
     if (!respons.ok || !data.success) {
-      const errorMsg = data.error || data.message || "Gagal mengambil tarif pengiriman dari BiteShip";
+      let errorMsg = data.error || data.message || "Gagal mengambil tarif pengiriman dari BiteShip";
+      if (payload.couriers === 'gojek') {
+        errorMsg = "Maaf, pengiriman Instan (Gojek) saat ini hanya melayani wilayah Sumedang dan sekitarnya (Maks 40km). Silakan pilih ekspedisi Reguler.";
+      }
       return NextResponse.json({ pesan: errorMsg }, { status: 400 });
     }
 
     const results = data.pricing || [];
 
-    const daftarBiaya = results.map((layanan: any) => ({
+    const filteredPricing = results.filter((layanan: any) => {
+      const courier = (layanan.courier_name || body.ekspedisi).toLowerCase();
+      const service = (layanan.courier_service_code || layanan.courier_service_name).toLowerCase();
+      
+      if (courier === 'jnt' || courier === 'j&t') return service === 'ez';
+      if (courier === 'jne') return service === 'reg' || service.includes('reguler');
+      if (courier === 'sicepat') return service === 'reg' || service === 'best';
+      if (courier === 'pos' || courier === 'pos indonesia') return service === 'pos reguler' || service === 'reg' || service.includes('reguler');
+      if (courier === 'gojek') return service.includes('instant') || service.includes('same day') || service.includes('sameday');
+      return false;
+    });
+
+    const daftarBiaya = filteredPricing.map((layanan: any) => ({
       ekspedisi: layanan.courier_name || body.ekspedisi.toUpperCase(),
       layanan: layanan.courier_service_code || layanan.courier_service_name,
       namaLayanan: layanan.courier_service_name || "Reguler",
       biaya: Number(layanan.price || 0),
       estimasi: layanan.duration || "-",
     }));
+
+    if (daftarBiaya.length === 0) {
+      let errorMsg = "Layanan pengiriman tidak tersedia untuk rute ini.";
+      if (payload.couriers === 'gojek') {
+        errorMsg = "Maaf, pengiriman Instan (Gojek) saat ini hanya melayani wilayah Sumedang dan sekitarnya (Maks 40km). Silakan pilih ekspedisi Reguler.";
+      }
+      return NextResponse.json({ pesan: errorMsg }, { status: 400 });
+    }
 
     daftarBiaya.sort((a: any, b: any) => a.biaya - b.biaya);
 

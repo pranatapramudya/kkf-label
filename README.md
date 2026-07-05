@@ -19,9 +19,9 @@ KKF Label adalah platform e-commerce full-stack modern yang dibangun untuk menan
 ## 📦 Fitur Utama
 
 ### 🛒 Klien (Customer Storefront)
-- **Katalog & Variasi Produk:** Menampilkan detail produk lengkap dengan dukungan multi-varian (Warna, Ukuran) dan galeri foto.
+- **Katalog & Variasi Produk:** Menampilkan detail produk lengkap dengan dukungan multi-varian (Warna, Ukuran) dan galeri foto. Sistem mendukung "Visual RGB Color Variants" untuk pengalaman UI yang lebih interaktif, termasuk rendering Visual RGB Color Badge pada halaman checkout, riwayat pesanan, dan cetak resi A6.
 - **Sistem Keranjang Lokal:** Manajemen *shopping cart* yang cepat dan ringan menggunakan `localStorage` dan `React Context`.
-- **Checkout Dinamis:** Penghitungan otomatis subtotal, ongkos kirim (Biteship), dan integrasi opsi pembayaran.
+- **Checkout Dinamis:** Penghitungan otomatis subtotal, ongkos kirim (Biteship), dan integrasi opsi pembayaran. Mendukung fitur "Curated Shipping Options via Biteship" untuk opsi logistik yang terfilter, serta dukungan pengiriman Instan (Gojek) dengan pemetaan koordinat otomatis.
 - **Validasi Stok Otomatis:** Mencegah pembelian (*overselling*) secara *real-time* dengan mematikan tombol di sisi UI dan melakukan validasi mutlak di sisi server saat pesanan dibuat.
 - **Pelacakan Pesanan:** Pelanggan dapat mengecek status pesanan dan melakukan *tracking* posisi perjalanan paket.
 - **Ulasan (Review):** Pelanggan (baik pengguna terdaftar maupun *guest*) dapat memberikan ulasan dan rating produk.

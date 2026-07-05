@@ -23,15 +23,14 @@ import {
 import { useKeranjang } from "@/context/CartContext";
 import { formatRupiah } from "@/lib/format";
 import type { PilihanOngkir, Wilayah } from "@/types/produk";
+import ColorBadge from "@/components/ColorBadge";
 
 const daftarEkspedisi = [
   { value: "jne", label: "JNE" },
   { value: "jnt", label: "J&T" },
   { value: "sicepat", label: "SiCepat" },
-  { value: "ninja", label: "Ninja" },
-  { value: "anteraja", label: "AnterAja" },
   { value: "pos", label: "Pos Indonesia" },
-  { value: "lion", label: "Lion Parcel" },
+  { value: "gojek", label: "Gojek" },
 ];
 
 const DropdownPencarian = ({
@@ -662,9 +661,9 @@ export default function HalamanCheckout() {
                               <Trash2 size={16} />
                             </button>
                           </div>
-                          <p className="mt-1 text-xs text-zinc-500 font-medium bg-white w-fit px-2 py-0.5 rounded border border-zinc-200">
-                            {item.ukuran} · {item.warna}
-                          </p>
+                          <div className="mt-1 text-xs text-zinc-500 font-medium bg-white w-fit px-2 py-0.5 rounded border border-zinc-200 flex items-center gap-1">
+                            <span>{item.ukuran} &middot;</span> <ColorBadge text={item.warna || ''} />
+                          </div>
                         </div>
                         <div className="flex items-center justify-between mt-3">
                           <div className="flex flex-col">
