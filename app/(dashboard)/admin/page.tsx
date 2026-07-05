@@ -45,14 +45,15 @@ import AdminNotification from "@/components/AdminNotification";
 import { Suspense } from "react";
 import { maskName } from "@/lib/masking";
 import dynamic from "next/dynamic";
+import AdminSkeleton from "@/components/admin/AdminSkeleton";
 
-const TabelProduk = dynamic(() => import("./produk/TabelProduk"), { ssr: false });
-const PromosiTab = dynamic(() => import("@/components/admin/PromosiTab"), { ssr: false });
+const TabelProduk = dynamic(() => import("./produk/TabelProduk"), { ssr: false, loading: () => <AdminSkeleton /> });
+const PromosiTab = dynamic(() => import("@/components/admin/PromosiTab"), { ssr: false, loading: () => <AdminSkeleton /> });
 import { useClerk, UserButton } from "@clerk/nextjs";
-const ProfitabilityChart = dynamic(() => import("@/components/admin/ProfitabilityChart"), { ssr: false });
-const RfmTable = dynamic(() => import("@/components/admin/RfmTable"), { ssr: false });
-const RingkasanAnalitik = dynamic(() => import("@/components/admin/RingkasanAnalitik"), { ssr: false });
-const UlasanTable = dynamic(() => import("@/components/admin/UlasanTable"), { ssr: false });
+const ProfitabilityChart = dynamic(() => import("@/components/admin/ProfitabilityChart"), { ssr: false, loading: () => <AdminSkeleton /> });
+const RfmTable = dynamic(() => import("@/components/admin/RfmTable"), { ssr: false, loading: () => <AdminSkeleton /> });
+const RingkasanAnalitik = dynamic(() => import("@/components/admin/RingkasanAnalitik"), { ssr: false, loading: () => <AdminSkeleton /> });
+const UlasanTable = dynamic(() => import("@/components/admin/UlasanTable"), { ssr: false, loading: () => <AdminSkeleton /> });
 import ColorBadge from "@/components/ColorBadge";
 import { ekstrakWarnaGambar } from "@/lib/colorExtractor";
 import { compressImage } from "@/lib/imageCompressor";
@@ -872,12 +873,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
           </div>
         </div>
 
-        {sedangMemuat ? (
-          <div className="flex flex-col items-center justify-center py-10 text-zinc-600 gap-2">
-            <Loader2 className="animate-spin text-soft-pink-500" size={24} />
-            <p className="text-sm font-medium">Menarik data transaksi...</p>
-          </div>
-        ) : (
+        {sedangMemuat ? <AdminSkeleton /> : (
           <div className="w-full pb-4 px-4 md:px-0">
             <table className="block w-full md:table text-left text-sm md:whitespace-nowrap">
               <thead className="hidden md:table-header-group">
@@ -1742,15 +1738,7 @@ function HalamanAdmin() {
                   </div>
 
                   {memuatAnalitik ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-zinc-600 gap-2">
-                      <Loader2
-                        className="animate-spin text-soft-pink-500"
-                        size={32}
-                      />
-                      <p className="text-sm font-medium">
-                        Sinkronisasi data dari Prisma...
-                      </p>
-                    </div>
+                    <AdminSkeleton />
                   ) : (
                     <RingkasanAnalitik
                       statistikRingkas={statistikRingkas}
@@ -1802,17 +1790,11 @@ function HalamanAdmin() {
                   </div>
                   <div className="rounded-2xl border border-pink-100 bg-white shadow-sm overflow-hidden mb-8">
                     {memuatProduk ? (
-                      <div className="flex flex-col items-center justify-center py-10 text-zinc-600 gap-2">
-                        <Loader2
-                          className="animate-spin text-soft-pink-500"
-                          size={24}
-                        />
-                        <p className="text-sm font-medium">
-                          Menarik data dari database Prisma...
-                        </p>
-                      </div>
+                      <AdminSkeleton />
                     ) : (
-                      <TabelProduk dataProduk={daftarProduk} />
+                      <Suspense fallback={<AdminSkeleton />}>
+                        <TabelProduk dataProduk={daftarProduk} />
+                      </Suspense>
                     )}
                   </div>
                 </>

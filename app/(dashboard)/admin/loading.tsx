@@ -1,0 +1,9 @@
+import AdminSkeleton from "@/components/admin/AdminSkeleton";
+
+export default function Loading() {
+  return (
+    <div className="min-h-screen bg-white">
+      <AdminSkeleton />
+    </div>
+  );
+}
