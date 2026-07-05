@@ -8,9 +8,10 @@ const prisma = new PrismaClient();
 export default async function HalamanKatalog({
   searchParams,
 }: {
-  searchParams: Promise<{ sort?: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const { sort } = await searchParams;
+  const resolvedParams = await searchParams;
+  const sort = resolvedParams.sort as string | undefined;
 
   let orderBy: any = { dibuatPada: "desc" };
   
