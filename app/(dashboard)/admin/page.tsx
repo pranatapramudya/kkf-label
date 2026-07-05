@@ -1,6 +1,6 @@
 "use client";
 
-import useSWR from "swr";
+import useSWR, { preload } from "swr";
 
 // Recharts removed, loaded dynamically via components
 import { uploadFotoProduk, uploadVideoProduk } from "@/lib/supabase";
@@ -565,8 +565,9 @@ function FormTambahProduk({
 // 2. KOMPONEN TABEL PESANAN
 // ==========================================
 function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
-  const [daftarPesanan, setDaftarPesanan] = useState<any[]>([]);
-  const [sedangMemuat, setSedangMemuat] = useState(true);
+  // SWR Refactor
+  // const [daftarPesanan, setDaftarPesanan] = useState<any[]>([]);
+  // const [sedangMemuat, setSedangMemuat] = useState(true);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
 
   const [pesananDiedit, setPesananDiedit] = useState<any>(null);
@@ -626,25 +627,25 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
     label: (tahunSekarang - i).toString(),
   }));
 
-  const fetchPesanan = async (page = 1) => {
-    setSedangMemuat(true);
-    try {
-      const res = await fetch(`/api/admin/pesanan?page=${page}&month=${bulanExport}&year=${tahunExport}`);
-      if (res.ok) {
-        const json = await res.json();
-        setDaftarPesanan(json.data);
-        setTotalPages(json.totalPages || 1);
-        setCurrentPage(json.page || 1);
-      }
-    } catch (e) {
-      console.error("Gagal memuat pesanan", e);
-    } finally {
-      setSedangMemuat(false);
-    }
+  const fetchPesanan = (page: number) => {
+    setCurrentPage(page);
   };
 
+  const { data: pesananData, isLoading: sedangMemuat } = useSWR(
+    `/api/admin/pesanan?page=${currentPage}&month=${bulanExport}&year=${tahunExport}`,
+    fetcher,
+    { keepPreviousData: true, refreshInterval: 10000 }
+  );
+  
+  const daftarPesanan = pesananData?.data || [];
+  
   useEffect(() => {
-    fetchPesanan(1);
+    if (pesananData?.totalPages) setTotalPages(pesananData.totalPages);
+    if (pesananData?.page) setCurrentPage(pesananData.page);
+  }, [pesananData]);
+  
+  useEffect(() => {
+    setCurrentPage(1);
   }, [bulanExport, tahunExport]);
 
   // Data tampil diambil langsung dari daftarPesanan karena API sudah mem-paginate
@@ -1362,8 +1363,9 @@ function HalamanAdmin() {
   const [terakhirDiperbarui, setTerakhirDiperbarui] = useState("");
   const [sedangRefresh, setSedangRefresh] = useState(false);
   const [modeTambah, setModeTambah] = useState(false);
-  const [daftarProduk, setDaftarProduk] = useState<any[]>([]);
-  const [memuatProduk, setMemuatProduk] = useState(false);
+  // SWR Refactor Produk
+  // const [daftarProduk, setDaftarProduk] = useState<any[]>([]);
+  // const [memuatProduk, setMemuatProduk] = useState(false);
 
   const [bukaKalkulator, setBukaKalkulator] = useState(false);
   const [kalkulatorBulan, setKalkulatorBulan] = useState(new Date().getMonth().toString());
@@ -1383,17 +1385,9 @@ function HalamanAdmin() {
   const [filterBulan, setFilterBulan] = useState(new Date().getMonth().toString());
   const [filterTahun, setFilterTahun] = useState(new Date().getFullYear().toString());
   const [modeGrafikTop, setModeGrafikTop] = useState("terjual");
-  const [memuatAnalitik, setMemuatAnalitik] = useState(true);
-
-  const [dataAnalitik, setDataAnalitik] = useState({
-    totalPenjualan: 0,
-    pesananBaru: 0,
-    produkAktif: 0,
-    daftarKategori: [],
-    grafikPenjualan: [],
-    grafikProdukTerjual: [],
-    grafikProdukDilihat: [],
-  });
+  // SWR Refactor Analitik
+  // const [memuatAnalitik, setMemuatAnalitik] = useState(true);
+  // const [dataAnalitik, setDataAnalitik] = useState({...});
 
   const tahunSekarang = new Date().getFullYear();
   const daftarTahun = Array.from(
@@ -1420,50 +1414,21 @@ function HalamanAdmin() {
   };
 
   // 🔥 FUNGSI TARIK DATA SILUMAN 🔥
-  const tarikProdukDariDB = async (sembunyi = false) => {
-    if (!sembunyi) setMemuatProduk(true);
-    try {
-      const respons = await fetch("/api/admin/produk");
-      if (respons.ok) setDaftarProduk(await respons.json());
-    } catch (galat) {
-      console.error(galat);
-    } finally {
-      if (!sembunyi) setMemuatProduk(false);
-    }
-  };
+  const { data: daftarProduk = [], isLoading: memuatProduk, mutate: mutateProduk } = useSWR("/api/admin/produk", fetcher, { refreshInterval: 10000, keepPreviousData: true });
+  const tarikProdukDariDB = (sembunyi = false) => mutateProduk();
 
-  const tarikDataAnalitik = async (sembunyi = false) => {
-    if (!sembunyi) setMemuatAnalitik(true);
-    try {
-      const respons = await fetch(`/api/admin/analitik?filter=${filterWaktu}&bulan=${filterBulan}&tahun=${filterTahun}`);
-      if (respons.ok) {
-        setDataAnalitik(await respons.json());
-        updateWaktuRefresh();
-      }
-    } catch (galat) {
-      console.error(galat);
-    } finally {
-      if (!sembunyi) setMemuatAnalitik(false);
-    }
-  };
+  const { data: dataAnalitik = {
+    totalPenjualan: 0, pesananBaru: 0, produkAktif: 0, daftarKategori: [], grafikPenjualan: [], grafikProdukTerjual: [], grafikProdukDilihat: []
+  }, isLoading: memuatAnalitik, mutate: mutateAnalitik } = useSWR(
+    `/api/admin/analitik?filter=${filterWaktu}&bulan=${filterBulan}&tahun=${filterTahun}`,
+    fetcher,
+    { refreshInterval: 10000, keepPreviousData: true }
+  );
+  
+  const tarikDataAnalitik = (sembunyi = false) => mutateAnalitik();
 
   // 🔥 EFEK REFRESH SILUMAN TIAP 10 DETIK 🔥
-  useEffect(() => {
-    if (tabAktif === "produk") {
-      tarikProdukDariDB(false);
-      const intervalRealtime = setInterval(() => {
-        tarikProdukDariDB(true);
-      }, 10000);
-      return () => clearInterval(intervalRealtime);
-    }
-    if (tabAktif === "analitik") {
-      tarikDataAnalitik(false);
-      const intervalRealtime = setInterval(() => {
-        tarikDataAnalitik(true);
-      }, 10000);
-      return () => clearInterval(intervalRealtime);
-    }
-  }, [tabAktif, filterWaktu, filterBulan, filterTahun]);
+  // useEffect interval realtime removed because SWR handles refreshInterval natively.
 
   useEffect(() => {
     if(bukaKalkulator) {
@@ -1556,6 +1521,11 @@ function HalamanAdmin() {
             {daftarMenu.map((menu) => (
               <button
                 key={menu.id}
+                onMouseEnter={() => {
+                  if (menu.id === "produk") preload("/api/admin/produk", fetcher);
+                  if (menu.id === "analitik") preload(`/api/admin/analitik?filter=${filterWaktu}&bulan=${filterBulan}&tahun=${filterTahun}`, fetcher);
+                  if (menu.id === "pesanan") preload(`/api/admin/pesanan?page=1&month=semua&year=${tahunSekarang}`, fetcher);
+                }}
                 onClick={() => {
                   setTabAktif(menu.id);
                   setModeTambah(false);
@@ -1932,6 +1902,11 @@ function HalamanAdmin() {
               <button
                 key={menu.id}
                 aria-label={menu.label}
+                onMouseEnter={() => {
+                  if (menu.id === "produk") preload("/api/admin/produk", fetcher);
+                  if (menu.id === "analitik") preload(`/api/admin/analitik?filter=${filterWaktu}&bulan=${filterBulan}&tahun=${filterTahun}`, fetcher);
+                  if (menu.id === "pesanan") preload(`/api/admin/pesanan?page=1&month=semua&year=${tahunSekarang}`, fetcher);
+                }}
                 onClick={() => {
                   setTabAktif(menu.id);
                   setModeTambah(false);
