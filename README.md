@@ -29,7 +29,7 @@ KKF Label adalah platform e-commerce full-stack modern yang dibangun untuk menan
 - **Open Graph (OG) & Social Media Share Ready:** Mengintegrasikan metadata Open Graph untuk memunculkan *link preview* (gambar, judul, deskripsi) yang sempurna saat dibagikan ke WhatsApp dan media sosial lainnya. Tombol "Bagikan" dioptimasi agar selalu menyalin *Clean URL*.
 
 ### 🛡️ Admin Dashboard
-- **Manajemen Produk (CRUD):** Kontrol penuh untuk tambah, edit, dan pengarsipan produk.
+- **Manajemen Produk (CRUD):** Kontrol penuh untuk tambah, edit, dan pengarsipan produk. Dilengkapi dengan "Client-Side Dominant Color Scanner" di mana admin dapat mengekstrak warna dominan (Hex) secara otomatis dari foto hanya dengan mengklik tombol "Scan Warna" pada setiap baris varian.
 - **Hybrid Delete System:** Proteksi integritas data dengan sistem penghapusan ganda (*Hard Delete* + Hapus gambar di Supabase untuk produk baru; *Soft Delete/isArchived* untuk produk yang memiliki riwayat transaksi).
 - **Manajemen Pesanan:** Memproses pesanan dari status *Pending* (menunggu pembayaran/verifikasi bukti transfer) hingga *Selesai*, termasuk input nomor resi pengiriman.
 - **Analitik Dasbor:** Grafik interaktif performa penjualan bulanan, pantauan jumlah kunjungan produk, dan kalkulasi profitabilitas menggunakan Recharts.

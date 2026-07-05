@@ -47,6 +47,7 @@ import {
   Mail,
   Phone,
   Search,
+  Camera,
 } from "lucide-react";
 import { formatRupiah } from "@/lib/format";
 import { useSearchParams } from "next/navigation";
@@ -62,6 +63,7 @@ import RingkasanAnalitik from "@/components/admin/RingkasanAnalitik";
 
 import UlasanTable from "@/components/admin/UlasanTable";
 import ColorBadge from "@/components/ColorBadge";
+import { ekstrakWarnaGambar } from "@/lib/colorExtractor";
 
 // ==========================================
 // 🔥 KOMPONEN DROPDOWN MEWAH
@@ -432,6 +434,31 @@ function FormTambahProduk({
                       className="w-full border border-zinc-300 p-2.5 rounded-lg focus:outline-none focus:border-soft-pink-500 text-sm"
                       placeholder="#FFC0CB"
                     />
+                    <button
+                      type="button"
+                      onClick={() => document.getElementById(`scan-warna-${index}`)?.click()}
+                      className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-700 transition"
+                      title="Scan dari Foto"
+                    >
+                      <Camera size={18} />
+                    </button>
+                    <input
+                      type="file"
+                      id={`scan-warna-${index}`}
+                      className="hidden"
+                      accept="image/*"
+                      onChange={async (e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          try {
+                            const hex = await ekstrakWarnaGambar(e.target.files[0]);
+                            updateVarian(index, "warna", hex);
+                          } catch (err) {
+                            console.error("Gagal scan warna", err);
+                          }
+                          e.target.value = "";
+                        }
+                      }}
+                    />
                   </div>
                 </div>
                 <div className="w-24">
@@ -474,8 +501,25 @@ function FormTambahProduk({
               multiple
               accept="image/*"
               required
-              onChange={(e) => {
-                if (e.target.files) setFileFoto(Array.from(e.target.files));
+              onChange={async (e) => {
+                if (e.target.files) {
+                  const files = Array.from(e.target.files);
+                  setFileFoto(files);
+                  
+                  if (files.length > 0) {
+                    try {
+                      const hex = await ekstrakWarnaGambar(files[0]);
+                      const varianBaru = [...daftarVarian];
+                      // Otomatis isi warna varian pertama jika kosong atau timpa saja untuk kemudahan
+                      if (varianBaru.length > 0) {
+                        varianBaru[0].warna = hex;
+                        setDaftarVarian(varianBaru);
+                      }
+                    } catch (err) {
+                      console.error("Gagal ekstrak warna", err);
+                    }
+                  }
+                }
               }}
               className="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:font-bold file:bg-soft-pink-100 file:text-soft-pink-700 cursor-pointer"
             />
