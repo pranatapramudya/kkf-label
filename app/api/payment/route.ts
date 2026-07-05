@@ -5,6 +5,7 @@ import "@/lib/firebase-admin";
 import { getMessaging } from "firebase-admin/messaging";
 
 const prisma = new PrismaClient();
+const rateLimitMap = new Map();
 
 export async function POST(permintaan: Request) {
   const serverKey = process.env.MIDTRANS_SERVER_KEY;
@@ -18,6 +19,44 @@ export async function POST(permintaan: Request) {
 
   try {
     const body = await permintaan.json();
+
+    // --- Security: Rate Limiting & Turnstile ---
+    const ip = permintaan.headers.get('x-forwarded-for') || '127.0.0.1';
+    const currentTime = Date.now();
+    const oneHour = 60 * 60 * 1000;
+    const rateData = rateLimitMap.get(ip) || { count: 0, firstRequest: currentTime };
+    
+    if (currentTime - rateData.firstRequest > oneHour) {
+      rateData.count = 1;
+      rateData.firstRequest = currentTime;
+    } else {
+      rateData.count += 1;
+    }
+    rateLimitMap.set(ip, rateData);
+
+    if (rateData.count > 3) {
+      return NextResponse.json(
+        { pesan: "Anda terlalu sering membuat pesanan. Coba lagi nanti." },
+        { status: 429 }
+      );
+    }
+
+    const { turnstileToken } = body;
+    if (!turnstileToken) {
+      return NextResponse.json({ pesan: "Verifikasi keamanan gagal, terdeteksi sebagai bot." }, { status: 403 });
+    }
+    
+    const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `secret=1x0000000000000000000000000000000AA&response=${turnstileToken}`,
+    });
+    
+    const verifyData = await verifyRes.json();
+    if (!verifyData.success) {
+      return NextResponse.json({ pesan: "Verifikasi keamanan gagal, terdeteksi sebagai bot." }, { status: 403 });
+    }
+    // ------------------------------------------
 
     // Baca Affiliate cookie
     const cookieStore = await cookies();
