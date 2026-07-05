@@ -30,7 +30,7 @@ export default function RfmTable() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 text-zinc-500 gap-2">
+      <div className="flex flex-col items-center justify-center py-10 text-zinc-600 gap-2">
         <Loader2 className="animate-spin text-soft-pink-500" size={24} />
         <p className="text-sm">Menganalisis RFM Pelanggan...</p>
       </div>
@@ -68,13 +68,13 @@ export default function RfmTable() {
       <div className="mb-6 flex justify-between items-end">
         <div>
           <h3 className="font-bold text-zinc-900">Analisis Pelanggan (RFM)</h3>
-          <p className="text-xs text-zinc-500">Segmentasi berdasarkan Recency, Frequency, Monetary.</p>
+          <p className="text-xs text-zinc-600">Segmentasi berdasarkan Recency, Frequency, Monetary.</p>
         </div>
       </div>
       <div className="w-full">
         <table className="block w-full md:table text-left text-sm md:whitespace-nowrap">
           <thead className="hidden md:table-header-group">
-            <tr className="border-b border-pink-100 text-zinc-500">
+            <tr className="border-b border-pink-100 text-zinc-600">
               <th className="pb-3 font-semibold px-2">Pelanggan</th>
               <th className="pb-3 font-semibold px-2 text-center">Recency (Hari)</th>
               <th className="pb-3 font-semibold px-2 text-center">Frequency</th>
@@ -85,7 +85,7 @@ export default function RfmTable() {
           <tbody className="block w-full md:table-row-group">
             {currentData.length === 0 ? (
               <tr className="block w-full md:table-row">
-                <td colSpan={5} className="block md:table-cell text-center py-8 text-zinc-400 italic">
+                <td colSpan={5} className="block md:table-cell text-center py-8 text-zinc-600 italic">
                   Belum ada data pelanggan.
                 </td>
               </tr>
@@ -93,26 +93,26 @@ export default function RfmTable() {
               currentData.map((user, idx) => (
                 <tr key={idx} className="block w-full mb-4 border border-pink-100 rounded-xl p-4 shadow-sm md:table-row md:border-b md:border-pink-50 md:rounded-none md:p-0 md:shadow-none hover:bg-pink-50/30 transition-colors md:mb-0 last:border-0">
                   <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-right md:text-left">
-                    <span className="md:hidden font-bold text-zinc-400">Pelanggan:</span>
+                    <span className="md:hidden font-bold text-zinc-600">Pelanggan:</span>
                     <div className="text-right md:text-left">
                       <p className="font-bold text-zinc-900">{user.nama}</p>
-                      <p className="text-xs text-zinc-500">{user.email}</p>
+                      <p className="text-xs text-zinc-600">{user.email}</p>
                     </div>
                   </td>
                   <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-center md:text-center font-medium text-zinc-700">
-                    <span className="md:hidden font-bold text-zinc-400">Recency:</span>
+                    <span className="md:hidden font-bold text-zinc-600">Recency:</span>
                     <span>{user.recency} Hari</span>
                   </td>
                   <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-center md:text-center font-medium text-zinc-700">
-                    <span className="md:hidden font-bold text-zinc-400">Frequency:</span>
+                    <span className="md:hidden font-bold text-zinc-600">Frequency:</span>
                     <span>{user.frequency}x</span>
                   </td>
                   <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 font-bold text-soft-pink-600">
-                    <span className="md:hidden font-bold text-zinc-400">Monetary:</span>
+                    <span className="md:hidden font-bold text-zinc-600">Monetary:</span>
                     <span>{formatRupiah(user.monetary)}</span>
                   </td>
                   <td className="flex justify-between items-center md:table-cell py-3 md:py-4 md:border-0 px-2">
-                    <span className="md:hidden font-bold text-zinc-400">Segmen:</span>
+                    <span className="md:hidden font-bold text-zinc-600">Segmen:</span>
                     <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase ${getSegmentStyle(user.segment)}`}>
                       {getSegmentIcon(user.segment)}
                       {user.segment}
@@ -126,7 +126,7 @@ export default function RfmTable() {
       </div>
       {totalPages > 1 && (
         <div className="p-4 border-t border-pink-50 flex items-center justify-between bg-zinc-50/50">
-          <span className="text-sm text-zinc-500 font-medium">
+          <span className="text-sm text-zinc-600 font-medium">
             Halaman {currentPage} dari {totalPages}
           </span>
           <div className="flex gap-2">

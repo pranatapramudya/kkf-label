@@ -34,7 +34,7 @@ export default function RingkasanAnalitik({
           >
             <div className="flex items-start justify-between gap-4 relative z-10">
               <div>
-                <p className="text-sm font-bold text-zinc-500">
+                <p className="text-sm font-bold text-zinc-600">
                   {st.judul}
                 </p>
                 <p className="mt-2 text-2xl font-black text-zinc-900">
@@ -58,7 +58,7 @@ export default function RingkasanAnalitik({
             <h3 className="font-bold text-zinc-900">
               Tren Pendapatan Real-Time
             </h3>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-zinc-600">
               Pendapatan kotor dari tabel Pesanan.
             </p>
           </div>
@@ -121,7 +121,7 @@ export default function RingkasanAnalitik({
               <h3 className="font-bold text-zinc-900">
                 Top Produk Live
               </h3>
-              <p className="text-[10px] text-zinc-500">
+              <p className="text-[10px] text-zinc-600">
                 Berdasarkan{" "}
                 {modeGrafikTop === "dilihat"
                   ? "klik pengunjung"
@@ -132,13 +132,13 @@ export default function RingkasanAnalitik({
             <div className="flex bg-zinc-50 p-1 rounded-lg border border-zinc-200 shrink-0">
               <button
                 onClick={() => setModeGrafikTop("terjual")}
-                className={`p-1.5 rounded-md transition-all ${modeGrafikTop === "terjual" ? "bg-white shadow-sm text-soft-pink-600" : "text-zinc-400 hover:text-zinc-600"}`}
+                className={`p-1.5 rounded-md transition-all ${modeGrafikTop === "terjual" ? "bg-white shadow-sm text-soft-pink-600" : "text-zinc-600 hover:text-zinc-600"}`}
               >
                 <CartIcon size={14} />
               </button>
               <button
                 onClick={() => setModeGrafikTop("dilihat")}
-                className={`p-1.5 rounded-md transition-all ${modeGrafikTop === "dilihat" ? "bg-white shadow-sm text-soft-pink-600" : "text-zinc-400 hover:text-zinc-600"}`}
+                className={`p-1.5 rounded-md transition-all ${modeGrafikTop === "dilihat" ? "bg-white shadow-sm text-soft-pink-600" : "text-zinc-600 hover:text-zinc-600"}`}
               >
                 <MousePointerClick size={14} />
               </button>
@@ -146,7 +146,7 @@ export default function RingkasanAnalitik({
           </div>
           <div className="flex-1 w-full text-xs min-h-[200px]">
             {dataGrafikTopAktif.length === 0 ? (
-              <div className="w-full h-full flex items-center justify-center text-zinc-400 italic">
+              <div className="w-full h-full flex items-center justify-center text-zinc-600 italic">
                 Belum ada data
               </div>
             ) : (

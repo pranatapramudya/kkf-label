@@ -108,7 +108,7 @@ function DropdownMewah({
         </span>
         <ChevronDown
           size={16}
-          className={`transition-transform text-zinc-500 ${buka ? "rotate-180" : ""}`}
+          className={`transition-transform text-zinc-600 ${buka ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -239,7 +239,7 @@ function FormTambahProduk({
         <button
           type="button"
           onClick={onKembali}
-          className="text-zinc-500 hover:text-zinc-900 font-bold flex items-center gap-2 bg-zinc-50 hover:bg-zinc-100 px-3 py-1.5 rounded-lg transition"
+          className="text-zinc-600 hover:text-zinc-900 font-bold flex items-center gap-2 bg-zinc-50 hover:bg-zinc-100 px-3 py-1.5 rounded-lg transition"
         >
           <ArrowLeft size={16} /> Kembali
         </button>
@@ -296,7 +296,7 @@ function FormTambahProduk({
                       </li>
                     ))
                   : kategori.trim() === "" && (
-                      <li className="px-4 py-2.5 text-sm text-zinc-400 italic text-center">
+                      <li className="px-4 py-2.5 text-sm text-zinc-600 italic text-center">
                         Ketik untuk mencari...
                       </li>
                     )}
@@ -323,7 +323,7 @@ function FormTambahProduk({
               Harga Normal
             </label>
             <div className="relative w-full">
-              <span className="absolute left-4 top-3.5 text-sm font-bold text-zinc-400">
+              <span className="absolute left-4 top-3.5 text-sm font-bold text-zinc-600">
                 Rp
               </span>
               <input
@@ -341,7 +341,7 @@ function FormTambahProduk({
               HPP (Modal)
             </label>
             <div className="relative w-full">
-              <span className="absolute left-4 top-3.5 text-sm font-bold text-zinc-400">
+              <span className="absolute left-4 top-3.5 text-sm font-bold text-zinc-600">
                 Rp
               </span>
               <input
@@ -438,7 +438,7 @@ function FormTambahProduk({
                     <button
                       type="button"
                       onClick={() => document.getElementById(`scan-warna-${index}`)?.click()}
-                      className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg bg-zinc-100 text-zinc-500 hover:bg-zinc-200 hover:text-zinc-700 transition"
+                      className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg bg-zinc-100 text-zinc-600 hover:bg-zinc-200 hover:text-zinc-700 transition"
                       title="Scan dari Foto"
                     >
                       <Camera size={18} />
@@ -851,7 +851,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
           <h3 className="font-bold text-zinc-900 text-lg">Rekapan Transaksi</h3>
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-fit">
             <div className="relative w-full sm:w-64 shrink-0">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" size={16} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600" size={16} />
               <input
                 type="text"
                 placeholder="Cari Invoice / Nama..."
@@ -882,7 +882,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
         </div>
 
         {sedangMemuat ? (
-          <div className="flex flex-col items-center justify-center py-10 text-zinc-500 gap-2">
+          <div className="flex flex-col items-center justify-center py-10 text-zinc-600 gap-2">
             <Loader2 className="animate-spin text-soft-pink-500" size={24} />
             <p className="text-sm font-medium">Menarik data transaksi...</p>
           </div>
@@ -890,7 +890,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
           <div className="w-full pb-4 px-4 md:px-0">
             <table className="block w-full md:table text-left text-sm md:whitespace-nowrap">
               <thead className="hidden md:table-header-group">
-                <tr className="border-b border-pink-100 text-zinc-500">
+                <tr className="border-b border-pink-100 text-zinc-600">
                   <th className="pb-3 font-semibold px-2 w-10 text-center">
                     No
                   </th>
@@ -906,7 +906,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                   <tr className="block w-full md:table-row">
                     <td
                       colSpan={6}
-                      className="block md:table-cell text-center py-8 text-zinc-400 font-medium"
+                      className="block md:table-cell text-center py-8 text-zinc-600 font-medium"
                     >
                       Belum ada pesanan masuk
                     </td>
@@ -917,21 +917,21 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                       key={p.id}
                       className="block w-full mb-4 border border-pink-100 rounded-xl p-4 shadow-sm md:table-row md:border-b md:border-pink-50 md:rounded-none md:p-0 md:shadow-none hover:bg-pink-50/30 transition-colors md:mb-0 last:border-0"
                     >
-                      <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 text-zinc-500 font-medium px-2">
-                        <span className="md:hidden font-bold text-zinc-400">No:</span>
+                      <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 text-zinc-600 font-medium px-2">
+                        <span className="md:hidden font-bold text-zinc-600">No:</span>
                         <span>{(currentPage - 1) * itemsPerPage + index + 1}</span>
                       </td>
                       <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 font-bold text-zinc-900 px-2">
-                        <span className="md:hidden font-bold text-zinc-400">Invoice:</span>
+                        <span className="md:hidden font-bold text-zinc-600">Invoice:</span>
                         <span>{p.kodePesanan}</span>
                       </td>
                       <td className="flex justify-between items-start md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 text-zinc-600 px-2">
-                        <span className="md:hidden font-bold text-zinc-400">Pelanggan:</span>
+                        <span className="md:hidden font-bold text-zinc-600">Pelanggan:</span>
                         <div className="flex flex-col gap-1 min-w-0 flex-1 text-right md:text-left ml-auto md:ml-0 w-full md:w-auto">
                           <span className="font-bold text-zinc-900 truncate block">
                             {p.namaPenerima}
                           </span>
-                          <div className="flex flex-col gap-0.5 text-[10px] text-zinc-500 items-end md:items-start min-w-0 w-full">
+                          <div className="flex flex-col gap-0.5 text-[10px] text-zinc-600 items-end md:items-start min-w-0 w-full">
                             <span className="flex items-center gap-1.5 justify-end md:justify-start min-w-0 w-full">
                               <span className="block w-full max-w-[180px] sm:max-w-[250px] md:max-w-none truncate text-xs md:text-sm">
                                 {p.emailPenerima}
@@ -948,11 +948,11 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                         </div>
                       </td>
                       <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 font-bold text-soft-pink-600 px-2">
-                        <span className="md:hidden font-bold text-zinc-400">Total:</span>
+                        <span className="md:hidden font-bold text-zinc-600">Total:</span>
                         <span>{formatRupiah(p.total)}</span>
                       </td>
                       <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2">
-                        <span className="md:hidden font-bold text-zinc-400">Status:</span>
+                        <span className="md:hidden font-bold text-zinc-600">Status:</span>
                         <span
                           className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase ${p.statusPesanan === "SELESAI" || p.statusPesanan === "SAMPAI" ? "bg-emerald-100 text-emerald-700" : p.statusPesanan === "DIKIRIM" ? "bg-blue-100 text-blue-700" : p.statusPesanan === "DIBATALKAN" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}
                         >
@@ -960,7 +960,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                         </span>
                       </td>
                       <td className="flex justify-between items-center md:table-cell py-3 md:py-4 md:border-0 px-2">
-                        <span className="md:hidden font-bold text-zinc-400">Aksi:</span>
+                        <span className="md:hidden font-bold text-zinc-600">Aksi:</span>
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => bukaModalEdit(p)}
@@ -983,7 +983,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
             </table>
             {totalPages > 1 && (
               <div className="p-4 border-t border-pink-50 flex items-center justify-between bg-zinc-50/50">
-                <span className="text-sm text-zinc-500 font-medium">
+                <span className="text-sm text-zinc-600 font-medium">
                   Halaman {currentPage} dari {totalPages}
                 </span>
                 <div className="flex gap-2">
@@ -1016,13 +1016,13 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                 <h3 className="text-lg font-bold text-zinc-900">
                   Proses Pesanan
                 </h3>
-                <p className="text-xs text-zinc-500 mt-1">
+                <p className="text-xs text-zinc-600 mt-1">
                   {pesananDiedit.kodePesanan}
                 </p>
               </div>
-              <button
+              <button aria-label="Tutup modal pesanan"
                 onClick={() => setPesananDiedit(null)}
-                className="text-zinc-400 hover:text-red-500 transition bg-zinc-50 p-2 rounded-full"
+                className="text-zinc-600 hover:text-red-500 transition bg-zinc-50 p-2 rounded-full"
               >
                 <X size={18} />
               </button>
@@ -1131,7 +1131,7 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                     type="text"
                     readOnly={true}
                     value={pesananDiedit?.ekspedisi || "Belum dipilih"}
-                    className="w-full border border-zinc-200 p-3 rounded-xl bg-zinc-100 cursor-not-allowed text-zinc-500 text-sm font-bold uppercase focus:outline-none"
+                    className="w-full border border-zinc-200 p-3 rounded-xl bg-zinc-100 cursor-not-allowed text-zinc-600 text-sm font-bold uppercase focus:outline-none"
                   />
                 </div>
                 <div>
@@ -1343,7 +1343,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function HalamanAdminWrapper() {
   return (
-    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center font-bold text-zinc-500">Memuat Dasbor...</div>}>
+    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center font-bold text-zinc-600">Memuat Dasbor...</div>}>
       <HalamanAdmin />
     </Suspense>
   );
@@ -1597,6 +1597,7 @@ function HalamanAdmin() {
           </nav>
           <div className="p-4 border-t border-pink-100 flex flex-col gap-3 bg-white">
             <button
+              aria-label="Keluar dari admin"
               onClick={async () => {
                 await signOut({ redirectUrl: '/admin' });
               }}
@@ -1623,8 +1624,9 @@ function HalamanAdmin() {
               <span className="hidden lg:inline">Kalkulator Profit</span>
             </button>
             <button
+              aria-label="Muat ulang data admin"
               onClick={tarikDataTerbaru}
-              className="flex items-center gap-1.5 text-[10px] md:text-xs font-medium text-zinc-500 bg-white border border-zinc-200 px-2 md:px-3 py-1.5 rounded-full shadow-sm hover:bg-zinc-50 transition"
+              className="flex items-center gap-1.5 text-[10px] md:text-xs font-medium text-zinc-600 bg-white border border-zinc-200 px-2 md:px-3 py-1.5 rounded-full shadow-sm hover:bg-zinc-50 transition"
               title={`Diperbarui: ${terakhirDiperbarui}`}
             >
               <RefreshCw
@@ -1664,7 +1666,7 @@ function HalamanAdmin() {
                      analitikTabAktif === "profitability" ? "Profitability (Margin)" :
                      "Analisis Pelanggan (RFM)"}
                   </span>
-                  <ChevronDown className={`text-gray-400 transition-transform ${isDropdownAnalitikOpen ? "rotate-180" : ""}`} size={16} />
+                  <ChevronDown className={`text-gray-600 transition-transform ${isDropdownAnalitikOpen ? "rotate-180" : ""}`} size={16} />
                 </button>
 
                 {isDropdownAnalitikOpen && (
@@ -1697,7 +1699,7 @@ function HalamanAdmin() {
                       <h3 className="font-bold text-zinc-900 text-lg">
                         Ringkasan Performa
                       </h3>
-                      <p className="text-sm text-zinc-500">
+                      <p className="text-sm text-zinc-600">
                         Database live dari server PostgreSQL KKF-Label.
                       </p>
                     </div>
@@ -1708,14 +1710,14 @@ function HalamanAdmin() {
                           <button
                             key={filter}
                             onClick={() => setFilterWaktu(filter)}
-                            className={`flex-shrink-0 px-4 py-1.5 text-xs md:text-sm rounded-lg capitalize transition-all whitespace-nowrap truncate ${filterWaktu === filter ? "bg-pink-100 text-pink-700 font-bold shadow-sm" : "text-zinc-500 hover:text-zinc-900 font-medium"}`}
+                            className={`flex-shrink-0 px-4 py-1.5 text-xs md:text-sm rounded-lg capitalize transition-all whitespace-nowrap truncate ${filterWaktu === filter ? "bg-pink-100 text-pink-700 font-bold shadow-sm" : "text-zinc-600 hover:text-zinc-900 font-medium"}`}
                           >
                             {filter === "hari" ? "Hari Ini" : "Minggu Ini"}
                           </button>
                         ))}
                         <button
                             onClick={() => setFilterWaktu("bulanan")}
-                            className={`flex-shrink-0 px-4 py-1.5 text-xs md:text-sm rounded-lg capitalize transition-all whitespace-nowrap truncate ${filterWaktu === "bulanan" ? "bg-pink-100 text-pink-700 font-bold shadow-sm" : "text-zinc-500 hover:text-zinc-900 font-medium"}`}
+                            className={`flex-shrink-0 px-4 py-1.5 text-xs md:text-sm rounded-lg capitalize transition-all whitespace-nowrap truncate ${filterWaktu === "bulanan" ? "bg-pink-100 text-pink-700 font-bold shadow-sm" : "text-zinc-600 hover:text-zinc-900 font-medium"}`}
                           >
                             Bulanan
                         </button>
@@ -1749,7 +1751,7 @@ function HalamanAdmin() {
                   </div>
 
                   {memuatAnalitik ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-zinc-500 gap-2">
+                    <div className="flex flex-col items-center justify-center py-20 text-zinc-600 gap-2">
                       <Loader2
                         className="animate-spin text-soft-pink-500"
                         size={32}
@@ -1800,7 +1802,7 @@ function HalamanAdmin() {
                     >
                       <Plus size={18} /> Tambah Produk Baru
                     </button>
-                    <button
+                    <button aria-label="Tambah produk"
                       onClick={() => setModeTambah(true)}
                       className="sm:hidden bg-soft-pink-600 hover:bg-soft-pink-700 text-white p-2.5 rounded-xl transition shadow-sm flex items-center justify-center"
                     >
@@ -1809,7 +1811,7 @@ function HalamanAdmin() {
                   </div>
                   <div className="rounded-2xl border border-pink-100 bg-white shadow-sm overflow-hidden mb-8">
                     {memuatProduk ? (
-                      <div className="flex flex-col items-center justify-center py-10 text-zinc-500 gap-2">
+                      <div className="flex flex-col items-center justify-center py-10 text-zinc-600 gap-2">
                         <Loader2
                           className="animate-spin text-soft-pink-500"
                           size={24}
@@ -1854,9 +1856,9 @@ function HalamanAdmin() {
                   <CircleDollarSign className="text-emerald-500" size={18} />{" "}
                   Kalkulator Profit
                 </h3>
-                <button
+                <button aria-label="Tutup kalkulator profit"
                   onClick={() => setBukaKalkulator(false)}
-                  className="text-zinc-400 hover:text-red-500 bg-zinc-50 rounded-full p-1.5 transition"
+                  className="text-zinc-600 hover:text-red-500 bg-zinc-50 rounded-full p-1.5 transition"
                 >
                   <X size={16} />
                 </button>
@@ -1883,7 +1885,7 @@ function HalamanAdmin() {
                     Total Pendapatan (Status Selesai)
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-sm font-bold text-zinc-400">
+                    <span className="absolute left-3 top-2.5 text-sm font-bold text-zinc-600">
                       Rp
                     </span>
                     <input
@@ -1899,7 +1901,7 @@ function HalamanAdmin() {
                     Total Pengeluaran / Modal
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-sm font-bold text-zinc-400">
+                    <span className="absolute left-3 top-2.5 text-sm font-bold text-zinc-600">
                       Rp
                     </span>
                     <input
@@ -1920,7 +1922,7 @@ function HalamanAdmin() {
                 <div
                   className={`p-4 rounded-xl mt-4 border ${profitKalkulator > 0 ? "bg-emerald-50 border-emerald-100" : profitKalkulator < 0 ? "bg-red-50 border-red-100" : "bg-zinc-50 border-zinc-200"}`}
                 >
-                  <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">
+                  <p className="text-xs font-bold text-zinc-600 uppercase tracking-widest mb-1">
                     Total Profit Margin
                   </p>
                   <p
@@ -1963,7 +1965,7 @@ function HalamanAdmin() {
                 className="relative flex flex-col items-center w-16 h-full"
               >
                 <div
-                  className={`absolute transition-all duration-300 ease-in-out flex items-center justify-center ${isActive ? "-top-5 h-14 w-14 bg-soft-pink-600 text-white rounded-full shadow-lg border-4 border-pink-50" : "top-2 h-8 w-8 text-zinc-400 hover:text-soft-pink-500"}`}
+                  className={`absolute transition-all duration-300 ease-in-out flex items-center justify-center ${isActive ? "-top-5 h-14 w-14 bg-soft-pink-600 text-white rounded-full shadow-lg border-4 border-pink-50" : "top-2 h-8 w-8 text-zinc-600 hover:text-soft-pink-500"}`}
                 >
                   <menu.ikon size={isActive ? 24 : 22} />
                   {menu.id === "pesanan" && pendingCount > 0 && (
@@ -1978,7 +1980,7 @@ function HalamanAdmin() {
                   )}
                 </div>
                 <span
-                  className={`absolute transition-all duration-300 font-bold ${isActive ? "bottom-1 text-[10px] text-soft-pink-600" : "bottom-1.5 text-[9px] text-zinc-500"}`}
+                  className={`absolute transition-all duration-300 font-bold ${isActive ? "bottom-1 text-[10px] text-soft-pink-600" : "bottom-1.5 text-[9px] text-zinc-600"}`}
                 >
                   {menu.label}
                 </span>

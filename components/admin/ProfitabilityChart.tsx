@@ -32,7 +32,7 @@ export default function ProfitabilityChart() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 text-zinc-500 gap-2">
+      <div className="flex flex-col items-center justify-center py-10 text-zinc-600 gap-2">
         <Loader2 className="animate-spin text-soft-pink-500" size={24} />
         <p className="text-sm">Menarik data Profitability...</p>
       </div>
@@ -46,12 +46,12 @@ export default function ProfitabilityChart() {
     <div className="rounded-2xl border border-pink-100 bg-white p-4 shadow-sm mt-6">
       <div className="mb-3">
         <h3 className="font-bold text-zinc-900 text-sm">Profitability (Margin Produk)</h3>
-        <p className="text-[10px] text-zinc-500">Margin Tertinggi (Harga Jual - HPP)</p>
+        <p className="text-[10px] text-zinc-600">Margin Tertinggi (Harga Jual - HPP)</p>
       </div>
       <div className="w-full">
         <div className="h-[180px]">
           {chartData.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-[10px] text-zinc-400 italic">
+            <div className="flex items-center justify-center h-full text-[10px] text-zinc-600 italic">
               Belum ada data penjualan selesai.
             </div>
           ) : (
@@ -102,17 +102,17 @@ export default function ProfitabilityChart() {
           <button
             onClick={() => setPage(page - 1)}
             disabled={page === 0}
-            className="p-1.5 rounded-lg text-zinc-500 hover:bg-zinc-100 disabled:opacity-30 disabled:pointer-events-none transition"
+            className="p-1.5 rounded-lg text-zinc-600 hover:bg-zinc-100 disabled:opacity-30 disabled:pointer-events-none transition"
           >
             <ChevronLeft size={16} />
           </button>
-          <span className="text-[10px] text-zinc-500 font-medium">
+          <span className="text-[10px] text-zinc-600 font-medium">
             Halaman {page + 1} dari {Math.ceil(sortedData.length / itemsPerPage)}
           </span>
           <button
             onClick={() => setPage(page + 1)}
             disabled={(page + 1) * itemsPerPage >= sortedData.length}
-            className="p-1.5 rounded-lg text-zinc-500 hover:bg-zinc-100 disabled:opacity-30 disabled:pointer-events-none transition"
+            className="p-1.5 rounded-lg text-zinc-600 hover:bg-zinc-100 disabled:opacity-30 disabled:pointer-events-none transition"
           >
             <ChevronRight size={16} />
           </button>

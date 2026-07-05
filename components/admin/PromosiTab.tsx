@@ -108,7 +108,7 @@ export default function PromosiTab() {
               </div>
 
               <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl mt-4">
-                <p className="text-[10px] font-bold text-zinc-500 mb-2 uppercase tracking-wider">Preview Pesan Email</p>
+                <p className="text-[10px] font-bold text-zinc-600 mb-2 uppercase tracking-wider">Preview Pesan Email</p>
                 <div className="text-sm text-zinc-800 whitespace-pre-wrap">
                   <span className="font-bold">Subjek: {judulPromo}</span>{"\n\n"}
                   {isiPesan}
@@ -142,26 +142,26 @@ export default function PromosiTab() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
                 <h3 className="font-bold text-zinc-900 text-lg">Pelanggan Setia</h3>
-                <p className="text-xs text-zinc-500 mt-1">Total {daftarPelanggan.length} pelanggan yang pernah order.</p>
+                <p className="text-xs text-zinc-600 mt-1">Total {daftarPelanggan.length} pelanggan yang pernah order.</p>
               </div>
             </div>
 
             {memuatData ? (
-              <div className="flex-1 flex flex-col items-center justify-center py-10 text-zinc-500 gap-2">
+              <div className="flex-1 flex flex-col items-center justify-center py-10 text-zinc-600 gap-2">
                 <Loader2 className="animate-spin text-soft-pink-500" size={24} />
                 <p className="text-sm font-medium">Menarik data dari database...</p>
               </div>
             ) : (
               <div className="flex-1">
                 {daftarPelanggan.length === 0 ? (
-                  <div className="text-center py-10 text-zinc-400 italic text-sm">Belum ada pelanggan dengan status Selesai.</div>
+                  <div className="text-center py-10 text-zinc-600 italic text-sm">Belum ada pelanggan dengan status Selesai.</div>
                 ) : (
                   <>
                     {/* Tampilan Desktop (Table) */}
                     <div className="hidden sm:block overflow-x-auto">
                       <table className="w-full text-left text-sm whitespace-nowrap">
                         <thead>
-                          <tr className="border-b border-pink-100 text-zinc-500">
+                          <tr className="border-b border-pink-100 text-zinc-600">
                             <th className="pb-3 font-semibold px-2">Nama</th>
                             <th className="pb-3 font-semibold px-2">Kontak</th>
                             <th className="pb-3 font-semibold px-2">Order Terakhir</th>
@@ -175,9 +175,9 @@ export default function PromosiTab() {
                               <td className="py-3 px-2 font-bold text-zinc-800">{p.nama}</td>
                               <td className="py-3 px-2 text-zinc-600">
                                 <div>{p.telepon}</div>
-                                <div className="text-xs text-zinc-400">{p.email || "-"}</div>
+                                <div className="text-xs text-zinc-600">{p.email || "-"}</div>
                               </td>
-                              <td className="py-3 px-2 text-zinc-500 text-xs">
+                              <td className="py-3 px-2 text-zinc-600 text-xs">
                                 {new Date(p.pesananTerakhir).toLocaleDateString("id-ID")}
                               </td>
                               <td className="py-3 px-2 font-bold text-soft-pink-600">
@@ -210,7 +210,7 @@ export default function PromosiTab() {
                           <div className="flex justify-between items-start mb-2">
                             <div>
                               <h4 className="font-bold text-zinc-800">{p.nama}</h4>
-                              <p className="text-xs text-zinc-500">{new Date(p.pesananTerakhir).toLocaleDateString("id-ID")}</p>
+                              <p className="text-xs text-zinc-600">{new Date(p.pesananTerakhir).toLocaleDateString("id-ID")}</p>
                             </div>
                             <span className="font-bold text-soft-pink-600 text-sm">{formatRupiah(p.totalBelanja)}</span>
                           </div>

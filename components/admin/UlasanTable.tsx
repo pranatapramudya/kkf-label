@@ -58,7 +58,7 @@ export default function UlasanTable() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-10 text-zinc-500 gap-2">
+      <div className="flex flex-col items-center justify-center py-10 text-zinc-600 gap-2">
         <Loader2 className="animate-spin text-soft-pink-500" size={24} />
         <p className="text-sm">Menarik data Ulasan Pelanggan...</p>
       </div>
@@ -71,13 +71,13 @@ export default function UlasanTable() {
         <div className="p-5 md:p-6 border-b border-pink-100 flex justify-between items-end">
           <div>
             <h3 className="font-bold text-zinc-900">Daftar Ulasan Pelanggan</h3>
-            <p className="text-xs text-zinc-500">Feedback langsung dari pembeli terverifikasi.</p>
+            <p className="text-xs text-zinc-600">Feedback langsung dari pembeli terverifikasi.</p>
           </div>
         </div>
         <div className="w-full pb-4 px-4 md:px-0">
           <table className="block w-full md:table text-left text-sm md:whitespace-nowrap">
             <thead className="hidden md:table-header-group">
-              <tr className="border-b border-pink-100 text-zinc-500">
+              <tr className="border-b border-pink-100 text-zinc-600">
                 <th className="pb-3 font-semibold px-4 pt-4">Pelanggan</th>
                 <th className="pb-3 font-semibold px-2 pt-4">Produk</th>
                 <th className="pb-3 font-semibold px-2 pt-4">Rating</th>
@@ -89,7 +89,7 @@ export default function UlasanTable() {
             <tbody className="block w-full md:table-row-group">
               {currentData.length === 0 ? (
                 <tr className="block w-full md:table-row">
-                  <td colSpan={6} className="block md:table-cell text-center py-8 text-zinc-400 font-medium">
+                  <td colSpan={6} className="block md:table-cell text-center py-8 text-zinc-600 font-medium">
                     Belum ada ulasan masuk.
                   </td>
                 </tr>
@@ -97,15 +97,15 @@ export default function UlasanTable() {
                 currentData.map((u) => (
                   <tr key={u.id} className="block w-full mb-4 border border-pink-100 rounded-xl p-4 shadow-sm md:table-row md:border-b md:border-pink-50 md:rounded-none md:p-0 md:shadow-none hover:bg-pink-50/30 transition-colors md:mb-0 last:border-0">
                     <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 md:px-4">
-                      <span className="md:hidden font-bold text-zinc-400">Pelanggan:</span>
+                      <span className="md:hidden font-bold text-zinc-600">Pelanggan:</span>
                       <p className="font-bold text-zinc-900">{u.namaReviewer}</p>
                     </td>
                     <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-right md:text-left">
-                      <span className="md:hidden font-bold text-zinc-400">Produk:</span>
+                      <span className="md:hidden font-bold text-zinc-600">Produk:</span>
                       <span className="text-zinc-600 font-medium whitespace-normal md:whitespace-nowrap truncate md:overflow-visible w-48 md:w-auto text-right md:text-left">{u.namaProduk}</span>
                     </td>
                     <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2">
-                      <span className="md:hidden font-bold text-zinc-400">Rating:</span>
+                      <span className="md:hidden font-bold text-zinc-600">Rating:</span>
                       <div className="flex text-amber-400">
                         {[...Array(5)].map((_, i) => (
                           <Star key={i} size={14} className={i < u.rating ? "fill-current" : "text-zinc-300"} />
@@ -113,7 +113,7 @@ export default function UlasanTable() {
                       </div>
                     </td>
                     <td className="flex flex-col md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-zinc-700 whitespace-normal min-w-[200px]">
-                      <span className="md:hidden font-bold text-zinc-400 mb-1">Komentar:</span>
+                      <span className="md:hidden font-bold text-zinc-600 mb-1">Komentar:</span>
                       <p>{u.comment}</p>
                       {u.adminReply && (
                         <div className="mt-2 bg-pink-50 p-2 rounded text-xs text-pink-700 border border-pink-100">
@@ -121,12 +121,12 @@ export default function UlasanTable() {
                         </div>
                       )}
                     </td>
-                    <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-xs text-zinc-500">
-                      <span className="md:hidden font-bold text-zinc-400">Tanggal:</span>
+                    <td className="flex justify-between items-center md:table-cell py-2 border-b border-pink-50 md:py-4 md:border-0 px-2 text-xs text-zinc-600">
+                      <span className="md:hidden font-bold text-zinc-600">Tanggal:</span>
                       <span>{new Date(u.dibuatPada).toLocaleDateString("id-ID")}</span>
                     </td>
                     <td className="flex justify-between items-center md:table-cell py-3 md:py-4 md:border-0 px-2 md:px-4 text-right">
-                      <span className="md:hidden font-bold text-zinc-400">Aksi:</span>
+                      <span className="md:hidden font-bold text-zinc-600">Aksi:</span>
                       <button
                         onClick={() => {
                           setSelectedReview(u);
@@ -145,7 +145,7 @@ export default function UlasanTable() {
         </div>
         {totalPages > 1 && (
           <div className="p-4 border-t border-pink-50 flex items-center justify-between bg-zinc-50/50">
-            <span className="text-sm text-zinc-500 font-medium">
+            <span className="text-sm text-zinc-600 font-medium">
               Halaman {currentPage} dari {totalPages}
             </span>
             <div className="flex gap-2">
@@ -173,13 +173,13 @@ export default function UlasanTable() {
           <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative animate-in zoom-in-95">
             <button
               onClick={() => setSelectedReview(null)}
-              className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-600 transition"
+              className="absolute top-4 right-4 text-zinc-600 hover:text-zinc-600 transition"
             >
               <X size={20} />
             </button>
             <h3 className="font-bold text-lg text-zinc-900 mb-4">Balas Ulasan Pelanggan</h3>
             <div className="mb-4 bg-zinc-50 p-3 rounded-xl border border-zinc-100">
-              <p className="text-xs text-zinc-500 mb-1">Komentar dari <span className="font-bold text-zinc-900">{selectedReview.namaReviewer}</span></p>
+              <p className="text-xs text-zinc-600 mb-1">Komentar dari <span className="font-bold text-zinc-900">{selectedReview.namaReviewer}</span></p>
               <p className="text-sm text-zinc-700">{selectedReview.comment}</p>
             </div>
             <div className="space-y-4">

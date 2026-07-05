@@ -40,6 +40,7 @@ KKF Label adalah platform e-commerce full-stack modern yang dibangun untuk menan
 - **Manajemen Pesanan:** Memproses pesanan dari status *Pending* (menunggu pembayaran/verifikasi bukti transfer) hingga *Selesai*, termasuk input nomor resi pengiriman.
 - **Analitik Dasbor:** Grafik interaktif performa penjualan bulanan, pantauan jumlah kunjungan produk, dan kalkulasi profitabilitas menggunakan Recharts.
 - **Sistem Penyiaran Notifikasi:** Modul khusus admin untuk memancarkan (*broadcast*) notifikasi *push* ke seluruh pelanggan via FCM.
+- **Optimasi Aksesibilitas (A11y) Penuh pada Dashboard Admin:** Aksesibilitas tingkat tinggi yang memastikan navigasi dan operasional dashboard ramah disabilitas.
 - **Security: Cloudflare Turnstile Anti-Bot & Rate Limiting:** Melindungi *endpoint* dari serangan spam bot menggunakan verifikasi *invisible* Turnstile di sisi klien dan perlindungan *rate limiting* in-memory di sisi server.
 
 ## 💻 Cara Menjalankan Proyek (Localhost)
