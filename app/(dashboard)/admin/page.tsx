@@ -2,17 +2,7 @@
 
 import useSWR from "swr";
 
-import {
-  LineChart,
-  Line,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+// Recharts removed, loaded dynamically via components
 import { uploadFotoProduk, uploadVideoProduk } from "@/lib/supabase";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -54,14 +44,15 @@ import { useSearchParams } from "next/navigation";
 import AdminNotification from "@/components/AdminNotification";
 import { Suspense } from "react";
 import { maskName } from "@/lib/masking";
-import TabelProduk from "./produk/TabelProduk";
-import PromosiTab from "@/components/admin/PromosiTab";
-import { useClerk, UserButton } from "@clerk/nextjs";
-import ProfitabilityChart from "@/components/admin/ProfitabilityChart";
-import RfmTable from "@/components/admin/RfmTable";
-import RingkasanAnalitik from "@/components/admin/RingkasanAnalitik";
+import dynamic from "next/dynamic";
 
-import UlasanTable from "@/components/admin/UlasanTable";
+const TabelProduk = dynamic(() => import("./produk/TabelProduk"), { ssr: false });
+const PromosiTab = dynamic(() => import("@/components/admin/PromosiTab"), { ssr: false });
+import { useClerk, UserButton } from "@clerk/nextjs";
+const ProfitabilityChart = dynamic(() => import("@/components/admin/ProfitabilityChart"), { ssr: false });
+const RfmTable = dynamic(() => import("@/components/admin/RfmTable"), { ssr: false });
+const RingkasanAnalitik = dynamic(() => import("@/components/admin/RingkasanAnalitik"), { ssr: false });
+const UlasanTable = dynamic(() => import("@/components/admin/UlasanTable"), { ssr: false });
 import ColorBadge from "@/components/ColorBadge";
 import { ekstrakWarnaGambar } from "@/lib/colorExtractor";
 import { compressImage } from "@/lib/imageCompressor";
@@ -1958,6 +1949,7 @@ function HalamanAdmin() {
             return (
               <button
                 key={menu.id}
+                aria-label={menu.label}
                 onClick={() => {
                   setTabAktif(menu.id);
                   setModeTambah(false);

@@ -45,61 +45,54 @@ export async function GET(request: Request) {
         ? { gte: tanggalMulai, lte: tanggalAkhir }
         : { gte: tanggalMulai };
 
-    const produkAktif = await prisma.product.count({ where: { aktif: true } });
-    const kategoriUnik = await prisma.category.findMany({
-      select: { nama: true },
-      distinct: ["nama"],
-    });
-    const daftarKategori = kategoriUnik.map((k) => k.nama);
-
-    let pesananReal: any[] = [];
-    try {
-      pesananReal = await prisma.order.findMany({
-        where: { dibuatPada: queryWaktu, statusPesanan: { not: "DIBATALKAN" } }, // Jangan hitung yang batal
+    const [
+      produkAktif,
+      kategoriUnik,
+      pesananReal,
+      items,
+      prods
+    ] = await Promise.all([
+      prisma.product.count({ where: { aktif: true } }).catch(() => 0),
+      prisma.category.findMany({ select: { nama: true }, distinct: ["nama"] }).catch(() => []),
+      prisma.order.findMany({
+        where: { dibuatPada: queryWaktu, statusPesanan: { not: "DIBATALKAN" } },
         select: { total: true, dibuatPada: true },
-      });
-    } catch (e) {
-      console.log("Belum ada data Order");
-    }
+      }).catch(() => {
+        console.log("Belum ada data Order");
+        return [];
+      }),
+      prisma.orderItem.groupBy({
+        by: ["produkId", "namaProduk"],
+        _sum: { jumlah: true },
+        orderBy: { _sum: { jumlah: "desc" } },
+        take: 5,
+      }).catch(() => []),
+      prisma.product.findMany({
+        orderBy: { viewCount: "desc" },
+        take: 5,
+        select: { nama: true, viewCount: true },
+      }).catch(() => [])
+    ]);
 
-    const totalPenjualan = pesananReal.reduce(
-      (sum, order) => sum + order.total,
-      0,
-    );
+    const daftarKategori = kategoriUnik.map((k: any) => k.nama);
+    const totalPenjualan = pesananReal.reduce((sum: number, order: any) => sum + order.total, 0);
     const pesananBaru = pesananReal.length;
 
-    // --- LOGIKA GRAFIK DINAMIS REAL-TIME ---
     let grafikPenjualan = [];
-
     if (isFilterTahun) {
-      // Grafik 12 Bulan (Januari - Desember)
       const mapBulan = new Map();
-      pesananReal.forEach((order) => {
-        const bulan = new Date(order.dibuatPada).getMonth(); // 0 = Jan, 1 = Feb
+      pesananReal.forEach((order: any) => {
+        const bulan = new Date(order.dibuatPada).getMonth();
         mapBulan.set(bulan, (mapBulan.get(bulan) || 0) + order.total);
       });
-      const namaBulan = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "Mei",
-        "Jun",
-        "Jul",
-        "Ags",
-        "Sep",
-        "Okt",
-        "Nov",
-        "Des",
-      ];
+      const namaBulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
       grafikPenjualan = namaBulan.map((nama, index) => ({
         hari: nama,
         total: mapBulan.get(index) || 0,
       }));
     } else if (isFilterBulan) {
-      // Grafik per tanggal dalam 1 bulan spesifik
       const mapTanggal = new Map();
-      pesananReal.forEach((order) => {
+      pesananReal.forEach((order: any) => {
         const tanggal = new Date(order.dibuatPada).getDate();
         mapTanggal.set(tanggal, (mapTanggal.get(tanggal) || 0) + order.total);
       });
@@ -111,10 +104,9 @@ export async function GET(request: Request) {
         total: mapTanggal.get(i + 1) || 0,
       }));
     } else {
-      // Grafik 7 Hari (Senin - Minggu)
       const mapHari = new Map();
-      pesananReal.forEach((order) => {
-        const hari = new Date(order.dibuatPada).getDay(); // 0 = Minggu, 1 = Senin
+      pesananReal.forEach((order: any) => {
+        const hari = new Date(order.dibuatPada).getDay();
         mapHari.set(hari, (mapHari.get(hari) || 0) + order.total);
       });
       grafikPenjualan = [
@@ -128,33 +120,15 @@ export async function GET(request: Request) {
       ];
     }
 
-    // Tarik Top Terjual & Dilihat
-    let topTerjual: any[] = [];
-    try {
-      const items = await prisma.orderItem.groupBy({
-        by: ["produkId", "namaProduk"],
-        _sum: { jumlah: true },
-        orderBy: { _sum: { jumlah: "desc" } },
-        take: 5,
-      });
-      topTerjual = items.map((item) => ({
-        nama: item.namaProduk,
-        jumlah: item._sum.jumlah || 0,
-      }));
-    } catch (e) {}
+    const topTerjual = items.map((item: any) => ({
+      nama: item.namaProduk,
+      jumlah: item._sum.jumlah || 0,
+    }));
 
-    let topDilihat: any[] = [];
-    try {
-      const prods = await prisma.product.findMany({
-        orderBy: { viewCount: "desc" },
-        take: 5,
-        select: { nama: true, viewCount: true },
-      });
-      topDilihat = prods.map((p) => ({
-        nama: p.nama,
-        jumlah: p.viewCount || 0,
-      }));
-    } catch (e) {}
+    const topDilihat = prods.map((p: any) => ({
+      nama: p.nama,
+      jumlah: p.viewCount || 0,
+    }));
 
     const dataResponse = {
       totalPenjualan,
