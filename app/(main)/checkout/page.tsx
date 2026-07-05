@@ -834,7 +834,7 @@ export default function HalamanCheckout() {
               <Turnstile 
                 siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"} 
                 onSuccess={(token) => setTurnstileToken(token)} 
-                options={{ appearance: 'invisible' }} 
+                options={{ appearance: 'interaction-only' }} 
               />
             </aside>
           </div>
