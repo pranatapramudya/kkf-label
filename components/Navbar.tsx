@@ -114,7 +114,7 @@ export function Navbar() {
           <nav className="md:hidden fixed bottom-0 inset-x-0 z-[90] bg-white border-t border-pink-100 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] pb-[env(safe-area-inset-bottom)] h-16">
             <div className="flex items-center justify-around h-full px-2">
               {navItems.map((item) => {
-                const isActive = activeNav === item.href;
+                const isActive = item.href === "/" ? pathname === "/" : activeNav === item.href;
 
                 return (
                   <Link

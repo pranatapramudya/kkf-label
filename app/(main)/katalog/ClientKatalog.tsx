@@ -6,6 +6,7 @@ import { ProdukKartu } from "@/components/ProdukKartu";
 export default function ClientKatalog({ semuaProduk }: { semuaProduk: any[] }) {
   const [kategoriAktif, setKategoriAktif] = useState<string | null>(null);
   const [halaman, setHalaman] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 10;
 
   const daftarKategori = [
@@ -23,8 +24,16 @@ export default function ClientKatalog({ semuaProduk }: { semuaProduk: any[] }) {
   const produkTampil = produkTampilFiltered.slice(0, halaman * itemsPerPage);
   const adaLebihBanyak = produkTampilFiltered.length > halaman * itemsPerPage;
 
+  const handleLoadMore = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setHalaman((prev) => prev + 1);
+      setIsLoading(false);
+    }, 400); // Simulasi delay singkat agar UX loading terlihat
+  };
+
   return (
-    <div className="kontainer-halaman py-6 md:py-10 min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="kontainer-halaman py-6 pb-32 md:py-10 md:pb-32 min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div className="mb-6 md:mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 mb-2">Katalog Produk</h1>
         <p className="text-sm md:text-base text-zinc-500">Temukan koleksi pilihan kami khusus untukmu.</p>
@@ -64,12 +73,13 @@ export default function ClientKatalog({ semuaProduk }: { semuaProduk: any[] }) {
       )}
 
       {adaLebihBanyak && (
-        <div className="mt-8 flex justify-center">
+        <div className="mt-10 flex justify-center pb-8 md:pb-0">
           <button
-            onClick={() => setHalaman((prev) => prev + 1)}
-            className="w-full md:w-auto px-6 py-3.5 bg-white border border-soft-pink-200 text-soft-pink-600 rounded-xl font-bold text-sm shadow-sm hover:bg-soft-pink-50 hover:border-soft-pink-300 transition-all active:scale-95"
+            onClick={handleLoadMore}
+            disabled={isLoading}
+            className="w-full md:w-auto px-8 py-3.5 bg-transparent border-2 border-soft-pink-300 text-soft-pink-600 rounded-xl font-bold text-sm shadow-sm hover:bg-soft-pink-50 hover:border-soft-pink-400 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-wait"
           >
-            Muat Lebih Banyak
+            {isLoading ? "Memuat..." : "Muat Lebih Banyak"}
           </button>
         </div>
       )}
