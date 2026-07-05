@@ -69,7 +69,7 @@ const DropdownPencarian = ({
         onClick={() => setBuka(!buka)}
         className={`flex w-full items-center justify-between border border-zinc-200 p-3 rounded-xl text-sm transition focus:border-soft-pink-500 focus:outline-none ${
           disabled
-            ? "bg-zinc-50 text-zinc-400 cursor-not-allowed"
+            ? "bg-zinc-50 text-zinc-500 cursor-not-allowed"
             : "bg-white text-zinc-900 hover:border-soft-pink-300"
         }`}
       >
@@ -78,7 +78,7 @@ const DropdownPencarian = ({
         </span>
         <ChevronDown
           size={16}
-          className={`transition-transform text-zinc-400 ${buka ? "rotate-180" : ""}`}
+          className={`transition-transform text-zinc-500 ${buka ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -91,7 +91,7 @@ const DropdownPencarian = ({
               placeholder="Cari ekspedisi..."
               value={kataKunci}
               onChange={(e) => setKataKunci(e.target.value)}
-              className="w-full bg-transparent text-sm focus:outline-none text-zinc-900 placeholder:text-zinc-400"
+              className="w-full bg-transparent text-sm focus:outline-none text-zinc-900 placeholder:text-zinc-500"
             />
           </div>
           <ul className="max-h-60 overflow-y-auto p-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-zinc-200 [&::-webkit-scrollbar-thumb]:rounded-full">
@@ -177,7 +177,7 @@ const AutocompleteAreaBiteship = ({ value, onChange }: { value: any, onChange: (
   return (
     <div ref={ref} className="relative w-full">
       <div className="flex items-center border border-zinc-200 rounded-xl p-3 bg-white focus-within:border-soft-pink-500 transition">
-        <Search size={16} className="text-zinc-400 shrink-0 mr-2" />
+        <Search size={16} className="text-zinc-500 shrink-0 mr-2" />
         <input
           type="text"
           placeholder="Cari kecamatan / kodepos (min 3 huruf)..."
@@ -206,7 +206,7 @@ const AutocompleteAreaBiteship = ({ value, onChange }: { value: any, onChange: (
                 className={`flex cursor-pointer flex-col rounded-lg p-2.5 transition-colors text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900`}
               >
                 <span className="text-sm font-semibold">{area.name}</span>
-                <span className="text-xs text-zinc-400">{area.administrative_division_level_1_name}</span>
+                <span className="text-xs text-zinc-500">{area.administrative_division_level_1_name}</span>
               </li>
             ))}
           </ul>
@@ -476,7 +476,7 @@ export default function HalamanCheckout() {
             </p>
 
             <div className="bg-zinc-50 border border-dashed border-zinc-200 rounded-2xl p-5 mb-8">
-              <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mb-1">
+              <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-1">
                 Nomor Invoice
               </p>
               <p className="text-xl font-black text-soft-pink-600 tracking-wider">
@@ -659,7 +659,8 @@ export default function HalamanCheckout() {
                             </p>
                             <button
                               onClick={() => hapusItem(item.idVarian)}
-                              className="grid h-8 w-8 place-items-center rounded-full text-zinc-400 hover:bg-red-50 hover:text-red-500 transition-colors shrink-0"
+                              className="grid h-[44px] w-[44px] place-items-center rounded-full text-zinc-500 hover:bg-red-50 hover:text-red-500 transition-colors shrink-0"
+                              aria-label="Hapus item"
                             >
                               <Trash2 size={16} />
                             </button>
@@ -672,7 +673,7 @@ export default function HalamanCheckout() {
                           <div className="flex flex-col">
                             {item.hargaCoret &&
                               Number(item.hargaCoret) > Number(item.harga) && (
-                                <span className="text-[10px] text-zinc-400 line-through">
+                                <span className="text-[10px] text-zinc-500 line-through">
                                   {formatRupiah(Number(item.hargaCoret))}
                                 </span>
                               )}
@@ -685,7 +686,8 @@ export default function HalamanCheckout() {
                               onClick={() =>
                                 ubahJumlah(item.idVarian, item.jumlah - 1)
                               }
-                              className="text-zinc-400 hover:text-soft-pink-600 transition-colors outline-none"
+                              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-500 hover:text-soft-pink-600 transition-colors outline-none"
+                              aria-label="Kurangi jumlah"
                             >
                               <Minus size={14} />
                             </button>
@@ -696,7 +698,8 @@ export default function HalamanCheckout() {
                               onClick={() =>
                                 ubahJumlah(item.idVarian, item.jumlah + 1)
                               }
-                              className="text-zinc-400 hover:text-soft-pink-600 transition-colors outline-none"
+                              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-500 hover:text-soft-pink-600 transition-colors outline-none"
+                              aria-label="Tambah jumlah"
                             >
                               <Plus size={14} />
                             </button>

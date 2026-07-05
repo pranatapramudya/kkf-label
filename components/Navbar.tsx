@@ -95,8 +95,9 @@ export function Navbar() {
           <div className="flex-1 flex justify-end items-center gap-2">
             <Link
               href="/checkout"
-              className="relative flex items-center justify-center h-10 w-10 bg-white border border-pink-200 rounded-full text-soft-pink-500 hover:bg-soft-pink-50 transition-all shadow-sm"
+              className="relative flex items-center justify-center min-h-[44px] min-w-[44px] bg-white border border-pink-200 rounded-full text-soft-pink-500 hover:bg-soft-pink-50 transition-all shadow-sm"
               onClick={cegahCheckoutKosong}
+              aria-label="Lihat Keranjang Belanja"
             >
               <ShoppingBag size={20} />
               {jumlahItem > 0 && (
@@ -127,7 +128,8 @@ export function Navbar() {
                       }
                       setActiveNav(item.href);
                     }}
-                    className="relative flex flex-col items-center justify-center gap-1 w-16 h-full"
+                    className="relative flex flex-col items-center justify-center gap-1 w-16 h-full min-h-[44px]"
+                    aria-label={`Navigasi ke ${item.name}`}
                   >
                     <div
                       className={`transition-all duration-300 ease-in-out flex items-center justify-center ${
