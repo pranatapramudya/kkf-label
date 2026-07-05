@@ -19,8 +19,9 @@ import {
 import { useKeranjang } from "@/context/CartContext";
 import { formatRupiah } from "@/lib/format";
 import ShareButton from "./ShareButton";
+import { ProdukKartu } from "@/components/ProdukKartu";
 
-export default function ClientProdukDetail({ produk }: { produk: any }) {
+export default function ClientProdukDetail({ produk, rekomendasi = [] }: { produk: any, rekomendasi?: any[] }) {
   const { tambahItem } = useKeranjang();
   const router = useRouter();
 
@@ -508,6 +509,21 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
           </section>
         </div>
       </div>
+
+      {/* REKOMENDASI PRODUK */}
+      {rekomendasi && rekomendasi.length > 0 && (
+        <section className="mt-12 md:mt-16 w-full pt-6 border-t border-zinc-100">
+          <div className="mb-6">
+            <h2 className="text-xl md:text-2xl font-bold text-zinc-900">Mungkin Anda Suka</h2>
+            <p className="text-sm text-zinc-500 mt-1">Pilihan produk terkait khusus untukmu.</p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+            {rekomendasi.map((prod) => (
+              <ProdukKartu key={prod.id} produk={prod} />
+            ))}
+          </div>
+        </section>
+      )}
 
       <div className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-zinc-200 p-3 px-4 flex items-center gap-3 z-[90] pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_30px_-10px_rgba(0,0,0,0.1)]">
         <button

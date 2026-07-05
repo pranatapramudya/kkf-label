@@ -70,6 +70,7 @@ export default async function HalamanDetailProduk({
       galeriFoto: true,
       stokTotal: true,
       videoUrl: true,
+      kategoriId: true,
       kategori: { select: { nama: true } },
       varian: {
         select: {
@@ -98,6 +99,53 @@ export default async function HalamanDetailProduk({
     notFound();
   }
 
-  // Lempar semua data dari server langsung ke Client Component yang tadi kita bikin
-  return <ClientProdukDetail produk={produkDb} />;
+  // ALGORITMA REKOMENDASI (Content-Based)
+  // 1. Ambil dari kategori yang sama
+  const rekomendasiKategori = await prisma.product.findMany({
+    where: {
+      aktif: true,
+      isArchived: false,
+      id: { not: produkDb.id },
+      kategoriId: produkDb.kategoriId,
+    },
+    take: 10,
+    orderBy: { dibuatPada: "desc" },
+    select: {
+      id: true,
+      nama: true,
+      harga: true,
+      hargaCoret: true,
+      diskonPersen: true,
+      fotoUtama: true,
+      kategori: { select: { nama: true } },
+    }
+  });
+
+  let rekomendasi = [...rekomendasiKategori];
+
+  // 2. Jika kurang dari 10, tambahkan dari kategori lain secara acak/terbaru
+  if (rekomendasi.length < 10) {
+    const idsToExclude = [produkDb.id, ...rekomendasi.map((p) => p.id)];
+    const tambahan = await prisma.product.findMany({
+      where: {
+        aktif: true,
+        isArchived: false,
+        id: { notIn: idsToExclude },
+      },
+      take: 10 - rekomendasi.length,
+      orderBy: { dibuatPada: "desc" },
+      select: {
+        id: true,
+        nama: true,
+        harga: true,
+        hargaCoret: true,
+        diskonPersen: true,
+        fotoUtama: true,
+        kategori: { select: { nama: true } },
+      }
+    });
+    rekomendasi = [...rekomendasi, ...tambahan];
+  }
+
+  return <ClientProdukDetail produk={produkDb} rekomendasi={rekomendasi} />;
 }
