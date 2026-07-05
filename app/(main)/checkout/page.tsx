@@ -830,6 +830,12 @@ export default function HalamanCheckout() {
                   {pesanPembayaran}
                 </p>
               )}
+              
+              <Turnstile 
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"} 
+                onSuccess={(token) => setTurnstileToken(token)} 
+                options={{ appearance: 'invisible' }} 
+              />
             </aside>
           </div>
         </div>
@@ -837,28 +843,23 @@ export default function HalamanCheckout() {
 
       {/* STICKY BOTTOM BAR BIKINAN SHOPEE */}
       {!modalSukses.show && (
-        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-zinc-200 p-4 z-50 flex flex-col md:flex-row justify-between md:items-center shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)] md:px-8 gap-4">
-          <div className="flex justify-between items-center w-full md:w-auto">
-            <div>
-              <span className="block text-xs font-bold text-zinc-500 mb-0.5">Total Tagihan</span>
-              <span className="text-xl font-black text-soft-pink-600">{formatRupiah(totalAkhir)}</span>
-            </div>
+        <div className="fixed bottom-0 left-0 w-full bg-white border-t border-zinc-200 p-4 z-50 flex justify-between items-center shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)] md:px-8">
+          <div>
+            <span className="block text-xs font-bold text-zinc-500 mb-0.5">Total Tagihan</span>
+            <span className="text-xl font-black text-soft-pink-600">{formatRupiah(totalAkhir)}</span>
           </div>
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <Turnstile siteKey="1x00000000000000000000AA" onSuccess={(token) => setTurnstileToken(token)} />
-            <button
-              onClick={buatPesanan}
-              disabled={sedangMembayar || itemKeranjang.length === 0 || !turnstileToken}
-              className="w-full sm:w-auto bg-soft-pink-600 hover:bg-soft-pink-700 text-white font-bold py-3 px-6 md:px-10 rounded-xl transition shadow-md flex items-center justify-center gap-2 disabled:bg-zinc-300 disabled:text-zinc-500 disabled:shadow-none min-w-[140px]"
-            >
-              {sedangMembayar ? (
-                <Loader2 size={18} className="animate-spin" />
-              ) : (
-                <CreditCard size={18} />
-              )}
-              {sedangMembayar ? "Memproses..." : "Bayar Sekarang"}
-            </button>
-          </div>
+          <button
+            onClick={buatPesanan}
+            disabled={sedangMembayar || itemKeranjang.length === 0 || !turnstileToken}
+            className="w-full sm:w-auto bg-soft-pink-600 hover:bg-soft-pink-700 text-white font-bold py-3 px-6 md:px-10 rounded-xl transition shadow-md flex items-center justify-center gap-2 disabled:bg-zinc-300 disabled:text-zinc-500 disabled:shadow-none min-w-[140px]"
+          >
+            {sedangMembayar ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <CreditCard size={18} />
+            )}
+            {sedangMembayar ? "Memproses..." : "Bayar Sekarang"}
+          </button>
         </div>
       )}
     </div>
