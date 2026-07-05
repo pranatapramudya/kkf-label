@@ -8,6 +8,7 @@ import { TestimonialSection } from "@/components/TestimonialSection";
 import { Katalog } from "@/components/Katalog";
 import { AutoRefresh } from "@/components/AutoRefresh"; // <--- Import komponen gaibnya
 import { ProductCarousel } from "@/components/ProductCarousel";
+import { RecentlyViewed } from "@/components/RecentlyViewed";
 
 const prisma = new PrismaClient();
 
@@ -144,6 +145,8 @@ export default async function HalamanUtama() {
           </div>
         </section>
       )}
+
+      <RecentlyViewed />
 
       <Katalog semuaProduk={semuaProdukLengkap} />
       <TestimonialSection />

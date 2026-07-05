@@ -31,11 +31,42 @@ export default function ClientProdukDetail({ produk, rekomendasi = [] }: { produ
     setIsMounted(true);
 
     if (produk?.id) {
+      // 1. Rekam view stat untuk analitik DB
       fetch("/api/produk/view", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: produk.id }),
       }).catch((err) => console.error("Gagal merekam view:", err));
+
+      // 2. Rekam histori produk terakhir dilihat ke LocalStorage (Nol Beban Database)
+      try {
+        const stored = localStorage.getItem("kkf_recently_viewed");
+        let recentViews = stored ? JSON.parse(stored) : [];
+        
+        // Buang duplikasi jika produk ini sudah ada di histori sebelumnya
+        recentViews = recentViews.filter((p: any) => p.id !== produk.id);
+        
+        // Tambahkan produk ini ke urutan paling awal
+        recentViews.unshift({
+          id: produk.id,
+          nama: produk.nama,
+          harga: produk.harga,
+          hargaCoret: produk.hargaCoret,
+          diskonPersen: produk.diskonPersen,
+          fotoUtama: produk.fotoUtama,
+          slug: produk.slug || produk.id,
+          kategori: produk.kategori
+        });
+        
+        // Batasi maksimal 10 produk
+        if (recentViews.length > 10) {
+          recentViews = recentViews.slice(0, 10);
+        }
+        
+        localStorage.setItem("kkf_recently_viewed", JSON.stringify(recentViews));
+      } catch (err) {
+        console.error("Gagal menyimpan recently viewed ke localStorage", err);
+      }
     }
 
     const autoRefreshSiluman = setInterval(() => {
@@ -43,7 +74,7 @@ export default function ClientProdukDetail({ produk, rekomendasi = [] }: { produ
     }, 15000);
 
     return () => clearInterval(autoRefreshSiluman);
-  }, [produk?.id, router]);
+  }, [produk?.id, produk?.nama, produk?.harga, produk?.hargaCoret, produk?.diskonPersen, produk?.fotoUtama, produk?.slug, produk?.kategori, router]);
 
   const mediaItems: { type: string; url: string }[] = [];
   if (produk.videoUrl && produk.videoUrl.trim() !== "") {
