@@ -26,6 +26,15 @@ const konfigurasi: Config = {
       },
       boxShadow: {
         lembut: "0 18px 50px rgba(244, 63, 116, 0.14)"
+      },
+      keyframes: {
+        marquee: {
+          "0%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(-50%)" }
+        }
+      },
+      animation: {
+        marquee: "marquee 0.1s linear infinite"
       }
     }
   },

@@ -64,6 +64,7 @@ import RingkasanAnalitik from "@/components/admin/RingkasanAnalitik";
 import UlasanTable from "@/components/admin/UlasanTable";
 import ColorBadge from "@/components/ColorBadge";
 import { ekstrakWarnaGambar } from "@/lib/colorExtractor";
+import { compressImage } from "@/lib/imageCompressor";
 
 // ==========================================
 // 🔥 KOMPONEN DROPDOWN MEWAH
@@ -503,10 +504,16 @@ function FormTambahProduk({
               required
               onChange={async (e) => {
                 if (e.target.files) {
-                  const files = Array.from(e.target.files);
-                  setFileFoto(files);
+                  const rawFiles = Array.from(e.target.files);
                   
-                  if (files.length > 0) {
+                  // Kompres semua gambar secara paralel
+                  const compressedFiles = await Promise.all(
+                    rawFiles.map(file => compressImage(file))
+                  );
+                  
+                  setFileFoto(compressedFiles);
+                  
+                  if (compressedFiles.length > 0) {
                     try {
                       const hex = await ekstrakWarnaGambar(files[0]);
                       const varianBaru = [...daftarVarian];

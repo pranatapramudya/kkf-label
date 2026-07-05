@@ -20,6 +20,7 @@ KKF Label adalah platform e-commerce full-stack modern yang dibangun untuk menan
 
 ### 🛒 Klien (Customer Storefront)
 - **Halaman Semua Katalog Khusus Mobile:** Menyajikan seluruh produk aktif dalam layout grid 2 kolom yang sangat responsif, dilengkapi sistem filter kategori dinamis dan fitur *Infinite Scroll/Pagination* (Load More per 10 produk) untuk navigasi yang ringan dan presisi di layar HP. Antarmuka telah disempurnakan dengan *Safe Area / Bottom Padding* khusus agar konten tidak tertutup elemen mengambang, serta perbaikan *state* presisi pada Bottom Navigation.
+- **Infinite Auto-Scroll Carousel:** Menyajikan galeri kategori produk di halaman Beranda dengan efek *seamless loop marquee* super ringan (murni CSS Tailwind tanpa *library* eksternal), lengkap dengan durasi dinamis yang proporsional dan interaksi *pause-on-hover*.
 - **Katalog & Variasi Produk:** Menampilkan detail produk lengkap dengan dukungan multi-varian (Warna, Ukuran) dan galeri foto. Sistem mendukung "Visual RGB Color Variants" untuk pengalaman UI yang lebih interaktif, termasuk rendering Visual RGB Color Badge pada halaman checkout, riwayat pesanan, dan cetak resi A6.
 - **Cross-Selling Recommendation:** Halaman Detail Produk dilengkapi dengan section "Mungkin Anda Suka" di bagian bawah yang secara cerdas merekomendasikan produk lain berdasarkan kategori serupa, guna meningkatkan retensi dan *conversion rate*.
 - **Sistem Keranjang Lokal:** Manajemen *shopping cart* yang cepat dan ringan menggunakan `localStorage` dan `React Context`.
@@ -31,6 +32,7 @@ KKF Label adalah platform e-commerce full-stack modern yang dibangun untuk menan
 - **Open Graph (OG) & Social Media Share Ready:** Mengintegrasikan metadata Open Graph untuk memunculkan *link preview* (gambar, judul, deskripsi) yang sempurna saat dibagikan ke WhatsApp dan media sosial lainnya. Tombol "Bagikan" dioptimasi agar selalu menyalin *Clean URL*.
 
 ### 🛡️ Admin Dashboard
+- **Auto-Compress Upload:** Gambar produk yang diunggah dikompresi otomatis secara *Client-Side* memanfaatkan HTML5 Canvas API (resize proporsional maksimal 1200px dan kualitas JPEG 70%) demi menghemat *bandwidth* server dan kapasitas Supabase Storage.
 - **Manajemen Produk (CRUD):** Kontrol penuh untuk tambah, edit, dan pengarsipan produk. Dilengkapi dengan "Client-Side Dominant Color Scanner" di mana admin dapat mengekstrak warna dominan (Hex) secara otomatis dari foto hanya dengan mengklik tombol "Scan Warna" pada setiap baris varian.
 - **Hybrid Delete System:** Proteksi integritas data dengan sistem penghapusan ganda (*Hard Delete* + Hapus gambar di Supabase untuk produk baru; *Soft Delete/isArchived* untuk produk yang memiliki riwayat transaksi).
 - **Manajemen Pesanan:** Memproses pesanan dari status *Pending* (menunggu pembayaran/verifikasi bukti transfer) hingga *Selesai*, termasuk input nomor resi pengiriman.

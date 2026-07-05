@@ -58,7 +58,7 @@ export function Katalog({ semuaProduk = [] }: { semuaProduk?: any[] }) {
         </div>
       ) : (
         <div className="mt-4">
-          <ProductCarousel products={produkTampil} />
+          <ProductCarousel products={produkTampil} autoPlay={true} />
         </div>
       )}
     </section>
