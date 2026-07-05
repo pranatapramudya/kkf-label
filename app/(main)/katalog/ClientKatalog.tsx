@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ProdukKartu } from "@/components/ProdukKartu";
 
@@ -12,6 +12,7 @@ export default function ClientKatalog({ semuaProduk }: { semuaProduk: any[] }) {
   const [kategoriAktif, setKategoriAktif] = useState<string | null>(null);
   const [halaman, setHalaman] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const itemsPerPage = 10;
 
   const daftarKategori = [
@@ -43,15 +44,16 @@ export default function ClientKatalog({ semuaProduk }: { semuaProduk: any[] }) {
     }, 400); // Simulasi delay singkat agar UX loading terlihat
   };
 
-  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    const params = new URLSearchParams(searchParams.toString());
-    if (val === "new") {
-      params.delete("sort");
-    } else {
-      params.set("sort", val);
-    }
-    router.push(`/katalog?${params.toString()}`);
+  const handleSortChange = (val: string) => {
+    startTransition(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (val === "new") {
+        params.delete("sort");
+      } else {
+        params.set("sort", val);
+      }
+      router.push(`/katalog?${params.toString()}`);
+    });
   };
 
   return (
@@ -61,18 +63,24 @@ export default function ClientKatalog({ semuaProduk }: { semuaProduk: any[] }) {
           <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 mb-2">Katalog Produk</h1>
           <p className="text-sm md:text-base text-zinc-500">Temukan koleksi pilihan kami khusus untukmu.</p>
         </div>
-        <div className="shrink-0">
-          <select
-            value={currentSort}
-            onChange={handleSortChange}
-            className="w-full md:w-auto px-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm font-semibold text-zinc-700 focus:outline-none focus:border-soft-pink-500 transition-colors cursor-pointer"
-          >
-            {daftarSort.map((sort) => (
-              <option key={sort.value} value={sort.value}>
-                Urutkan: {sort.label}
-              </option>
-            ))}
-          </select>
+        <div className="shrink-0 flex gap-2 overflow-x-auto w-full md:w-auto pb-2 scrollbar-hide">
+          {daftarSort.map((sort) => {
+            const isActive = currentSort === sort.value;
+            return (
+              <button
+                key={sort.value}
+                onClick={() => handleSortChange(sort.value)}
+                disabled={isPending}
+                className={`whitespace-nowrap px-4 py-2 rounded-full text-xs md:text-sm font-semibold transition-all shrink-0 ${
+                  isActive
+                    ? "bg-soft-pink-500 text-white shadow-md"
+                    : "bg-white text-zinc-600 border border-zinc-200 hover:border-soft-pink-300 hover:bg-soft-pink-50"
+                } ${isPending ? "opacity-70 cursor-wait" : ""}`}
+              >
+                {sort.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -102,7 +110,7 @@ export default function ClientKatalog({ semuaProduk }: { semuaProduk: any[] }) {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-4 lg:grid-cols-5">
+        <div className={`grid grid-cols-2 gap-3 md:gap-4 md:grid-cols-4 lg:grid-cols-5 transition-opacity duration-300 ${isPending ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
           {produkTampil.map((produk) => (
             <ProdukKartu key={produk.id} produk={produk} />
           ))}
