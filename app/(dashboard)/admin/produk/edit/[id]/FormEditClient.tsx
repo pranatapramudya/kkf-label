@@ -494,7 +494,7 @@ export default function FormEditClient({ produkAwal }: { produkAwal: any }) {
                       
                       if (compressedFiles.length > 0) {
                         try {
-                          const hex = await ekstrakWarnaGambar(files[0]);
+                          const hex = await ekstrakWarnaGambar(compressedFiles[0]);
                           const varianBaru = [...daftarVarian];
                           // Otomatis isi warna varian pertama jika kosong atau timpa saja untuk kemudahan
                           if (varianBaru.length > 0) {
