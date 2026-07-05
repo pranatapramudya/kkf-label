@@ -75,13 +75,13 @@ export async function GET(request: Request) {
     ]);
 
     const daftarKategori = kategoriUnik.map((k: any) => k.nama);
-    const totalPenjualan = pesananReal.reduce<number>((sum, order: any) => sum + (Number(order.total) || 0), 0);
-    const pesananBaru = pesananReal.length;
+    const totalPenjualan = (pesananReal as any[]).reduce((sum: number, order: any) => sum + (Number(order.total) || 0), 0);
+    const pesananBaru = (pesananReal as any[]).length;
 
     let grafikPenjualan = [];
     if (isFilterTahun) {
       const mapBulan = new Map();
-      pesananReal.forEach((order: any) => {
+      (pesananReal as any[]).forEach((order: any) => {
         const bulan = new Date(order.dibuatPada).getMonth();
         mapBulan.set(bulan, (mapBulan.get(bulan) || 0) + order.total);
       });
@@ -92,7 +92,7 @@ export async function GET(request: Request) {
       }));
     } else if (isFilterBulan) {
       const mapTanggal = new Map();
-      pesananReal.forEach((order: any) => {
+      (pesananReal as any[]).forEach((order: any) => {
         const tanggal = new Date(order.dibuatPada).getDate();
         mapTanggal.set(tanggal, (mapTanggal.get(tanggal) || 0) + order.total);
       });
@@ -105,7 +105,7 @@ export async function GET(request: Request) {
       }));
     } else {
       const mapHari = new Map();
-      pesananReal.forEach((order: any) => {
+      (pesananReal as any[]).forEach((order: any) => {
         const hari = new Date(order.dibuatPada).getDay();
         mapHari.set(hari, (mapHari.get(hari) || 0) + order.total);
       });
@@ -120,12 +120,12 @@ export async function GET(request: Request) {
       ];
     }
 
-    const topTerjual = items.map((item: any) => ({
+    const topTerjual = (items as any[]).map((item: any) => ({
       nama: item.namaProduk,
       jumlah: item._sum.jumlah || 0,
     }));
 
-    const topDilihat = prods.map((p: any) => ({
+    const topDilihat = (prods as any[]).map((p: any) => ({
       nama: p.nama,
       jumlah: p.viewCount || 0,
     }));
