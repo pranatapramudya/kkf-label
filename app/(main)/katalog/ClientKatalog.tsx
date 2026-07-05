@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ProdukKartu } from "@/components/ProdukKartu";
+import { ChevronDown, Check } from "lucide-react";
 
 export default function ClientKatalog({ semuaProduk }: { semuaProduk: any[] }) {
   const router = useRouter();
@@ -13,6 +14,19 @@ export default function ClientKatalog({ semuaProduk }: { semuaProduk: any[] }) {
   const [halaman, setHalaman] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const itemsPerPage = 10;
 
   const daftarKategori = [
@@ -45,6 +59,7 @@ export default function ClientKatalog({ semuaProduk }: { semuaProduk: any[] }) {
   };
 
   const handleSortChange = (val: string) => {
+    setIsDropdownOpen(false);
     startTransition(() => {
       const params = new URLSearchParams(searchParams.toString());
       if (val === "new") {
@@ -63,24 +78,39 @@ export default function ClientKatalog({ semuaProduk }: { semuaProduk: any[] }) {
           <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 mb-2">Katalog Produk</h1>
           <p className="text-sm md:text-base text-zinc-500">Temukan koleksi pilihan kami khusus untukmu.</p>
         </div>
-        <div className="shrink-0 flex gap-2 overflow-x-auto w-full md:w-auto pb-2 scrollbar-hide">
-          {daftarSort.map((sort) => {
-            const isActive = currentSort === sort.value;
-            return (
-              <button
-                key={sort.value}
-                onClick={() => handleSortChange(sort.value)}
-                disabled={isPending}
-                className={`whitespace-nowrap px-4 py-2 rounded-full text-xs md:text-sm font-semibold transition-all shrink-0 ${
-                  isActive
-                    ? "bg-soft-pink-500 text-white shadow-md"
-                    : "bg-white text-zinc-600 border border-zinc-200 hover:border-soft-pink-300 hover:bg-soft-pink-50"
-                } ${isPending ? "opacity-70 cursor-wait" : ""}`}
-              >
-                {sort.label}
-              </button>
-            );
-          })}
+        <div className="relative shrink-0 w-full md:w-auto z-20" ref={dropdownRef}>
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center justify-between md:justify-center w-full md:w-auto gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors shadow-sm"
+          >
+            <span className="flex items-center gap-2">
+              Urutkan
+              {currentSort !== "new" && (
+                <span className="w-2 h-2 rounded-full bg-soft-pink-500"></span>
+              )}
+            </span>
+            <ChevronDown className={`w-4 h-4 text-zinc-500 transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+          </button>
+          
+          {isDropdownOpen && (
+            <div className="absolute top-full mt-2 right-0 w-full md:w-56 bg-white border border-zinc-100 rounded-xl shadow-lg overflow-hidden flex flex-col py-1 animate-in fade-in slide-in-from-top-2">
+              {daftarSort.map((sort) => {
+                const isActive = currentSort === sort.value;
+                return (
+                  <button
+                    key={sort.value}
+                    onClick={() => handleSortChange(sort.value)}
+                    className={`flex items-center justify-between w-full text-left px-4 py-3 md:py-2 text-sm transition-colors ${
+                      isActive ? "bg-soft-pink-50 text-soft-pink-600 font-semibold" : "text-zinc-600 hover:bg-zinc-50"
+                    }`}
+                  >
+                    {sort.label}
+                    {isActive && <Check className="w-4 h-4 text-soft-pink-500" />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
