@@ -1,5 +1,6 @@
 export const revalidate = 60;
 
+import Link from "next/link";
 import { ArrowRight, Heart, ShieldCheck, Truck } from "lucide-react";
 import { PrismaClient } from "@prisma/client";
 import { ProdukKartu } from "@/components/ProdukKartu";
@@ -68,10 +69,10 @@ export default async function HalamanUtama() {
               potongan bersih, serta pengalaman belanja yang nyaman dari HP.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <a href="#katalog" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-pink-600 text-white font-semibold px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition-all">
-                Lihat Katalog
+              <Link href="/katalog" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-pink-600 text-white font-semibold px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition-all">
+                Semua Katalog
                 <ArrowRight size={18} />
-              </a>
+              </Link>
               {topProducts && topProducts.length > 0 && (
                 <a
                   href="#pilihan-disukai"

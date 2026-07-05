@@ -393,9 +393,9 @@ function FormTambahProduk({
             {daftarVarian.map((item, index) => (
               <div
                 key={index}
-                className="flex items-end gap-3 rounded-xl bg-white p-4 shadow-sm border border-zinc-100"
+                className="flex flex-col md:flex-row items-start md:items-end gap-3 rounded-xl bg-white p-4 shadow-sm border border-zinc-100"
               >
-                <div className="flex-1">
+                <div className="w-full md:flex-1">
                   <label className="block text-xs font-bold text-zinc-600 mb-1">
                     Ukuran
                   </label>
@@ -410,7 +410,7 @@ function FormTambahProduk({
                     placeholder="S, M, L"
                   />
                 </div>
-                <div className="flex-1">
+                  <div className="w-full md:flex-1">
                   <label className="block text-xs font-bold text-zinc-600 mb-1">
                     Warna (RGB/Hex)
                   </label>
@@ -461,7 +461,7 @@ function FormTambahProduk({
                     />
                   </div>
                 </div>
-                <div className="w-24">
+                <div className="w-full md:w-24">
                   <label className="block text-xs font-bold text-zinc-600 mb-1">
                     Stok
                   </label>
@@ -481,7 +481,7 @@ function FormTambahProduk({
                   <button
                     type="button"
                     onClick={() => hapusBarisVarian(index)}
-                    className="h-[42px] w-[42px] flex items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition"
+                    className="w-full md:w-[42px] h-[42px] flex items-center justify-center rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition mt-2 md:mt-0"
                   >
                     <Trash2 size={18} />
                   </button>

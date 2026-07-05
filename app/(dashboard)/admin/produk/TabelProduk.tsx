@@ -109,7 +109,7 @@ export default function TabelProduk({ dataProduk }: { dataProduk: any[] }) {
 
               {/* Header Kartu: Judul & Deskripsi */}
               <div className="pr-10">
-                <h3 className="font-bold text-zinc-900 text-base leading-tight">
+                <h3 className="font-bold text-zinc-900 text-base leading-tight line-clamp-2">
                   {item.nama}
                 </h3>
                 <p className="text-xs text-zinc-400 mt-1 line-clamp-1">
@@ -118,7 +118,7 @@ export default function TabelProduk({ dataProduk }: { dataProduk: any[] }) {
               </div>
 
               {/* Info Box: Harga & Stok (Lebih Lega) */}
-              <div className="flex justify-between items-center bg-zinc-50 p-3.5 rounded-xl border border-zinc-100">
+              <div className="flex flex-wrap justify-between items-center gap-3 bg-zinc-50 p-3.5 rounded-xl border border-zinc-100">
                 <div>
                   <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
                     Harga
@@ -131,7 +131,7 @@ export default function TabelProduk({ dataProduk }: { dataProduk: any[] }) {
                   <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
                     Stok & Kategori
                   </p>
-                  <div className="flex items-center justify-end gap-2">
+                  <div className="flex flex-wrap items-center justify-end gap-2">
                     <span className="font-bold text-emerald-600 text-sm">
                       {item.varian?.reduce(
                         (tot: number, v: any) => tot + v.stok,
@@ -139,7 +139,7 @@ export default function TabelProduk({ dataProduk }: { dataProduk: any[] }) {
                       ) ?? 0}{" "}
                       Pcs
                     </span>
-                    <span className="bg-pink-100 text-soft-pink-700 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase">
+                    <span className="bg-pink-100 text-soft-pink-700 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase whitespace-nowrap">
                       {item.kategori?.nama || "Umum"}
                     </span>
                   </div>

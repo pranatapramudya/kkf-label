@@ -371,14 +371,23 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                           : "border-zinc-200 text-zinc-600 hover:border-soft-pink-300 hover:bg-zinc-50"
                       }`}
                     >
-                      <span className="w-full truncate flex items-center gap-1.5">
-                        {v.ukuran} 
+                      <div className="w-full flex items-center gap-3">
                         {v.warna?.startsWith('#') || v.warna?.startsWith('rgb') ? (
-                          <span className="w-3.5 h-3.5 rounded-full inline-block shadow-sm border border-black/10" style={{ backgroundColor: v.warna }} title={v.warna} />
-                        ) : (
-                          <span>&middot; {v.warna}</span>
-                        )}
-                      </span>
+                          <div 
+                            className="w-8 h-8 rounded-full shadow-sm border border-zinc-200 shrink-0" 
+                            style={{ backgroundColor: v.warna }} 
+                            title={v.warna}
+                          />
+                        ) : null}
+                        <div className="flex flex-col truncate">
+                          <span className="truncate">
+                            {v.ukuran} {(!v.warna?.startsWith('#') && !v.warna?.startsWith('rgb')) ? `- ${v.warna}` : ''}
+                          </span>
+                          {varianAktif?.id === v.id && (v.warna?.startsWith('#') || v.warna?.startsWith('rgb')) && (
+                            <span className="text-[10px] text-soft-pink-600 font-normal truncate mt-0.5">Warna: {v.warna}</span>
+                          )}
+                        </div>
+                      </div>
                       <span
                         className={`text-[10px] mt-1 ${varianAktif?.id === v.id ? "font-bold" : "font-normal opacity-70"}`}
                       >
@@ -587,11 +596,18 @@ export default function ClientProdukDetail({ produk }: { produk: any }) {
                             : "border-zinc-200 text-zinc-600 hover:bg-zinc-50"
                         }`}
                       >
-                        {v.ukuran}
                         {v.warna?.startsWith('#') || v.warna?.startsWith('rgb') ? (
-                          <span className="w-3.5 h-3.5 rounded-full inline-block shadow-sm border border-black/10" style={{ backgroundColor: v.warna }} title={v.warna} />
+                          <div className="flex items-center gap-2">
+                            <span className="w-8 h-8 rounded-full shadow-sm border border-zinc-200 shrink-0" style={{ backgroundColor: v.warna }} title={v.warna} />
+                            <div className="flex flex-col items-start">
+                              <span>{v.ukuran}</span>
+                              {varianAktif?.id === v.id && (
+                                <span className="text-[10px] text-soft-pink-600 font-normal leading-none mt-1">Warna: {v.warna}</span>
+                              )}
+                            </div>
+                          </div>
                         ) : (
-                          <span>- {v.warna}</span>
+                          <span>{v.ukuran} - {v.warna}</span>
                         )}
                       </button>
                     ))}

@@ -25,7 +25,7 @@ export function ProdukKartu({ produk, priority = false }: { produk: any, priorit
     <Link
       href={`/produk/${produk.id}`}
       prefetch={true}
-      className="group block overflow-hidden rounded-2xl border border-pink-50 bg-white shadow-sm transition hover:shadow-md relative"
+      className="group flex flex-col h-full overflow-hidden rounded-2xl border border-pink-50 bg-white shadow-sm transition hover:shadow-md relative"
     >
       {/* LABEL DISKON (Muncul otomatis kalau ada diskon) */}
       {adaDiskon && (
@@ -56,25 +56,25 @@ export function ProdukKartu({ produk, priority = false }: { produk: any, priorit
       </div>
 
       {/* INFO PRODUK */}
-      <div className="p-4 sm:p-5">
-        <p className="text-xs font-bold uppercase tracking-wider text-soft-pink-500 mb-1">
+      <div className="p-3 sm:p-5 flex-1 flex flex-col">
+        <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-soft-pink-500 mb-1 truncate">
           {produk.kategori?.nama || "KATEGORI"}
         </p>
-        <h3 className="text-sm font-semibold text-zinc-900 mb-2 truncate">
+        <h3 className="text-xs sm:text-sm font-semibold text-zinc-900 mb-1.5 line-clamp-2 leading-tight">
           {produk.nama}
         </h3>
 
-        <div className="flex items-end gap-2">
+        <div className="flex flex-col items-start mt-auto pt-1">
+          {/* Harga Coret (Muncul kalau ada diskon) */}
+          {adaDiskon && (
+            <p className="text-[10px] text-zinc-400 line-through mb-0.5">
+              Rp {hargaAsli.toLocaleString("id-ID")}
+            </p>
+          )}
           {/* Harga Final */}
           <p className="text-sm font-bold text-zinc-800">
             Rp {hargaAkhir.toLocaleString("id-ID")}
           </p>
-          {/* Harga Coret (Muncul kalau ada diskon) */}
-          {adaDiskon && (
-            <p className="text-xs text-gray-400 line-through mb-0.5">
-              Rp {hargaAsli.toLocaleString("id-ID")}
-            </p>
-          )}
         </div>
       </div>
     </Link>
