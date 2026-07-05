@@ -75,7 +75,7 @@ export async function GET(request: Request) {
     ]);
 
     const daftarKategori = kategoriUnik.map((k: any) => k.nama);
-    const totalPenjualan = pesananReal.reduce((sum: number, order: any) => sum + order.total, 0);
+    const totalPenjualan = pesananReal.reduce<number>((sum, order: any) => sum + (Number(order.total) || 0), 0);
     const pesananBaru = pesananReal.length;
 
     let grafikPenjualan = [];
