@@ -10,6 +10,7 @@ import { Katalog } from "@/components/Katalog";
 import { AutoRefresh } from "@/components/AutoRefresh"; // <--- Import komponen gaibnya
 import { ProductCarousel } from "@/components/ProductCarousel";
 import { RecentlyViewed } from "@/components/RecentlyViewed";
+import OutfitRecommendationButton from "@/components/OutfitRecommendationButton";
 
 const prisma = new PrismaClient();
 
@@ -90,7 +91,7 @@ export default async function HalamanUtama() {
                 <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center group-hover:bg-pink-50 group-hover:scale-105 transition-all shadow-md border border-pink-100">
                   <Image src="/icons/icon-cart.png" alt="Semua Produk" width={40} height={40} className="object-contain" />
                 </div>
-                <span className="text-[10px] font-bold text-black text-center uppercase tracking-wide">
+                <span className="text-[10px] font-bold text-black text-center uppercase tracking-wide max-w-[80px] leading-tight">
                   Semua Produk
                 </span>
               </Link>
@@ -100,11 +101,14 @@ export default async function HalamanUtama() {
                   <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center group-hover:bg-pink-50 group-hover:scale-105 transition-all shadow-md border border-pink-100">
                     <Image src="/icons/icon-new.png" alt="Paling Disukai" width={40} height={40} className="object-contain" />
                   </div>
-                  <span className="text-[10px] font-bold text-black text-center uppercase tracking-wide">
+                  <span className="text-[10px] font-bold text-black text-center uppercase tracking-wide max-w-[80px] leading-tight">
                     Paling Disukai
                   </span>
                 </a>
               )}
+              
+              {/* Tombol Rekomendasi Outfit dengan Alert Custom */}
+              <OutfitRecommendationButton />
             </div>
           </div>
 
