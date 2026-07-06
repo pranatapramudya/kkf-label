@@ -1,6 +1,7 @@
 export const revalidate = 60;
 
 import Link from "next/link";
+import Image from "next/image";
 import { LayoutGrid, Heart, ShieldCheck, Truck } from "lucide-react";
 import { PrismaClient } from "@prisma/client";
 import { ProdukKartu } from "@/components/ProdukKartu";
@@ -69,8 +70,8 @@ export default async function HalamanUtama() {
             {/* Modern Icon Grid Menu */}
             <div className="mt-6 flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
               <Link href="/katalog" className="flex flex-col items-center gap-2 group min-w-[80px]">
-                <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-pink-600 group-hover:bg-pink-50 group-hover:scale-105 transition-all shadow-md border border-pink-100">
-                  <LayoutGrid size={24} strokeWidth={2.5} />
+                <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center group-hover:bg-pink-50 group-hover:scale-105 transition-all shadow-md border border-pink-100">
+                  <Image src="/icons/icon-cart.png" alt="Semua Produk" width={40} height={40} className="object-contain" />
                 </div>
                 <span className="text-[10px] font-bold text-black text-center uppercase tracking-wide">
                   Semua Produk
@@ -79,8 +80,8 @@ export default async function HalamanUtama() {
               
               {topProducts && topProducts.length > 0 && (
                 <a href="#pilihan-disukai" className="flex flex-col items-center gap-2 group min-w-[80px]">
-                  <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-pink-600 group-hover:bg-pink-50 group-hover:scale-105 transition-all shadow-md border border-pink-100">
-                    <Heart size={24} strokeWidth={2.5} />
+                  <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center group-hover:bg-pink-50 group-hover:scale-105 transition-all shadow-md border border-pink-100">
+                    <Image src="/icons/icon-new.png" alt="Paling Disukai" width={40} height={40} className="object-contain" />
                   </div>
                   <span className="text-[10px] font-bold text-black text-center uppercase tracking-wide">
                     Paling Disukai
