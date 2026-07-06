@@ -59,7 +59,7 @@ export default async function HalamanUtama() {
 
       <section className="kontainer-halaman pt-2">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div className="pb-4">
+          <div className="bg-gradient-to-b from-pink-200 via-pink-100 to-white pt-4 pb-8 px-4 mt-2 rounded-[2rem] shadow-sm sm:px-8 sm:rounded-3xl mb-6 lg:mb-0">
             <p className="inline-flex rounded-full bg-white px-4 py-2 text-xs font-semibold text-soft-pink-600 shadow-sm">
               Koleksi terbaru 2026
             </p>
@@ -68,7 +68,7 @@ export default async function HalamanUtama() {
             </h1>
             
             {/* Modern Icon Grid Menu */}
-            <div className="mt-6 flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="mt-6 flex items-center justify-around bg-white/70 backdrop-blur-md border border-white/50 shadow-sm rounded-2xl p-5 w-full">
               <Link href="/katalog" className="flex flex-col items-center gap-2 group min-w-[80px]">
                 <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center group-hover:bg-pink-50 group-hover:scale-105 transition-all shadow-md border border-pink-100">
                   <Image src="/icons/icon-cart.png" alt="Semua Produk" width={40} height={40} className="object-contain" />

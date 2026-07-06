@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { ProductCarousel } from "./ProductCarousel";
+import { ChevronDown } from "lucide-react";
 
 export function Katalog({ semuaProduk = [] }: { semuaProduk?: any[] }) {
   const [kategoriAktif, setKategoriAktif] = useState("Semua");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const daftarKategori = [
     "Semua",
@@ -33,7 +35,40 @@ export function Katalog({ semuaProduk = [] }: { semuaProduk?: any[] }) {
           </h2>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        {/* Dropdown untuk Mobile */}
+        <div className="relative w-fit md:hidden">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="flex items-center justify-between gap-2 bg-white border border-gray-200 text-gray-800 text-sm font-medium py-2 px-4 rounded-full shadow-sm"
+          >
+            <span>{kategoriAktif}</span>
+            <ChevronDown size={16} className={`transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+          </button>
+          
+          {isDropdownOpen && (
+            <div className="absolute z-50 mt-2 w-48 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              {daftarKategori.map((kat: any) => (
+                <button
+                  key={kat}
+                  onClick={() => {
+                    setKategoriAktif(kat);
+                    setIsDropdownOpen(false);
+                  }}
+                  className={`w-full text-left px-4 py-3 text-sm transition-colors duration-150 font-medium ${
+                    kategoriAktif === kat
+                      ? "bg-pink-50 text-pink-600"
+                      : "text-gray-700 hover:bg-pink-50 hover:text-pink-600"
+                  }`}
+                >
+                  {kat}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Tombol Pills untuk Desktop */}
+        <div className="hidden md:flex flex-wrap gap-2">
           {daftarKategori.map((kat: any) => (
             <button
               key={kat}
