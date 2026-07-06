@@ -4,7 +4,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
-export function ProdukKartu({ produk, priority = false }: { produk: any, priority?: boolean }) {
+import { Star } from "lucide-react";
+
+export function ProdukKartu({ 
+  produk, 
+  priority = false,
+  averageRating: propAverageRating,
+  totalSold: propTotalSold
+}: { 
+  produk: any, 
+  priority?: boolean,
+  averageRating?: number,
+  totalSold?: number
+}) {
   // PENGAMAN FOTO: Kalau URL kurang dari 5 huruf (misal kosong/asal ketik), paksa pakai logo KKF
   const fotoValid =
     produk.fotoUtama && produk.fotoUtama.length > 5
@@ -20,6 +32,16 @@ export function ProdukKartu({ produk, priority = false }: { produk: any, priorit
   const hargaAkhir = adaDiskon
     ? hargaAsli - hargaAsli * (produk.diskonPersen / 100)
     : hargaAsli;
+
+  const totalSold = propTotalSold !== undefined 
+    ? propTotalSold 
+    : produk.itemPesanan?.reduce((acc: number, curr: any) => acc + curr.jumlah, 0);
+
+  const averageRating = propAverageRating !== undefined
+    ? propAverageRating
+    : produk.ulasan && produk.ulasan.length > 0
+      ? produk.ulasan.reduce((acc: number, curr: any) => acc + curr.rating, 0) / produk.ulasan.length
+      : undefined;
 
   return (
     <Link
@@ -63,6 +85,26 @@ export function ProdukKartu({ produk, priority = false }: { produk: any, priorit
         <h3 className="text-xs sm:text-sm font-semibold text-zinc-900 mb-1.5 line-clamp-2 leading-tight">
           {produk.nama}
         </h3>
+
+        {/* Dynamic Social Proof */}
+        {(averageRating !== undefined || totalSold !== undefined) && (
+          <div className="flex items-center gap-1.5 mb-2 text-[10px] sm:text-xs text-zinc-500 font-medium">
+            {averageRating !== undefined && averageRating > 0 && (
+              <div className="flex items-center gap-0.5">
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                <span>{averageRating.toFixed(1)}</span>
+              </div>
+            )}
+            
+            {averageRating !== undefined && averageRating > 0 && totalSold !== undefined && totalSold > 0 && (
+              <span className="text-zinc-300">|</span>
+            )}
+
+            {totalSold !== undefined && totalSold > 0 && (
+              <span>Terjual {totalSold >= 1000 ? `${(totalSold/1000).toFixed(1)}k+` : totalSold}</span>
+            )}
+          </div>
+        )}
 
         <div className="flex flex-col items-start mt-auto pt-1">
           {/* Harga Coret (Muncul kalau ada diskon) */}

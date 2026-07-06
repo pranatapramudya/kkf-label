@@ -30,6 +30,15 @@ export default async function HalamanKatalog({
       diskonPersen: true,
       fotoUtama: true,
       kategori: { select: { nama: true } },
+      ulasan: { select: { rating: true } },
+      itemPesanan: {
+        where: {
+          pesanan: {
+            statusPesanan: { in: ["DIBAYAR", "DIPROSES", "DIKIRIM", "SAMPAI", "SELESAI"] },
+          },
+        },
+        select: { jumlah: true },
+      },
     },
     orderBy,
   });

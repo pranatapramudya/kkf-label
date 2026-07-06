@@ -118,6 +118,15 @@ export default async function HalamanDetailProduk({
       diskonPersen: true,
       fotoUtama: true,
       kategori: { select: { nama: true } },
+      ulasan: { select: { rating: true } },
+      itemPesanan: {
+        where: {
+          pesanan: {
+            statusPesanan: { in: ["DIBAYAR", "DIPROSES", "DIKIRIM", "SAMPAI", "SELESAI"] },
+          },
+        },
+        select: { jumlah: true },
+      },
     }
   });
 
@@ -142,6 +151,15 @@ export default async function HalamanDetailProduk({
         diskonPersen: true,
         fotoUtama: true,
         kategori: { select: { nama: true } },
+        ulasan: { select: { rating: true } },
+        itemPesanan: {
+          where: {
+            pesanan: {
+              statusPesanan: { in: ["DIBAYAR", "DIPROSES", "DIKIRIM", "SAMPAI", "SELESAI"] },
+            },
+          },
+          select: { jumlah: true },
+        },
       }
     });
     rekomendasi = [...rekomendasi, ...tambahan];

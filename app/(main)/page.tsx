@@ -23,6 +23,15 @@ export default async function HalamanUtama() {
       diskonPersen: true,
       fotoUtama: true,
       kategori: { select: { nama: true } },
+      ulasan: { select: { rating: true } },
+      itemPesanan: {
+        where: {
+          pesanan: {
+            statusPesanan: { in: ["DIBAYAR", "DIPROSES", "DIKIRIM", "SAMPAI", "SELESAI"] },
+          },
+        },
+        select: { jumlah: true },
+      },
     },
     orderBy: { dibuatPada: "desc" },
     take: 2,
@@ -38,6 +47,14 @@ export default async function HalamanUtama() {
       fotoUtama: true,
       kategori: { select: { nama: true } },
       ulasan: { select: { rating: true } },
+      itemPesanan: {
+        where: {
+          pesanan: {
+            statusPesanan: { in: ["DIBAYAR", "DIPROSES", "DIKIRIM", "SAMPAI", "SELESAI"] },
+          },
+        },
+        select: { jumlah: true },
+      },
     },
     orderBy: { dibuatPada: "desc" },
     take: 20,
