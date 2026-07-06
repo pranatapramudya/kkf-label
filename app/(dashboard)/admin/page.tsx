@@ -1204,29 +1204,32 @@ function TabelPesanan({ tampilkanNotifikasi }: { tampilkanNotifikasi?: any }) {
                   <h3 className="text-2xl font-black text-black leading-none uppercase">
                     {selectedInvoice.ekspedisi || "STD"}
                   </h3>
-                  <p className="text-[10px] font-bold bg-black text-white px-2 py-0.5 inline-block mt-1">
-                    CASHLESS
-                  </p>
                 </div>
               </div>
 
               {/* 2. BARCODE AREA */}
               <div className="flex flex-col items-center justify-center border-b-2 border-black pb-2 mb-2">
-                <div className="w-full flex justify-center overflow-hidden scale-90 print:scale-100">
-                  <Barcode
-                    value={
-                      selectedInvoice.nomorResi || selectedInvoice.kodePesanan
-                    }
-                    height={45}
-                    width={1.8}
-                    displayValue={false}
-                    margin={0}
-                    background="#ffffff"
-                  />
-                </div>
-                <p className="text-sm font-black tracking-widest mt-1 uppercase">
-                  {selectedInvoice.nomorResi || "RESI MENYUSUL"}
-                </p>
+                {selectedInvoice.nomorResi ? (
+                  <>
+                    <div className="w-full flex justify-center overflow-hidden scale-90 print:scale-100">
+                      <Barcode
+                        value={selectedInvoice.nomorResi}
+                        height={45}
+                        width={1.8}
+                        displayValue={false}
+                        margin={0}
+                        background="#ffffff"
+                      />
+                    </div>
+                    <p className="text-sm font-black tracking-widest mt-1 uppercase">
+                      {selectedInvoice.nomorResi}
+                    </p>
+                  </>
+                ) : (
+                  <p className="text-sm font-black tracking-widest mt-1 uppercase">
+                    RESI MENYUSUL
+                  </p>
+                )}
               </div>
 
               {/* 3. ALAMAT PENERIMA & PENGIRIM */}
