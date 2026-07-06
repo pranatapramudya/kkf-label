@@ -1,7 +1,7 @@
 export const revalidate = 60;
 
 import Link from "next/link";
-import { ArrowRight, Heart, ShieldCheck, Truck } from "lucide-react";
+import { LayoutGrid, Heart, ShieldCheck, Truck } from "lucide-react";
 import { PrismaClient } from "@prisma/client";
 import { ProdukKartu } from "@/components/ProdukKartu";
 import { TestimonialSection } from "@/components/TestimonialSection";
@@ -52,34 +52,39 @@ export default async function HalamanUtama() {
     .slice(0, 5); // Ambil maksimal 5 teratas
 
   return (
-    <div>
+    <div className="pb-28">
       {/* Komponen gaib buat refresh background tiap menit */}
       <AutoRefresh />
 
-      <section className="kontainer-halaman pt-6">
+      <section className="kontainer-halaman pt-2">
         <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-          <div className="py-4">
+          <div className="pb-4">
             <p className="inline-flex rounded-full bg-white px-4 py-2 text-xs font-semibold text-soft-pink-600 shadow-sm">
               Koleksi terbaru 2026
             </p>
-            <h1 className="mt-5 max-w-xl text-4xl font-bold leading-tight text-zinc-900 sm:text-5xl">
+            <h1 className="mt-3 max-w-xl text-4xl font-bold leading-tight sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-pink-600 to-pink-300">
               Fashion wanita minimalis untuk hari yang terasa lembut.
             </h1>
-            <p className="mt-4 max-w-lg text-base leading-7 text-zinc-600">
-              Pilihan dress, blouse, outer, dan setelan dengan palet soft pink,
-              potongan bersih, serta pengalaman belanja yang nyaman dari HP.
-            </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Link href="/katalog" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-pink-600 text-white font-semibold px-8 py-3 rounded-xl shadow-md hover:shadow-lg transition-all">
-                Semua Katalog
-                <ArrowRight size={18} />
+            
+            {/* Modern Icon Grid Menu */}
+            <div className="mt-6 flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+              <Link href="/katalog" className="flex flex-col items-center gap-2 group min-w-[80px]">
+                <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-pink-600 group-hover:bg-pink-50 group-hover:scale-105 transition-all shadow-md border border-pink-100">
+                  <LayoutGrid size={24} strokeWidth={2.5} />
+                </div>
+                <span className="text-[10px] font-bold text-black text-center uppercase tracking-wide">
+                  Semua Produk
+                </span>
               </Link>
+              
               {topProducts && topProducts.length > 0 && (
-                <a
-                  href="#pilihan-disukai"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-pink-50 text-pink-600 font-semibold px-8 py-3 rounded-xl hover:bg-pink-100 transition-all"
-                >
-                  Pilihan Paling Disukai
+                <a href="#pilihan-disukai" className="flex flex-col items-center gap-2 group min-w-[80px]">
+                  <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center text-pink-600 group-hover:bg-pink-50 group-hover:scale-105 transition-all shadow-md border border-pink-100">
+                    <Heart size={24} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-[10px] font-bold text-black text-center uppercase tracking-wide">
+                    Paling Disukai
+                  </span>
                 </a>
               )}
             </div>

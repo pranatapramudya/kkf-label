@@ -73,15 +73,14 @@ export default function ClientKatalog({ semuaProduk }: { semuaProduk: any[] }) {
 
   return (
     <div className="kontainer-halaman py-6 pb-32 md:py-10 md:pb-32 min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="mb-6 md:mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <div className="mb-6 flex flex-row items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-zinc-900 mb-2">Katalog Produk</h1>
-          <p className="text-sm md:text-base text-zinc-500">Temukan koleksi pilihan kami khusus untukmu.</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-zinc-900">Katalog Produk</h1>
         </div>
-        <div className="relative shrink-0 w-full md:w-auto z-20" ref={dropdownRef}>
+        <div className="relative shrink-0 w-auto z-20" ref={dropdownRef}>
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center justify-between md:justify-center w-full md:w-auto gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition-colors shadow-sm"
+            className="flex items-center justify-center gap-2 px-4 py-1.5 bg-white border border-zinc-200 rounded-full text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors shadow-sm w-fit"
           >
             <span className="flex items-center gap-2">
               Urutkan
@@ -114,7 +113,7 @@ export default function ClientKatalog({ semuaProduk }: { semuaProduk: any[] }) {
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-3 mb-6 scrollbar-hide snap-x">
+      <div className="flex gap-2 overflow-x-auto pb-3 mb-6 snap-x [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {daftarKategori.map((kat: any) => (
           <button
             key={kat.label}

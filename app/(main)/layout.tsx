@@ -12,7 +12,7 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const hideFooter = pathname?.startsWith("/checkout") || pathname?.startsWith("/pembayaran");
+  const hideFooter = pathname?.startsWith("/checkout") || pathname?.startsWith("/pembayaran") || pathname === "/katalog";
 
   return (
     <>
