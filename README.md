@@ -86,4 +86,19 @@ KKF Label adalah platform e-commerce full-stack modern yang dibangun untuk menan
    Akses aplikasi secara lokal melalui browser di `http://localhost:3000`.
 
 ---
+
+## 🚀 Panduan Deployment & Transisi Production (Web & Mobile)
+
+Ketika platform KKF Label beralih dari fase **Development** ke **Production**, ada penyesuaian khusus yang sangat krusial, terutama pada sistem Autentikasi (Clerk) dan integrasi Mobile App (Capacitor):
+
+1. **Isolasi Database User (Clerk)**
+   Lingkungan Development dan Production di Clerk memiliki pangkalan data (database) *user* yang terisolasi total. Semua *user* yang terdaftar saat pengembangan tidak akan terbawa ke tahap *live*. Oleh karena itu, Admin **WAJIB melakukan registrasi ulang (Sign Up)** di domain production menggunakan email yang telah terdaftar dalam *Whitelist* (seperti `kkflabel@gmail.com`) agar dapat kembali mengakses menu `/admin`.
+2. **Environment Variables Vercel vs Localhost**
+   Kunci rahasia Production (`pk_live_...` & `sk_live_...`) dilarang diletakkan pada file `.env` lokal (localhost) untuk mencegah *error* atau penolakan akses oleh Clerk. Kunci Production ini harus murni diinjeksi melalui panel *Environment Variables* di dashboard Vercel.
+3. **Google OAuth Custom Credentials**
+   Fitur "Continue with Google" yang sebelumnya dipinjamkan oleh Clerk secara otomatis di mode pengembangan akan diblokir di Production. Sistem wajib diatur secara mandiri menggunakan kredensial kustom (*Client ID* & *Client Secret*) dari Google Cloud Console. Alternatif tercepatnya adalah menonaktifkan Social Login via Google dan hanya mengizinkan *Email/OTP Login* dari dashboard Clerk.
+4. **Konfigurasi Domain Capacitor (Android APK)**
+   Sistem APK Android dibangun menggunakan *WebView* (Capacitor) yang menembak langsung ke website *live*. Karena protokol keamanan ketat dari Clerk untuk memblokir cookie *third-party* dari domain tak dikenal, variabel `server.url` di dalam `capacitor.config.ts` **WAJIB** dikalibrasi agar menunjuk langsung ke domain otentik *Production* (contoh: `https://www.kkflabel.com/sign-in`), bukan domain turunan bawaan Vercel (`*.vercel.app`). Pembaruan URL ini juga mewajibkan *developer* menjalankan siklus `npx cap sync` dan melakukan re-kompilasi ulang berkas APK.
+
+---
 *Dikelola oleh Tim Pengembangan KKF Label.*
