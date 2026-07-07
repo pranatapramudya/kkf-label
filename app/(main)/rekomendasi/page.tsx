@@ -129,6 +129,27 @@ export default function RekomendasiOutfitPage() {
 
       {/* Input Area */}
       <div className="shrink-0 p-4 bg-white border-t w-full">
+        {/* Quick Reply Chips */}
+        {userMessageCount === 0 && !isRateLimited && (
+          <div 
+            className="flex gap-2 overflow-x-auto pb-3 mb-1 snap-x max-w-3xl mx-auto w-full"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {["Outfit santai buat ngopi", "Rekomendasi baju ngantor", "Baju elegan buat kondangan"].map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => {
+                  if (isLoading) return;
+                  sendMessage({ role: "user", parts: [{ type: "text", text: chip }] });
+                }}
+                className="shrink-0 snap-start bg-white text-pink-600 border border-pink-200 text-xs font-medium px-4 py-2 rounded-full hover:bg-pink-50 transition-colors shadow-sm whitespace-nowrap"
+              >
+                💡 {chip}
+              </button>
+            ))}
+          </div>
+        )}
         <form onSubmit={(e) => {
           handleSubmit(e);
         }} className="relative flex items-center max-w-3xl mx-auto w-full">
