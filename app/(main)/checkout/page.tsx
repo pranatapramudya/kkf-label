@@ -290,6 +290,7 @@ export default function HalamanCheckout() {
 
   const totalDiskon = subtotalKotor - subtotalBersih;
   const BIAYA_LAYANAN = 1000;
+  const totalKuantitas = itemKeranjang.reduce((acc: number, item: any) => acc + Number(item.jumlah), 0);
   const totalAkhir = subtotalBersih + (pilihanOngkir?.biaya ?? 0) + BIAYA_LAYANAN;
 
   const hitungOngkir = useCallback(async () => {
@@ -330,11 +331,20 @@ export default function HalamanCheckout() {
     } finally {
       setSedangMenghitung(false);
     }
-  }, [areaDipilih, ekspedisiDipilih, itemKeranjang.length]);
+  }, [areaDipilih, ekspedisiDipilih, itemKeranjang, totalKuantitas]);
 
   useEffect(() => {
-    hitungOngkir();
-  }, [hitungOngkir]);
+    if (areaDipilih && ekspedisiDipilih && itemKeranjang.length > 0) {
+      setSedangMenghitung(true);
+    }
+    const handler = setTimeout(() => {
+      hitungOngkir();
+    }, 800);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [hitungOngkir, areaDipilih, ekspedisiDipilih, totalKuantitas]);
 
   // 🔥 FUNGSI BAYAR SUPER CANGGIH 🔥
   async function buatPesanan() {
@@ -698,7 +708,8 @@ export default function HalamanCheckout() {
                               onClick={() =>
                                 ubahJumlah(item.idVarian, item.jumlah + 1)
                               }
-                              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-500 hover:text-soft-pink-600 transition-colors outline-none"
+                              disabled={item.jumlah >= item.stok}
+                              className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-zinc-500 hover:text-soft-pink-600 transition-colors outline-none disabled:opacity-30 disabled:cursor-not-allowed"
                               aria-label="Tambah jumlah"
                             >
                               <Plus size={14} />

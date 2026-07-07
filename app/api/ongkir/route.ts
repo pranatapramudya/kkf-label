@@ -57,15 +57,25 @@ export async function POST(permintaan: Request) {
 
     const originId = await getOriginAreaId(apiKey);
 
+    const resolvedItems = body.items && body.items.length > 0 ? body.items : defaultItems;
+
     const payload: any = {
       origin_area_id: originId,
       destination_area_id: body.areaIdTujuan,
       couriers: body.ekspedisi.toLowerCase(),
-      items: body.items && body.items.length > 0 ? body.items : defaultItems
+      items: resolvedItems
     };
 
     // FIX: Kurir Instant Gojek sering membutuhkan koordinat pasti agar tidak error "No courier available"
     if (payload.couriers === 'gojek') {
+      const totalBerat = resolvedItems.reduce((acc: number, item: any) => acc + (item.quantity * (item.weight || 250)), 0);
+      if (totalBerat > 20000) {
+        return NextResponse.json(
+          { pesan: "Pesanan terlalu berat untuk pengiriman Instan/Motor. Silakan gunakan ekspedisi reguler." },
+          { status: 400 }
+        );
+      }
+      
       // Hardcode default origin/dest koordinat untuk sementara jika belum dinamis
       payload.origin_latitude = -6.8398;
       payload.origin_longitude = 107.9405;

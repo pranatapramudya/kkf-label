@@ -16,6 +16,7 @@ export function Footer() {
     pathname.startsWith("/admin") ||
     pathname.startsWith("/produk/") ||
     pathname.startsWith("/akun") || // 👈 Ini yang bikin footer hilang di halaman detail!
+    pathname.startsWith("/rekomendasi") ||
     pathname === "/checkout" ||
     pathname === "/lacak-pesanan"
   ) {
@@ -28,19 +29,8 @@ export function Footer() {
       className="mt-16 border-t border-pink-100 bg-soft-pink-50/70"
     >
       <div className="kontainer-halaman grid gap-10 py-12 sm:grid-cols-1 md:grid-cols-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="grid h-10 w-10 place-items-center rounded-full bg-white text-soft-pink-500 shadow-sm">
-              <Sparkles size={18} />
-            </span>
-            <span className="text-lg font-semibold text-zinc-900">
-              kkf-label
-            </span>
-          </div>
-          <p className="mt-4 max-w-xs text-sm leading-6 text-zinc-600">
-            Fashion wanita minimalis dengan warna lembut, potongan bersih, dan
-            detail yang mudah dipakai setiap hari.
-          </p>
+        <div className="hidden md:block">
+          {/* Kolom kosong untuk menjaga layout grid 3 kolom jika diperlukan, atau bisa dihapus dan diubah jadi grid-cols-2 */}
         </div>
 
         <div>

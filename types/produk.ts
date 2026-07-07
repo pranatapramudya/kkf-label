@@ -29,6 +29,7 @@ export type ItemKeranjang = {
   warna: string;
   harga: number;
   jumlah: number;
+  stok: number;
 };
 
 export type Wilayah = {

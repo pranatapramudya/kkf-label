@@ -48,7 +48,7 @@ export function PenyediaKeranjang({ children }: { children: React.ReactNode }) {
 
       return itemSaatIni.map((item) =>
         item.idVarian === itemBaru.idVarian
-          ? { ...item, jumlah: item.jumlah + itemBaru.jumlah }
+          ? { ...item, jumlah: Math.min(item.jumlah + itemBaru.jumlah, item.stok) }
           : item
       );
     });
@@ -58,7 +58,7 @@ export function PenyediaKeranjang({ children }: { children: React.ReactNode }) {
     setItemKeranjang((itemSaatIni) =>
       itemSaatIni
         .map((item) =>
-          item.idVarian === idVarian ? { ...item, jumlah: Math.max(jumlahBaru, 1) } : item
+          item.idVarian === idVarian ? { ...item, jumlah: Math.min(Math.max(jumlahBaru, 1), item.stok) } : item
         )
         .filter((item) => item.jumlah > 0)
     );

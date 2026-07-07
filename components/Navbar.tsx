@@ -24,7 +24,7 @@ export function Navbar() {
     setActiveNav(window.location.hash || pathname);
   }, [pathname]);
 
-  if (pathname.startsWith("/admin")) return null;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/rekomendasi")) return null;
 
   const cegahCheckoutKosong = (e: React.MouseEvent<HTMLAnchorElement>) => {
     if (jumlahItem === 0) {

@@ -58,6 +58,10 @@ export default function HalamanAkunSaya() {
   const [modalKonfirm, setModalKonfirm] = useState<string | null>(null);
   const [sedangKonfirm, setSedangKonfirm] = useState(false);
 
+  // State Modal Batal Pesanan
+  const [modalBatal, setModalBatal] = useState<string | null>(null);
+  const [sedangBatal, setSedangBatal] = useState(false);
+
   // State Lacak dihapus (dipindah ke halaman Lacak Pesanan)
 
   // State untuk Copy Order ID
@@ -148,6 +152,26 @@ export default function HalamanAkunSaya() {
     setModalUlasan(true);
   };
 
+  const batalkanPesanan = async () => {
+    if (!modalBatal) return;
+    setSedangBatal(true);
+    try {
+      const res = await fetch(`/api/pesanan/${modalBatal}/cancel`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Gagal membatalkan pesanan.");
+
+      showNotif("Pesanan berhasil dibatalkan", "sukses");
+      setModalBatal(null);
+      if (kontak) tarikDataPesanan(kontak);
+    } catch (error: any) {
+      showNotif(error.message, "gagal");
+    } finally {
+      setSedangBatal(false);
+    }
+  };
+
   const kirimUlasan = async (e: React.FormEvent) => {
     e.preventDefault();
     setSedangKirim(true);
@@ -174,8 +198,6 @@ export default function HalamanAkunSaya() {
       setSedangKirim(false);
     }
   };
-
-  // Fungsi Lacak Paket dipindah ke halaman Lacak Pesanan
 
   const listBelumBayar = dataPesanan.filter((p) => {
     const s = p.statusPesanan?.toUpperCase() || "";
@@ -364,9 +386,8 @@ export default function HalamanAkunSaya() {
             pesananTampil.map((order) => {
               let totalDiskon = 0;
               order.item.forEach((itm: any) => {
-                // Tarik harga katalog asli, fallback ke harga beli jika null
                 const hargaAsli = itm.produk?.harga || itm.harga; 
-                const hargaBeli = itm.harga; // Ini harga yang udah dipotong diskon di DB
+                const hargaBeli = itm.harga; 
                 if (hargaAsli > hargaBeli) {
                   totalDiskon += (hargaAsli - hargaBeli) * itm.jumlah;
                 }
@@ -423,13 +444,11 @@ export default function HalamanAkunSaya() {
                           x{itm.jumlah}
                         </span>
                         <div className="flex flex-col items-end">
-                          {/* Tampilkan harga coret JIKA harga asli lebih besar dari harga beli */}
                           {(itm.produk?.harga || itm.harga) > itm.harga && (
                             <span className="text-[10px] text-gray-400 line-through">
                               {formatRupiah(itm.produk?.harga || itm.harga)}
                             </span>
                           )}
-                          {/* WAJIB nampilin item.harga sebagai harga bayar! */}
                           <span className="text-xs font-black text-pink-600">
                             {formatRupiah(itm.harga)}
                           </span>
@@ -460,8 +479,17 @@ export default function HalamanAkunSaya() {
                   </div>
                 </div>
 
-                {/* 🔥 PERUBAHAN TOMBOL AKSI: Ada tombol Lacak di mode Dikirim 🔥 */}
                 <div className="mt-4 flex justify-end gap-2 border-t border-pink-50 pt-4">
+                  {(order.statusPesanan === "MENUNGGU_PEMBAYARAN" || order.statusPesanan === "PENDING") && (
+                     <div className="flex gap-2 w-full justify-end">
+                       <button
+                         onClick={() => setModalBatal(order.id)}
+                         className="border border-red-200 text-red-600 bg-red-50 text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-red-100 transition shadow-sm"
+                       >
+                         Batalkan Pesanan
+                       </button>
+                     </div>
+                  )}
                   {(order.statusPesanan === "DIKIRIM" ||
                     order.statusPesanan === "SAMPAI") && (
                     <div className="flex gap-2 w-full justify-end">
@@ -505,6 +533,39 @@ export default function HalamanAkunSaya() {
         </div>
         </div>
       </div>
+
+      {/* MODAL PEMBATALAN PESANAN */}
+      {modalBatal && (
+        <div className="fixed inset-0 z-[99998] flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4 animate-in fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-sm p-6 text-center shadow-2xl animate-in zoom-in-95">
+            <div className="mx-auto bg-red-100 text-red-600 h-14 w-14 rounded-full flex items-center justify-center mb-4">
+              <AlertTriangle size={24} />
+            </div>
+            <h3 className="font-black text-zinc-900 text-lg mb-2">
+              Batalkan Pesanan?
+            </h3>
+            <p className="text-sm text-zinc-600 mb-6 leading-relaxed">
+              Apakah Anda yakin ingin membatalkan pesanan ini? Aksi ini tidak dapat diurungkan dan stok barang akan dikembalikan ke gudang.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setModalBatal(null)}
+                className="flex-1 border border-zinc-200 text-zinc-600 font-bold py-3 rounded-xl hover:bg-zinc-50 transition"
+                disabled={sedangBatal}
+              >
+                Kembali
+              </button>
+              <button
+                onClick={batalkanPesanan}
+                disabled={sedangBatal}
+                className="flex-1 bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition disabled:opacity-50"
+              >
+                {sedangBatal ? "Memproses..." : "Ya, Batalkan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* MODAL ULASAN */}
       {modalUlasan && itemUlasan && (

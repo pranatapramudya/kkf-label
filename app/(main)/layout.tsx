@@ -12,15 +12,16 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const hideFooter = pathname?.startsWith("/checkout") || pathname?.startsWith("/pembayaran") || pathname === "/katalog";
+  const isRekomendasi = pathname?.startsWith("/rekomendasi");
+  const hideFooter = pathname?.startsWith("/checkout") || pathname?.startsWith("/pembayaran") || pathname === "/katalog" || isRekomendasi;
 
   return (
     <>
       <Navbar />
-      <main className="min-h-screen pt-20">{children}</main>
+      <main className={`min-h-screen ${isRekomendasi ? "" : "pt-20"}`}>{children}</main>
       {!hideFooter && <Footer />}
       <FCMProvider />
-      <FloatingCSButton />
+      {!isRekomendasi && <FloatingCSButton />}
     </>
   );
 }

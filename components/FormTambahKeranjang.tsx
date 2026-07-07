@@ -59,6 +59,7 @@ export function FormTambahKeranjang({ produk }: { produk: any }) {
       harga: getHargaFinal(),
       hargaCoret: Number(produk.harga) || 0, // <--- INI NYAWANYA!
       jumlah: Number(jumlah) || 1,
+      stok: varianAktif ? varianAktif.stok : produk.stokTotal || 1,
     };
   };
 

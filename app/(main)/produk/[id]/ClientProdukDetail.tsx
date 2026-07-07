@@ -166,6 +166,7 @@ export default function ClientProdukDetail({ produk, rekomendasi = [] }: { produ
       harga: hargaAkhir,
       hargaCoret: hargaAsli,
       jumlah: Number(jumlah) || 1,
+      stok: varianAktif?.stok || produk.stokTotal || 0,
     };
   };
 
