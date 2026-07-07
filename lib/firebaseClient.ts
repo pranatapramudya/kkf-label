@@ -30,8 +30,13 @@ export const requestForToken = async () => {
       console.log('Tidak bisa mendapatkan token, user mungkin belum mengizinkan notifikasi.');
       return null;
     }
-  } catch (error) {
-    console.warn('Error saat mengambil token', error);
+  } catch (error: any) {
+    if (error?.code === "messaging/permission-blocked") {
+      // Silent fail atau gunakan warn halus agar tidak mengotori console production
+      console.warn("Info: Izin push notifikasi belum diberikan/diblokir pengguna.");
+    } else {
+      console.warn('Info: Gagal inisialisasi FCM:', error?.message || error);
+    }
     return null;
   }
 };
