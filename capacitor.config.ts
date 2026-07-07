@@ -5,10 +5,11 @@ const config: CapacitorConfig = {
   appName: 'Admin KKF',
   webDir: 'public',
   server: {
-    url: 'https://kkf-label.vercel.app/admin', // 👈 Tembak langsung ke rute admin
+    url: 'https://www.kkflabel.com/sign-in', // 👈 Tembak langsung ke rute sign-in
     cleartext: true,
     allowNavigation: [
       '*',
+      '*.kkflabel.com',
       '*.vercel.app',
       '*.clerk.com',
       '*.clerk.accounts.dev',
