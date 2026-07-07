@@ -31,12 +31,7 @@ export const requestForToken = async () => {
       return null;
     }
   } catch (error: any) {
-    if (error?.code === "messaging/permission-blocked") {
-      // Silent fail atau gunakan warn halus agar tidak mengotori console production
-      console.warn("Info: Izin push notifikasi belum diberikan/diblokir pengguna.");
-    } else {
-      console.warn('Info: Gagal inisialisasi FCM:', error?.message || error);
-    }
+    // 100% Silent fail untuk menjaga kebersihan console production
     return null;
   }
 };
