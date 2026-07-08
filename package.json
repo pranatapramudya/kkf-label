@@ -12,11 +12,6 @@
   "dependencies": {
     "@ai-sdk/google": "^4.0.8",
     "@ai-sdk/react": "^4.0.16",
-    "@capacitor/android": "^8.4.0",
-    "@capacitor/browser": "^8.0.3",
-    "@capacitor/core": "^8.4.0",
-    "@capacitor/push-notifications": "^8.1.1",
-    "@capacitor/status-bar": "^8.0.2",
     "@clerk/localizations": "^4.8.2",
     "@clerk/nextjs": "^7.5.3",
     "@marsidev/react-turnstile": "^1.5.3",
@@ -26,11 +21,11 @@
     "@vercel/speed-insights": "^2.0.0",
     "ai": "^7.0.15",
     "axios": "^1.18.0",
-    "capacitor-plugin-safe-area": "^5.0.0",
     "embla-carousel-react": "^8.6.0",
     "firebase": "^12.15.0",
     "firebase-admin": "^14.1.0",
     "lucide-react": "^0.468.0",
+    "@ducanh2912/next-pwa": "^10.2.9",
     "next": "^15.0.3",
     "react": "^19.0.0",
     "react-barcode": "^1.6.1",
@@ -42,8 +37,6 @@
     "swr": "^2.4.2"
   },
   "devDependencies": {
-    "@capacitor/assets": "^3.0.5",
-    "@capacitor/cli": "^8.4.0",
     "@types/node": "^22.9.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

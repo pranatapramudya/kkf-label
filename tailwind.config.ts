@@ -31,10 +31,30 @@ const konfigurasi: Config = {
         marquee: {
           "0%": { transform: "translateX(0%)" },
           "100%": { transform: "translateX(-50%)" }
-        }
+        },
+        "slide-up": {
+          "0%": { transform: "translateY(100%)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        "slide-down": {
+          "0%": { transform: "translateY(0)", opacity: "1" },
+          "100%": { transform: "translateY(100%)", opacity: "0" },
+        },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "fade-out": {
+          "0%": { opacity: "1" },
+          "100%": { opacity: "0" },
+        },
       },
       animation: {
-        marquee: "marquee 0.1s linear infinite"
+        marquee: "marquee 0.1s linear infinite",
+        "slide-up": "slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+        "slide-down": "slide-down 0.3s cubic-bezier(0.7, 0, 0.84, 0) forwards",
+        "fade-in": "fade-in 0.3s ease-out forwards",
+        "fade-out": "fade-out 0.2s ease-in forwards",
       }
     }
   },

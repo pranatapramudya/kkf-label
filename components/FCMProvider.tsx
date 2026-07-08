@@ -9,8 +9,10 @@ export function FCMProvider() {
       // Hanya berjalan di browser
       if (typeof window !== "undefined" && "serviceWorker" in navigator) {
         try {
-          // Minta token hanya jika izin tidak diblokir secara eksplisit
-          if (Notification.permission !== "denied") {
+          // Hanya auto-request token jika izin sudah diberikan sebelumnya.
+          // Jika permission masih "default", biarkan custom NotificationDrawer
+          // yang menangani flow permintaan izin terlebih dahulu.
+          if (Notification.permission === "granted") {
             const token = await requestForToken();
             if (token) {
               // Simpan token ke localStorage agar bisa dilampirkan saat Checkout
@@ -27,3 +29,4 @@ export function FCMProvider() {
 
   return null;
 }
+

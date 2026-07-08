@@ -14,7 +14,8 @@ KKF Label adalah platform e-commerce full-stack modern yang dibangun untuk menan
   - **Payment Gateway:** Midtrans (saat ini dinonaktifkan sementara/tahap pengembangan)
   - **Pengiriman (Ongkir & Resi):** Biteship API. namun untuk API nembak no resi masih di off kan dari fitur admin menu pada tombol proses
   - **Pemantauan Performa:** Vercel Speed Insights (@vercel/speed-insights)
-- **Mobile Wrapper:** Capacitor (Android & iOS)
+- **Progressive Web App (PWA):** `@ducanh2912/next-pwa` (Workbox)
+- **Arsitektur Mobile:** PWA Standalone (menggantikan Capacitor)
 
 ## 📦 Fitur Utama
 
@@ -37,6 +38,8 @@ KKF Label adalah platform e-commerce full-stack modern yang dibangun untuk menan
 - **Ulasan (Review):** Pelanggan (baik pengguna terdaftar maupun *guest*) dapat memberikan ulasan dan rating produk.
 - **Technical SEO Ready:** Penerapan *Dynamic Metadata* untuk setiap produk, *Semantic HTML*, serta *auto-generation* Sitemap (`sitemap.xml`) dan `robots.txt` secara dinamis dari database.
 - **Open Graph (OG) & Social Media Share Ready:** Mengintegrasikan metadata Open Graph untuk memunculkan *link preview* (gambar, judul, deskripsi) yang sempurna saat dibagikan ke WhatsApp dan media sosial lainnya. Tombol "Bagikan" dioptimasi agar selalu menyalin *Clean URL*.
+- **Progressive Web App (PWA):** Aplikasi dapat dipasang (*installable*) langsung dari browser ke layar utama perangkat, berjalan dalam mode *Standalone* layaknya aplikasi native tanpa *address bar*. Didukung oleh *Service Worker* berbasis Workbox untuk *aggressive caching* dan navigasi offline-ready.
+- **Custom PWA Install & Notification Prompt (Glassmorphism Bottom-Sheet):** Menggantikan dialog browser bawaan yang kaku dengan antarmuka *bottom-sheet drawer* bergaya *glassmorphism* (`backdrop-blur`, `bg-white/95`) yang konsisten dengan identitas visual KKF Label. Sistem menerapkan *deferred prompting* (30 detik setelah kunjungan pertama) dan *anti-spam cooldown* (7 hari via `localStorage`) agar tidak mengganggu pengalaman belanja. Mendukung dua mode: instalasi native via `beforeinstallprompt` untuk Android/Chrome, dan panduan visual manual (*Share → Add to Home Screen*) khusus untuk pengguna iOS Safari.
 
 ### ⚡ Keamanan & Performa Tingkat Lanjut (Premium SaaS Grade)
 - **Automated Inventory Recovery (Anti-Hit & Run):** Melindungi ketersediaan stok barang (menghindari fenomena *Ghost Stock*) dengan membatalkan pesanan secara otomatis dan memulihkan stok yang dipesan jika pembeli tidak melakukan transfer dalam kurun waktu 24 jam menggunakan Cron Job.
@@ -87,9 +90,9 @@ KKF Label adalah platform e-commerce full-stack modern yang dibangun untuk menan
 
 ---
 
-## 🚀 Panduan Deployment & Transisi Production (Web & Mobile)
+## 🚀 Panduan Deployment & Transisi Production (Web & PWA)
 
-Ketika platform KKF Label beralih dari fase **Development** ke **Production**, ada penyesuaian khusus yang sangat krusial, terutama pada sistem Autentikasi (Clerk) dan integrasi Mobile App (Capacitor):
+Ketika platform KKF Label beralih dari fase **Development** ke **Production**, ada penyesuaian khusus yang sangat krusial:
 
 1. **Isolasi Database User (Clerk)**
    Lingkungan Development dan Production di Clerk memiliki pangkalan data (database) *user* yang terisolasi total. Semua *user* yang terdaftar saat pengembangan tidak akan terbawa ke tahap *live*. Oleh karena itu, Admin **WAJIB melakukan registrasi ulang (Sign Up)** di domain production menggunakan email yang telah terdaftar dalam *Whitelist* (seperti `kkflabel@gmail.com`) agar dapat kembali mengakses menu `/admin`.
@@ -97,8 +100,10 @@ Ketika platform KKF Label beralih dari fase **Development** ke **Production**, a
    Kunci rahasia Production (`pk_live_...` & `sk_live_...`) dilarang diletakkan pada file `.env` lokal (localhost) untuk mencegah *error* atau penolakan akses oleh Clerk. Kunci Production ini harus murni diinjeksi melalui panel *Environment Variables* di dashboard Vercel.
 3. **Google OAuth Custom Credentials**
    Fitur "Continue with Google" yang sebelumnya dipinjamkan oleh Clerk secara otomatis di mode pengembangan akan diblokir di Production. Sistem wajib diatur secara mandiri menggunakan kredensial kustom (*Client ID* & *Client Secret*) dari Google Cloud Console. Alternatif tercepatnya adalah menonaktifkan Social Login via Google dan hanya mengizinkan *Email/OTP Login* dari dashboard Clerk.
-4. **Konfigurasi Domain Capacitor (Android APK)**
-   Sistem APK Android dibangun menggunakan *WebView* (Capacitor) yang menembak langsung ke website *live*. Karena protokol keamanan ketat dari Clerk untuk memblokir cookie *third-party* dari domain tak dikenal, variabel `server.url` di dalam `capacitor.config.ts` **WAJIB** dikalibrasi agar menunjuk langsung ke domain otentik *Production* (contoh: `https://www.kkflabel.com/sign-in`), bukan domain turunan bawaan Vercel (`*.vercel.app`). Pembaruan URL ini juga mewajibkan *developer* menjalankan siklus `npx cap sync` dan melakukan re-kompilasi ulang berkas APK.
+4. **Deployment PWA (Service Worker & Manifest)**
+   Service Worker (`sw.js`) dan file Workbox pendukungnya di-*generate* secara otomatis oleh `@ducanh2912/next-pwa` saat proses `next build`. File-file ini di-*output* ke folder `public/` dan telah terdaftar di `.gitignore` agar tidak masuk *repository*. Vercel akan secara otomatis menjalankan proses *build* dan menyajikan Service Worker tanpa konfigurasi tambahan. Pastikan `manifest.json` dan file ikon PNG (`icon-192x192.png`, `icon-512x512.png`) sudah berada di folder `public/`.
+
+> **Catatan Migrasi (PRD-058):** Arsitektur *Mobile Wrapper* Capacitor dan direktori `/android` telah sepenuhnya dihapus dari *repository*. Aplikasi mobile kini dilayani murni melalui PWA yang dapat dipasang langsung dari browser. Repositori Next.js ini berfokus pada Web & Backend API, menyiapkan fondasi bersih untuk ekspansi aplikasi mobile native (Flutter) di masa mendatang.
 
 ---
 *Dikelola oleh Tim Pengembangan KKF Label.*

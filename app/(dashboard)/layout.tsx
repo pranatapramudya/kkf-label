@@ -1,5 +1,3 @@
-import PushNotificationSetup from "@/components/PushNotificationSetup";
-
 export default function DashboardLayout({
   children,
 }: {
@@ -7,7 +5,6 @@ export default function DashboardLayout({
 }) {
   return (
     <>
-      <PushNotificationSetup />
       {children}
     </>
   );
