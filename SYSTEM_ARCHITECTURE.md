@@ -86,8 +86,17 @@ Dalam menangani anomali penumpukan waktu eksekusi (*bottleneck / high Total Bloc
 ## 13. Aksesibilitas & Inklusivitas Antarmuka (A11y)
 Seluruh lapisan antarmuka pengguna (UI), baik pada etalase toko (*Storefront*) maupun Dasbor Admin, telah dikalibrasi untuk memenuhi standar aksesibilitas web (A11y) secara penuh. Penyesuaian mencakup standardisasi rasio kontras warna (*color contrast*) pada elemen teks dan latar belakang sekunder, perlebaran area sentuh (*touch targets*) minimum 44px untuk kenyamanan perangkat *mobile*, penyediaan atribut pembaca layar (`aria-label`) pada seluruh tombol navigasi berbasis ikon, dan konfigurasi *viewport* tak terbatas (*scalable*). Pendekatan ini ditujukan semata-mata untuk menjamin pengalaman pengguna (UX) yang inklusif, profesional, dan setara bagi seluruh pelanggan serta pengelola sistem tanpa terkecuali.
 
-## 14. Arsitektur AI Virtual Stylist (Retrieval-Augmented Generation / RAG)
-Untuk menyuguhkan pengalaman "Pramuniaga Pribadi", KKF Label menyematkan fitur **AI Virtual Stylist** dengan landasan arsitektur RAG ringan (*Database-to-Prompt Injection*) yang ditenagai oleh model kognitif Gemini 2.5 Flash dari Google (melalui Vercel AI SDK 4+).
+## 14. Arsitektur AI Virtual Stylist (Pre-flight Validation & Dual LLM)
+
+Untuk menyuguhkan pengalaman "Pramuniaga Pribadi", KKF Label menyematkan fitur **AI Virtual Stylist** dengan landasan arsitektur RAG ringan (*Database-to-Prompt Injection*) yang ditenagai oleh model kognitif Gemini 2.5 Flash dari Google sebagai AI utama, dan Groq Llama 3.1 8B sebagai *fallback* sekunder.
+
+### 14.1. Pre-flight Validation Fallback Pattern
+Mengingat Vercel AI SDK v7 mengonsumsi error ke dalam *streaming response* (tidak *throw error* ke blok `catch`), sistem mengimplementasikan pola **Pre-flight Validation**:
+- **Health Check:** Sebelum memulai *stream*, sistem memanggil `generateText()` (1 token) ke Gemini.
+- **Failover:** Jika Gemini mengalami 401 (Auth), 429 (Rate Limit), atau 500, error tersebut langsung ditangkap oleh `catch`.
+- **Seamless Streaming:** Saat terdeteksi *error*, *flag* `useGroqFallback` diaktifkan dan `streamText()` dijalankan secara mulus menggunakan Groq (`llama-3.1-8b-instant`), tanpa ada interupsi di sisi *client*.
+
+### 14.2. Injeksi Konteks Produk & Persona Ketat
 - **Retrieval & Serialisasi Katalog:** Kapanpun sesi *chat* diaktifkan, modul *Server Route* mengekstrak data dari PostgreSQL secara senyap (memuat daftar produk, relasi ukuran, dan varian warna yang aktif). Struktur relasional kompleks Prisma ini kemudian diserialisasi menjadi teks mentah terstruktur dan diinjeksi mutlak ke dalam `system` prompt model.
 - **Kontekstualisasi Domain:** AI dirantai (*System Prompt Boundaries*) agar murni bertindak selayaknya pelayan butik profesional KKF Label dan mutlak menolak perbincangan di luar ranah mode busana muslimah atau data katalog yang disuntikkan.
 - **Interactive UX & Quick Replies:** Di sisi antarmuka (*client*), AI disajikan dengan tombol pintas interaktif (*Quick Reply Chips*) seperti "Outfit santai buat ngopi" yang secara otomatis menghilang pasca-interaksi pertama. Pola *foolproof UX* ini memecah kebuntuan (kebingungan mengetik) bagi pengguna awam dan melesatkan angka interaksi.
