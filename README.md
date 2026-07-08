@@ -55,6 +55,7 @@ KKF Label adalah platform e-commerce full-stack modern yang dibangun untuk menan
 - **Manajemen Pesanan:** Memproses pesanan dari status *Pending* (menunggu pembayaran/verifikasi bukti transfer) hingga *Selesai*, termasuk input nomor resi pengiriman.
 - **Analitik Dasbor:** Grafik interaktif performa penjualan bulanan, pantauan jumlah kunjungan produk, dan kalkulasi profitabilitas menggunakan Recharts.
 - **Sistem Penyiaran Notifikasi:** Modul khusus admin untuk memancarkan (*broadcast*) notifikasi *push* ke seluruh pelanggan via FCM.
+- **PWA Admin Shortcut (Easter Egg):** Akses pintu belakang (*backdoor*) yang sama sekali tidak kasat mata bagi pelanggan umum. Tahun hak cipta ("2026") di *Footer* seluruh halaman pelanggan berfungsi sebagai tautan ajaib menuju panel `/admin` saat diklik/di-tap. Fitur ini sengaja disamarkan (`outline-none text-inherit`) agar admin bisa masuk sistem langsung dari PWA *Standalone* dengan satu sentuhan tanpa perlu mengetik URL.
 - **Optimasi Aksesibilitas (A11y) Penuh pada Dashboard Admin:** Aksesibilitas tingkat tinggi yang memastikan navigasi dan operasional dashboard ramah disabilitas.
 - **Security: Cloudflare Turnstile Anti-Bot & Rate Limiting:** Melindungi *endpoint* dari serangan spam bot menggunakan verifikasi *invisible* Turnstile di sisi klien dan perlindungan *rate limiting* in-memory di sisi server.
 

@@ -93,7 +93,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-pink-100 py-5 text-center text-xs text-zinc-500">
-        © 2026 kkf_label. Semua hak dilindungi.
+        © <Link href="/admin" className="text-zinc-500 outline-none">2026</Link> kkf_label. Semua hak dilindungi.
       </div>
     </footer>
   );

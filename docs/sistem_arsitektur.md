@@ -137,8 +137,11 @@ Untuk menggantikan dialog browser bawaan yang kaku dan tidak bisa dikustomisasi,
 ### 15.4. FCM Token Gating
 
 `FCMProvider` (`components/FCMProvider.tsx`) dimodifikasi agar **tidak lagi** secara otomatis meminta izin notifikasi saat permission berstatus `"default"`. Token FCM hanya di-*request* secara otomatis jika pengguna sudah pernah memberikan izin (`Notification.permission === "granted"`). Flow permintaan izin pertama kali kini sepenuhnya ditangani oleh `NotificationDrawer`, mencegah browser menandai situs sebagai *abusive notification requester*.
+### 15.5. PWA Admin Shortcut (Easter Egg)
 
-### 15.5. Arsitektur Terdekopling (Separation of Concerns)
+Untuk memfasilitasi akses cepat ke panel kontrol dari perangkat mobile PWA (yang berjalan mode *Standalone* tanpa *address bar/URL*), sistem menerapkan metode *invisible backdoor link* di komponen `Footer.tsx`. Tahun rilis pada hak cipta (`© 2026`) diselubungi elemen `<Link href="/admin">` dan distilisasi agar membaur murni layaknya teks statis biasa (`text-inherit outline-none`). Pendekatan "pintu rahasia" ini melindungi rute admin dari eksposur publik, sekaligus mencegah penggunaan `manifest.json` *shortcuts* yang berisiko menelanjangi menu admin ke OS pengguna awam saat aplikasi ditahan/ditekan lama (*long-press*).
+
+### 15.6. Arsitektur Terdekopling (Separation of Concerns)
 
 Dengan dihapusnya Capacitor, repositori Next.js ini kini memiliki tanggung jawab yang jelas dan terfokus:
 
