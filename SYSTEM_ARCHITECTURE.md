@@ -105,6 +105,8 @@ Sistem PWA dibangun menggunakan **`@ducanh2912/next-pwa`** yang mengintegrasikan
 - **Service Worker Generation:** Saat proses `next build`, Workbox secara otomatis men-*generate* file `sw.js` ke folder `public/`. Service Worker menangani *precaching* aset statis dan *runtime caching* untuk navigasi halaman (`cacheOnFrontEndNav: true`, `aggressiveFrontEndNavCaching: true`).
 - **Manifest (`public/manifest.json`):** Berisi metadata aplikasi (nama, ikon PNG 192x192 & 512x512, `display: standalone`, `theme_color: #ff0080`) yang memungkinkan browser menampilkan opsi instalasi PWA.
 - **Meta Tags:** Root Layout (`app/layout.tsx`) menginjeksi metadata PWA melalui Next.js Metadata API (`manifest`, `appleWebApp`, `icons.apple`) untuk kompatibilitas penuh dengan iOS Safari dan Android Chrome.
+- **Responsivitas & PWA Standalone:** Komponen layout utama telah disesuaikan dengan *padding* dinamis untuk menangani elemen *fixed* bawaan OS (seperti iOS Home Indicator) dan *Bottom Navigation Bar* PWA, memastikan aksesibilitas Pintu Rahasia (Admin Backdoor) tetap terjaga.
+- **Strategi Label Statis:** Penggunaan teks lokasi statis pada `ProductCard` diputuskan sebagai langkah optimalisasi performa frontend (mengurangi beban payload API) sambil tetap memberikan *trust value* ala marketplace besar.
 
 ### 15.2. Dual Service Worker (PWA + Firebase)
 

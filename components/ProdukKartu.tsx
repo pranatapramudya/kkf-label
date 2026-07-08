@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
-import { Star } from "lucide-react";
+import { Star, MapPin } from "lucide-react";
 
 export function ProdukKartu({ 
   produk, 
@@ -106,17 +106,24 @@ export function ProdukKartu({
           </div>
         )}
 
-        <div className="flex flex-col items-start mt-auto pt-1">
-          {/* Harga Coret (Muncul kalau ada diskon) */}
-          {adaDiskon && (
-            <p className="text-[10px] text-zinc-400 line-through mb-0.5">
-              Rp {hargaAsli.toLocaleString("id-ID")}
+        <div className="flex justify-between items-end mt-auto pt-1 gap-2">
+          <div className="flex flex-col items-start shrink-0">
+            {/* Harga Coret (Muncul kalau ada diskon) */}
+            {adaDiskon && (
+              <p className="text-[10px] text-zinc-400 line-through mb-0.5">
+                Rp {hargaAsli.toLocaleString("id-ID")}
+              </p>
+            )}
+            {/* Harga Final */}
+            <p className="text-sm font-bold text-zinc-800">
+              Rp {hargaAkhir.toLocaleString("id-ID")}
             </p>
-          )}
-          {/* Harga Final */}
-          <p className="text-sm font-bold text-zinc-800">
-            Rp {hargaAkhir.toLocaleString("id-ID")}
-          </p>
+          </div>
+          
+          <div className="flex items-center gap-0.5 text-zinc-500 mb-0.5 min-w-0">
+            <MapPin className="w-3 h-3 shrink-0" />
+            <span className="text-[9px] whitespace-nowrap truncate text-right">Sumedang, Jawa Barat</span>
+          </div>
         </div>
       </div>
     </Link>

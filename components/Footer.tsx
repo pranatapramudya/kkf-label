@@ -26,7 +26,7 @@ export function Footer() {
   return (
     <footer
       id="kontak"
-      className="mt-16 border-t border-pink-100 bg-soft-pink-50/70"
+      className="mt-16 border-t border-pink-100 bg-soft-pink-50/70 pb-24 md:pb-0"
     >
       <div className="kontainer-halaman grid gap-10 py-12 sm:grid-cols-1 md:grid-cols-3">
         <div className="hidden md:block">
