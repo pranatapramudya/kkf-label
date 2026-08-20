@@ -41,6 +41,7 @@ export default async function HalamanKatalog({
       },
     },
     orderBy,
+    take: 24,
   });
 
   return <ClientKatalog semuaProduk={semuaProduk} />;

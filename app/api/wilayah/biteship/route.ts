@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 2592000; // Cache 30 hari
 
 export async function GET(req: Request) {
   const apiKey = process.env.BITESHIP_API_KEY;
@@ -23,7 +23,7 @@ export async function GET(req: Request) {
         headers: {
           "Authorization": apiKey,
         },
-        cache: "no-store",
+        next: { revalidate: 2592000 },
       }
     );
 

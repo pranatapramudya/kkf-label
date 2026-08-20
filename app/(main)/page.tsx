@@ -58,17 +58,51 @@ export default async function HalamanUtama() {
       },
     },
     orderBy: { dibuatPada: "desc" },
-    take: 20,
+    take: 12,
   });
 
-  const topProducts = semuaProdukLengkap
-    .filter((p) => {
-      if (!p.ulasan || p.ulasan.length === 0) return false;
-      const rataRata =
-        p.ulasan.reduce((acc, curr) => acc + curr.rating, 0) / p.ulasan.length;
-      return rataRata >= 4.5;
+  const topRatedReviews = await prisma.review.groupBy({
+    by: ['produkId'],
+    _avg: { rating: true },
+    having: {
+      rating: {
+        _avg: {
+          gte: 4.5,
+        },
+      },
+    },
+    orderBy: {
+      _avg: {
+        rating: 'desc',
+      },
+    },
+    take: 5,
+  });
+
+  const topProductIds = topRatedReviews.map((r) => r.produkId);
+
+  const topProducts = topProductIds.length > 0
+    ? await prisma.product.findMany({
+      where: { id: { in: topProductIds }, aktif: true, isArchived: false },
+      select: {
+        id: true,
+        nama: true,
+        harga: true,
+        diskonPersen: true,
+        fotoUtama: true,
+        kategori: { select: { nama: true } },
+        ulasan: { select: { rating: true } },
+        itemPesanan: {
+          where: {
+            pesanan: {
+              statusPesanan: { in: ["DIBAYAR", "DIPROSES", "DIKIRIM", "SAMPAI", "SELESAI"] },
+            },
+          },
+          select: { jumlah: true },
+        },
+      },
     })
-    .slice(0, 5); // Ambil maksimal 5 teratas
+    : [];
 
   return (
     <div className="pb-28">
@@ -84,7 +118,7 @@ export default async function HalamanUtama() {
             <h1 className="mt-3 max-w-xl text-4xl font-bold leading-tight sm:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-pink-600 to-pink-300">
               Fashion wanita minimalis untuk hari yang terasa lembut.
             </h1>
-            
+
             {/* Modern Icon Grid Menu */}
             <div className="mt-6 flex items-center justify-around bg-white/70 backdrop-blur-md border border-white/50 shadow-sm rounded-2xl p-5 w-full">
               <Link href="/katalog" className="flex flex-col items-center gap-2 group min-w-[80px]">
@@ -95,7 +129,7 @@ export default async function HalamanUtama() {
                   Semua Produk
                 </span>
               </Link>
-              
+
               {topProducts && topProducts.length > 0 && (
                 <a href="#pilihan-disukai" className="flex flex-col items-center gap-2 group min-w-[80px]">
                   <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center group-hover:bg-pink-50 group-hover:scale-105 transition-all shadow-md border border-pink-100">
@@ -106,7 +140,7 @@ export default async function HalamanUtama() {
                   </span>
                 </a>
               )}
-              
+
               {/* Tombol Rekomendasi Outfit dengan Alert Custom */}
               <OutfitRecommendationButton />
             </div>

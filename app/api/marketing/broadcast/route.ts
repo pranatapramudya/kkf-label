@@ -12,7 +12,8 @@ export async function POST(request: Request) {
           some: { statusPesanan: "SELESAI" },
         },
       },
-      select: { nama: true, email: true },
+      select: { id: true, nama: true, email: true, telepon: true },
+      take: 1000,
     });
 
     // 2. Simulasi pengiriman email (Mock-up)

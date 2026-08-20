@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 2592000; // Cache 30 hari
 
 export async function GET(
   request: Request,
@@ -17,7 +17,7 @@ export async function GET(
       {
         method: "GET",
         headers: { Key: apiKey },
-        cache: "no-store",
+        next: { revalidate: 2592000 },
       },
     );
 

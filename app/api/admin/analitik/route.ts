@@ -48,19 +48,25 @@ export async function GET(request: Request) {
     const [
       produkAktif,
       kategoriUnik,
+      totalAgregasi,
+      pesananBaruCount,
       pesananReal,
       items,
       prods
     ] = await Promise.all([
       prisma.product.count({ where: { aktif: true } }).catch(() => 0),
       prisma.category.findMany({ select: { nama: true }, distinct: ["nama"] }).catch(() => []),
+      prisma.order.aggregate({
+        where: { dibuatPada: queryWaktu, statusPesanan: { not: "DIBATALKAN" } },
+        _sum: { total: true },
+      }).catch(() => ({ _sum: { total: 0 } })),
+      prisma.order.count({
+        where: { dibuatPada: queryWaktu, statusPesanan: { not: "DIBATALKAN" } },
+      }).catch(() => 0),
       prisma.order.findMany({
         where: { dibuatPada: queryWaktu, statusPesanan: { not: "DIBATALKAN" } },
         select: { total: true, dibuatPada: true },
-      }).catch(() => {
-        console.log("Belum ada data Order");
-        return [];
-      }),
+      }).catch(() => []),
       prisma.orderItem.groupBy({
         by: ["produkId", "namaProduk"],
         _sum: { jumlah: true },
@@ -75,8 +81,8 @@ export async function GET(request: Request) {
     ]);
 
     const daftarKategori = kategoriUnik.map((k: any) => k.nama);
-    const totalPenjualan = (pesananReal as any[]).reduce((sum: number, order: any) => sum + (Number(order.total) || 0), 0);
-    const pesananBaru = (pesananReal as any[]).length;
+    const totalPenjualan = totalAgregasi?._sum?.total || 0;
+    const pesananBaru = pesananBaruCount;
 
     let grafikPenjualan = [];
     if (isFilterTahun) {

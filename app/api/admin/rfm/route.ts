@@ -3,73 +3,49 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
   try {
-    // Ambil semua pesanan yang berhasil (Selesai/Sampai)
-    const orders = await prisma.order.findMany({
+    const rfmRaw = await prisma.order.groupBy({
+      by: ['emailPenerima', 'namaPenerima'],
       where: {
         statusPesanan: {
           in: ["SELESAI", "SAMPAI"],
         },
       },
-      orderBy: {
-        dibuatPada: "desc",
-      },
-      select: {
-        emailPenerima: true,
-        namaPenerima: true,
-        total: true,
-        dibuatPada: true,
-      },
+      _count: { _all: true },
+      _sum: { total: true },
+      _max: { dibuatPada: true },
     });
 
     const now = new Date();
-    const customerMap: Record<string, any> = {};
 
-    // Hitung Recency, Frequency, Monetary
-    orders.forEach((order) => {
-      const email = order.emailPenerima;
-      if (!customerMap[email]) {
-        customerMap[email] = {
-          email: email,
-          nama: order.namaPenerima,
-          frequency: 0,
-          monetary: 0,
-          lastOrderDate: order.dibuatPada,
-        };
-      }
+    const rfmData = rfmRaw.map((customer) => {
+      const email = customer.emailPenerima;
+      const nama = customer.namaPenerima;
+      const frequency = customer._count._all;
+      const monetary = customer._sum.total || 0;
+      const lastOrderDate = customer._max.dibuatPada ? new Date(customer._max.dibuatPada) : new Date(0);
       
-      customerMap[email].frequency += 1;
-      customerMap[email].monetary += order.total;
-      
-      // Update last order date if this order is more recent
-      if (new Date(order.dibuatPada) > new Date(customerMap[email].lastOrderDate)) {
-        customerMap[email].lastOrderDate = order.dibuatPada;
-      }
-    });
-
-    const rfmData = Object.values(customerMap).map((customer) => {
-      const lastOrder = new Date(customer.lastOrderDate);
-      const diffTime = Math.abs(now.getTime() - lastOrder.getTime());
+      const diffTime = Math.abs(now.getTime() - lastOrderDate.getTime());
       const recencyDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
 
-      customer.recency = recencyDays;
-
-      // Logika Segmentasi RFM
-      // VIP: Frequency > 2 AND Monetary > 1.000.000 AND Recency < 30 hari
-      // Sleeping: Recency > 60 hari
-      // New: Frequency == 1
-      // Regular: sisanya
       let segment = "Regular";
 
-      if (customer.frequency > 2 && customer.monetary >= 1000000 && customer.recency <= 30) {
+      if (frequency > 2 && monetary >= 1000000 && recencyDays <= 30) {
         segment = "VIP";
-      } else if (customer.recency > 60) {
+      } else if (recencyDays > 60) {
         segment = "Sleeping";
-      } else if (customer.frequency === 1) {
+      } else if (frequency === 1) {
         segment = "New";
       }
 
-      customer.segment = segment;
-      return customer;
+      return {
+        email,
+        nama,
+        frequency,
+        monetary,
+        lastOrderDate,
+        recency: recencyDays,
+        segment,
+      };
     });
 
     // Sort by Monetary Descending as default

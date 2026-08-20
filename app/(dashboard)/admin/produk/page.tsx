@@ -4,8 +4,12 @@ import TabelProduk from "./TabelProduk"; // Import komponen tabel kita
 
 const prisma = new PrismaClient();
 
-export default async function HalamanManajemenProduk() {
-  // Tarik data dari Supabase, termasuk nama kategorinya
+export default async function HalamanManajemenProduk({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
+  const params = await searchParams;
+  const page = parseInt(params.page || "1", 10);
+  const take = 50;
+  const skip = (page - 1) * take;
+
   const produk = await prisma.product.findMany({
     orderBy: {
       dibuatPada: "desc",
@@ -13,6 +17,8 @@ export default async function HalamanManajemenProduk() {
     include: {
       kategori: true,
     },
+    take,
+    skip,
   });
 
   return (

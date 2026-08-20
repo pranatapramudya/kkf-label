@@ -3,54 +3,52 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
   try {
-    // Ambil data penjualan yang selesai (atau sampai)
-    // Untuk margin, kita bisa hitung berdasarkan OrderItem dari pesanan yang sukses.
-    const completedOrders = await prisma.order.findMany({
+    // Menggunakan agregasi groupBy di level database
+    const groupedItems = await prisma.orderItem.groupBy({
+      by: ["produkId", "namaProduk"],
       where: {
-        statusPesanan: {
-          in: ["SELESAI", "SAMPAI"],
-        },
-      },
-      include: {
-        item: {
-          include: {
-            produk: true, // Untuk ambil costPrice
+        pesanan: {
+          statusPesanan: {
+            in: ["SELESAI", "SAMPAI"],
           },
         },
       },
+      _sum: {
+        jumlah: true,
+        total: true, // ini adalah revenue per order item
+      },
     });
 
-    // Mengelompokkan data per produk
+    // Tarik costPrice terpisah
+    const productIds = groupedItems.map(item => item.produkId);
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, costPrice: true },
+    });
+
+    const costPriceMap = new Map();
+    products.forEach(p => costPriceMap.set(p.id, p.costPrice));
+
     const profitabilityMap: Record<string, any> = {};
 
-    completedOrders.forEach((order) => {
-      order.item.forEach((orderItem: any) => {
-        const prodId = orderItem.produkId;
-        const productName = orderItem.namaProduk;
-        const quantity = orderItem.jumlah;
-        const sellPrice = orderItem.harga;
-        const costPrice = orderItem.produk?.costPrice || 0;
+    groupedItems.forEach((item) => {
+      const prodId = item.produkId;
+      const productName = item.namaProduk;
+      const quantity = item._sum.jumlah || 0;
+      const revenue = item._sum.total || 0;
+      const costPrice = costPriceMap.get(prodId) || 0;
 
-        const revenue = sellPrice * quantity;
-        const totalHpp = costPrice * quantity;
-        const margin = revenue - totalHpp;
+      const totalHpp = costPrice * quantity;
+      const margin = revenue - totalHpp;
 
-        if (!profitabilityMap[prodId]) {
-          profitabilityMap[prodId] = {
-            id: prodId,
-            nama: productName,
-            totalTerjual: 0,
-            revenue: 0,
-            hppTotal: 0,
-            margin: 0,
-          };
-        }
-
-        profitabilityMap[prodId].totalTerjual += quantity;
-        profitabilityMap[prodId].revenue += revenue;
-        profitabilityMap[prodId].hppTotal += totalHpp;
-        profitabilityMap[prodId].margin += margin;
-      });
+      profitabilityMap[prodId] = {
+        id: prodId,
+        nama: productName,
+        totalTerjual: quantity,
+        revenue: revenue,
+        hppTotal: totalHpp,
+        margin: margin,
+      };
     });
 
     const data = Object.values(profitabilityMap).sort((a, b) => b.margin - a.margin);
