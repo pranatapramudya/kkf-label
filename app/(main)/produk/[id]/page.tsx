@@ -108,7 +108,7 @@ export default async function HalamanDetailProduk({
       id: { not: produkDb.id },
       kategoriId: produkDb.kategoriId,
     },
-    take: 10,
+    take: 4,
     orderBy: { dibuatPada: "desc" },
     select: {
       id: true,
@@ -127,13 +127,13 @@ export default async function HalamanDetailProduk({
         },
         select: { jumlah: true },
       },
-    }
+    },
   });
 
   let rekomendasi = [...rekomendasiKategori];
 
-  // 2. Jika kurang dari 10, tambahkan dari kategori lain secara acak/terbaru
-  if (rekomendasi.length < 10) {
+  // 2. Jika kurang dari 4, tambahkan dari kategori lain secara acak/terbaru
+  if (rekomendasi.length < 4) {
     const idsToExclude = [produkDb.id, ...rekomendasi.map((p) => p.id)];
     const tambahan = await prisma.product.findMany({
       where: {
@@ -141,7 +141,7 @@ export default async function HalamanDetailProduk({
         isArchived: false,
         id: { notIn: idsToExclude },
       },
-      take: 10 - rekomendasi.length,
+      take: 4 - rekomendasi.length,
       orderBy: { dibuatPada: "desc" },
       select: {
         id: true,

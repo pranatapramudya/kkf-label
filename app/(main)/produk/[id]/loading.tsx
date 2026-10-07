@@ -2,23 +2,23 @@ import React from "react";
 
 export default function LoadingProdukDetail() {
   return (
-    <div className="kontainer-halaman pt-0 md:py-6 pb-32 md:pb-12 animate-pulse w-full max-w-[100vw]">
+    <div className="kontainer-halaman pt-0 md:py-6 pb-32 md:pb-12 animate-pulse w-full max-w-[100vw] overflow-x-hidden">
       <div className="grid gap-6 md:gap-8 lg:grid-cols-2 w-full max-w-full">
         {/* Gambar Skeleton */}
         <div className="w-full flex flex-col gap-3">
           <div className="w-full aspect-square md:aspect-[4/5] bg-zinc-200 md:rounded-2xl border border-pink-50" />
-          <div className="flex gap-3 w-full">
+          <div className="flex gap-3 w-full px-4 md:px-0">
             {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="h-16 w-16 md:h-20 md:w-16 flex-none bg-zinc-200 rounded-lg"
+                className="h-16 w-16 md:h-20 md:w-20 flex-none bg-zinc-200 rounded-lg"
               />
             ))}
           </div>
         </div>
 
         {/* Info Skeleton */}
-        <div className="flex flex-col w-full mt-4 md:mt-0 space-y-4">
+        <div className="flex flex-col w-full mt-4 md:mt-0 space-y-4 px-4 md:px-0">
           <div className="h-6 w-24 bg-soft-pink-100 rounded-full" />
           <div className="h-10 w-3/4 bg-zinc-200 rounded-lg" />
           
