@@ -3,6 +3,7 @@ import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
 import "@/lib/firebase-admin";
 import { getMessaging } from "firebase-admin/messaging";
+import { createMayarPaymentLink } from "@/lib/mayar";
 
 const prisma = new PrismaClient();
 const rateLimitMap = new Map();
@@ -212,9 +213,34 @@ export async function POST(permintaan: Request) {
       console.error("Gagal mengirim Push Notification via FCM:", pushErr);
     }
 
-    // Jika metode pembayaran manual, kembalikan kode pesanan langsung tanpa buat token Midtrans
-    if (body.metodePembayaran && body.metodePembayaran !== "MIDTRANS") {
+    // Jika metode pembayaran manual, kembalikan kode pesanan langsung tanpa buat payment gateway
+    if (body.metodePembayaran && body.metodePembayaran !== "MIDTRANS" && body.metodePembayaran !== "MAYAR") {
       return NextResponse.json({ sukses: true, kodePesanan });
+    }
+
+    if (body.metodePembayaran === "MAYAR") {
+      try {
+        const paymentData = await createMayarPaymentLink({
+          orderId: kodePesanan,
+          amount: grossAmount,
+          customerName: body.namaLengkap,
+          customerEmail: body.email,
+          customerPhone: body.telepon,
+          description: `Pesanan KKF Label - ${kodePesanan}`,
+        });
+
+        return NextResponse.json({
+          sukses: true,
+          kodePesanan,
+          paymentUrl: paymentData.link || paymentData.data?.link, // Menyesuaikan respons Mayar
+        });
+      } catch (err: any) {
+        console.error("Gagal buat Mayar Link, fallback ke manual / error", err);
+        return NextResponse.json(
+          { pesan: "Gagal membuat link pembayaran otomatis (Mayar)" },
+          { status: 500 }
+        );
+      }
     }
 
     // Menyusun daftar belanjaan buat ditampilin di nota Midtrans

@@ -230,7 +230,7 @@ export default function HalamanCheckout() {
   const [pilihanOngkir, setPilihanOngkir] = useState<PilihanOngkir | null>(
     null,
   );
-  const [metodePembayaran, setMetodePembayaran] = useState("MANUAL_BCA");
+  const [metodePembayaran, setMetodePembayaran] = useState<string>("MAYAR");
 
   const [pesanOngkir, setPesanOngkir] = useState("");
   const [sedangMemuatWilayah, setSedangMemuatWilayah] = useState(false);
@@ -385,7 +385,7 @@ export default function HalamanCheckout() {
         fcmToken: localStorage.getItem("fcm_token") || undefined,
       };
 
-      if (metodePembayaran === "MIDTRANS") {
+      if (metodePembayaran === "MAYAR") {
         // 1. Minta tiket/token dulu ke server API kita
         const resToken = await fetch("/api/payment", {
           method: "POST",
@@ -395,38 +395,34 @@ export default function HalamanCheckout() {
 
         const dataToken = await resToken.json();
 
-        if (!resToken.ok || !dataToken.token) {
+        if (!resToken.ok || (!dataToken.token && !dataToken.paymentUrl)) {
           throw new Error(dataToken.pesan || "Gagal membuka jalur pembayaran.");
         }
 
         setSedangMembayar(false); // Matikan loading biar popup bisa nongol
 
-        // 2. Munculin Popup Midtrans
-        // @ts-ignore
-        window.snap.pay(dataToken.token, {
-          onSuccess: async function (result: any) {
-            // Pesanan sudah tersimpan di database lewat /api/payment sebagai PENDING
-            kosongkanKeranjang();
-            setModalSukses({
+        // 2. Tentukan jalur pembayaran berdasarkan metode
+        if (metodePembayaran === "MAYAR") {
+          // Buka tab baru ke payment link Mayar
+          if (dataToken.paymentUrl) {
+            window.location.href = dataToken.paymentUrl;
+          } else {
+             kosongkanKeranjang();
+             setModalSukses({
               show: true,
               invoice: dataToken.kodePesanan,
               total: totalAkhir,
             });
-          },
-          onPending: function (result: any) {
-            setPesanPembayaran(
-              "Mohon selesaikan pembayaran Anda terlebih dahulu.",
-            );
-          },
-          onError: function (result: any) {
-            setPesanPembayaran("Proses pembayaran gagal atau ditolak bank.");
-          },
-          onClose: function () {
-            setPesanPembayaran(
-              "Anda menutup jendela pembayaran sebelum menyelesaikannya.",
-            );
-          },
-        });
+          }
+        } else {
+          // Fallback just in case, walau harusnya ga masuk sini
+          kosongkanKeranjang();
+          setModalSukses({
+            show: true,
+            invoice: dataToken.kodePesanan,
+            total: totalAkhir,
+          });
+        }
       } else {
         // Alur Transfer Manual
         const resManual = await fetch("/api/payment", {
@@ -798,7 +794,7 @@ export default function HalamanCheckout() {
                   
                   <div className="space-y-2 mb-4">
                     {[
-                      { id: "MIDTRANS", label: "Otomatis (Virtual Account, QRIS, e-Wallet)", icon: <div className="bg-zinc-800 text-white font-bold text-[10px] w-12 h-7 flex items-center justify-center rounded shrink-0">PAY</div> },
+                      { id: "MAYAR", label: "Otomatis (QRIS, Virtual Account, e-Wallet)", icon: <div className="bg-blue-600 text-white font-bold text-[10px] w-12 h-7 flex items-center justify-center rounded shrink-0">Mayar</div> },
                       { id: "MANUAL_BCA", label: "Transfer Manual BCA", icon: <div className="bg-[#0066AE] text-white font-black text-[12px] w-12 h-7 flex items-center justify-center rounded shrink-0 tracking-wide italic">BCA</div> },
                       { id: "MANUAL_BRI", label: "Transfer Manual BRI", icon: <div className="bg-[#00529C] text-white font-black text-[12px] w-12 h-7 flex items-center justify-center rounded shrink-0 tracking-wide">BRI</div> },
                       { id: "MANUAL_SHOPEEPAY", label: "Transfer Manual ShopeePay", icon: <div className="bg-[#EE4D2D] text-white font-bold text-[8px] w-12 h-7 flex items-center justify-center rounded shrink-0 leading-none text-center">Shopee<br/>Pay</div> },
@@ -806,29 +802,27 @@ export default function HalamanCheckout() {
                     ]
                       .filter(m => showAllMethods || m.id === metodePembayaran)
                       .map(method => {
-                        const isMidtrans = method.id === "MIDTRANS";
+                        const isOtomatis = method.id === "MAYAR";
                         return (
-                          <label key={method.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${isMidtrans ? 'bg-zinc-100 cursor-not-allowed opacity-60 border-zinc-200' : (metodePembayaran === method.id ? 'border-soft-pink-500 bg-soft-pink-50/50 cursor-pointer' : 'border-zinc-200 hover:border-soft-pink-300 cursor-pointer')}`}>
+                          <label key={method.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${metodePembayaran === method.id ? 'border-soft-pink-500 bg-soft-pink-50/50 cursor-pointer' : 'border-zinc-200 hover:border-soft-pink-300 cursor-pointer'}`}>
                             {showAllMethods && (
                               <input 
                                 type="radio" 
                                 name="metodePembayaran" 
                                 value={method.id} 
                                 checked={metodePembayaran === method.id}
-                                disabled={isMidtrans}
                                 onChange={(e) => {
-                                  if (isMidtrans) return;
                                   setMetodePembayaran(e.target.value);
                                   setShowAllMethods(false);
                                 }}
-                                className="text-soft-pink-600 focus:ring-soft-pink-500 w-4 h-4 disabled:opacity-50"
+                                className="text-soft-pink-600 focus:ring-soft-pink-500 w-4 h-4"
                               />
                             )}
                             {method.icon}
                             <div className="flex flex-col">
                               <span className="text-sm font-medium text-zinc-700">{method.label}</span>
-                              {isMidtrans && (
-                                <span className="text-[10px] text-zinc-500 font-medium italic mt-0.5">Fitur ini sedang dalam tahap pengembangan</span>
+                              {isOtomatis && (
+                                <span className="text-[10px] text-zinc-500 font-medium italic mt-0.5">Metode Instan & Realtime</span>
                               )}
                             </div>
                           </label>
